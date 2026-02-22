@@ -52,7 +52,7 @@ namespace CHANG
             }
 
             option.allowSceneActivation = true;
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(3);
             yield return StartCoroutine(FadeSystem.Fade(group, false));
 
         }
