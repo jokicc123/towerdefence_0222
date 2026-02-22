@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a1beaea2123fae24798c8567dbe43d63
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 146824
+  packageName: Human Towers Pack
+  packageVersion: 2.0
+  assetPath: Assets/TowerDefence_Vsquad/Prefabs/HM_crossbow_1.prefab
+  uploadId: 332186

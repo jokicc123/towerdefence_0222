@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3b2712d5ba13b854b91af82e7924f4e5
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 146824
+  packageName: Human Towers Pack
+  packageVersion: 2.0
+  assetPath: Assets/TowerDefence_Vsquad/Prefabs/Hits/HM_crossbow_impact_1.prefab
+  uploadId: 332186

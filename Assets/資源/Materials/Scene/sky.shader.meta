@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 2aadb4e60594ab741a34f91a4fbd8fdb
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 146824
+  packageName: Human Towers Pack
+  packageVersion: 2.0
+  assetPath: Assets/TowerDefence_Vsquad/Materials/Scene/sky.shader
+  uploadId: 332186

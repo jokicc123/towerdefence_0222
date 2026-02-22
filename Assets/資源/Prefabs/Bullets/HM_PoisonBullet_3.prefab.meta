@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 5cbce723b31a42e45ac848afa85ddec2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 146824
+  packageName: Human Towers Pack
+  packageVersion: 2.0
+  assetPath: Assets/TowerDefence_Vsquad/Prefabs/Bullets/HM_PoisonBullet_3.prefab
+  uploadId: 332186
