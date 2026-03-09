@@ -6,11 +6,13 @@ namespace CHANG
 
     {
         protected StateMachine stateMachine;
+
+
         protected virtual void Awake()
         {
             stateMachine = new StateMachine();
         }
-        protected virtual void Start()
+        protected virtual void Update()
 
         {
 
