@@ -12,7 +12,7 @@ namespace CHANG
         {
             stateMachine = new StateMachine();
         }
-        protected virtual void Update()
+       public virtual void Update()
 
         {
 

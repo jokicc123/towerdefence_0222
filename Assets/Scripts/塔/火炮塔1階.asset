@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fae2c384834793c409e75e367a88eb31, type: 3}
   m_Name: "\u706B\u70AE\u58541\u968E"
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerData
-  attackRange: 5
+  attackRange: 4
   damage: 10
   attackSpeed: 2
   bulletPrefab: {fileID: 1240887441953726, guid: 8a976dcd328a4664c85144f33b9c46b0, type: 3}

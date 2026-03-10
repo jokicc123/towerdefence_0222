@@ -10,12 +10,14 @@ namespace CHANG
         // --- 路徑相關 ---
         private Transform targetPoint;
         private int wavePointIndex = 0;
+       Rigidbody rb;
 
         public float MoveSpeed => data != null ? data.moveSpeed : 3f;
 
         private void Awake()
         {
             if (data != null) currentHealth = data.maxHealth;
+                rb = GetComponent<Rigidbody>();
         }
 
         private void Start()

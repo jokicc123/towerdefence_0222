@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 33833157834804856}
   - component: {fileID: 23972824282041216}
   - component: {fileID: 65923475919724998}
+  - component: {fileID: 7226779312119340465}
   m_Layer: 0
   m_Name: HM_cannon_bullet1
   m_TagString: Untagged
@@ -114,6 +115,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.1, y: 0.1, z: 0.1}
   m_Center: {x: -0.00000002980233, y: 0, z: 0.000000014901165}
+--- !u!114 &7226779312119340465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1240887441953726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b9872f5b9d247346ac0384529999f3e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.Bullet
+  speed: 1
+  reachDistance: 1
+  hitEffectPrefab: {fileID: 1240887441953726}
 --- !u!1 &1420486808462880
 GameObject:
   m_ObjectHideFlags: 0

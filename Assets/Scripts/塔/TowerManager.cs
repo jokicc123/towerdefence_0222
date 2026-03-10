@@ -76,7 +76,7 @@ namespace CHANG
             if (Physics.Raycast(ray, out RaycastHit hit, 2000f, groundLayer))
                 
             {
-                Debug.Log($"<color=green>射中地板了：{hit.collider.name}，座標：{hit.point}</color>");
+                //Debug.Log($"<color=green>射中地板了：{hit.collider.name}，座標：{hit.point}</color>");
                 previewInstance.SetActive(true);
 
                 // 網格對齊邏輯
