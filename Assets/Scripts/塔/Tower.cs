@@ -1,6 +1,7 @@
 ﻿
 using System.Collections.Generic;
 using UnityEngine;
+using static CHANG.TowerData;
 
 namespace CHANG
 {
@@ -14,10 +15,14 @@ namespace CHANG
         public float attackRange => data != null ? data.attackRange : 5f;
         public float damage => data != null ? data.damage : 10f;
         public float attackSpeed => data != null ? data.attackSpeed : 2f;
-
+        public  float cost => data != null ? data.cost : 100f;
+        
         // 子彈與點位
         private GameObject bulletPrefab => data?.bulletPrefab;
-        [SerializeField] private Transform firePoint;
+        [SerializeField] public Transform firePoint;
+        public Transform FirePoint => firePoint;
+        [SerializeField] private Transform head;
+        public Transform Head => head;
         #endregion
 
         private float attackTimer;
@@ -55,6 +60,24 @@ namespace CHANG
             this.data = towerData;
             if (rangeCollider != null) rangeCollider.radius = attackRange;
         }
+
+        public override void Update()
+        {
+            base.Update();
+            // 偵測範圍內敵人
+            UpdateEnemiesInRange();
+
+            // 攻擊邏輯
+            if (HasTarget())
+            {
+                if (IsAttackReady())
+                {
+                    Fire(GetTarget());
+                    ResetAttackTimer();
+                }
+                TickAttackTimer();
+            }
+        }
         public bool HasTarget()
         {
             enemiesInRange.RemoveAll(e => e == null);
@@ -70,22 +93,6 @@ namespace CHANG
         }
         public Enemy GetTarget() => HasTarget() ? enemiesInRange[0] : null;
 
-       public override void Update()
-        {
-            // 偵測範圍內敵人
-            UpdateEnemiesInRange();
-
-            // 攻擊邏輯
-            if (HasTarget())
-            {
-                if (IsAttackReady())
-                {
-                    Fire(GetTarget());
-                    ResetAttackTimer();
-                }
-                TickAttackTimer();
-            }
-        }
 
         private void UpdateEnemiesInRange()
         {
@@ -121,7 +128,7 @@ namespace CHANG
             return attackTimer <= 0f;
         }
 
-        public void Fire(Enemy target)
+        public virtual void Fire(Enemy target)
         {
             if (target == null || bulletPrefab == null || firePoint == null)
             {
@@ -131,17 +138,20 @@ namespace CHANG
 
             Debug.Log("塔發射子彈攻擊: " + target.name);
 
-            GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, Quaternion.identity);
+            GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+
             Bullet b = bulletObj.GetComponent<Bullet>();
 
             if (b != null)
             {
                 b.SetTarget(target, damage);
             }
-
+           
         }
+
     }
-}
+ }
+
     
   
 

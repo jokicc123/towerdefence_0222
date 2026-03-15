@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fae2c384834793c409e75e367a88eb31, type: 3}
+  m_Name: "\u706B\u7130\u58541"
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerData
+  attackRange: 5
+  damage: 10
+  attackSpeed: 2
+  bulletPrefab: {fileID: 1570095931659952, guid: 06bbf55df0b7f7c44a8396ab29b0c736, type: 3}
+  cost: 100
+  towerModelPrefab: {fileID: 1111581069580094, guid: 1ced8274635d6354e9da6572dcbb911d, type: 3}
+  towerName: 

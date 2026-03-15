@@ -8,14 +8,15 @@ namespace CHANG
         {
         }
 
+       
         public override void Enter()
         {
             base.Enter();
         }
-
         public override void Update()
         {
             base.Update();
+
             Debug.Log("TowerAttack 狀態運行中");
 
             if (!tower.HasTarget())
@@ -24,12 +25,24 @@ namespace CHANG
                 return;
             }
 
+            Enemy target = tower.GetTarget();
+
+            if (target != null && tower.Head != null)
+            {
+                // ⭐ 讓塔頭旋轉
+                Vector3 dir = target.transform.position - tower.Head.position;
+                Quaternion rot = Quaternion.LookRotation(dir);
+                tower.Head.rotation = Quaternion.Lerp(
+                    tower.Head.rotation,
+                    rot,
+                    10f * Time.deltaTime
+                );
+            }
+
             tower.TickAttackTimer();
 
             if (tower.IsAttackReady())
             {
-                Enemy target = tower.GetTarget();
-
                 if (target != null)
                 {
                     Debug.Log("塔攻擊");
