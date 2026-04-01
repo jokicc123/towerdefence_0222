@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace CHANG
 {
@@ -10,7 +11,7 @@ namespace CHANG
         // --- 路徑相關 ---
         private Transform targetPoint;
         private int wavePointIndex = 0;
-       Rigidbody rb;
+        Rigidbody rb;
 
         public float MoveSpeed => data != null ? data.moveSpeed : 3f;
 
@@ -65,6 +66,7 @@ namespace CHANG
             {
                 GetNextWaypoint();
             }
+
         }
 
         private void GetNextWaypoint()
@@ -72,21 +74,19 @@ namespace CHANG
             // 檢查是否還有下一個點
             if (wavePointIndex >= Waypoints.Points.Length - 1)
             {
-                ReachEnd();
+                GameManager.Instance.TakeDamege(data.damage);
+                Die();
+
                 return;
             }
 
             wavePointIndex++;
             targetPoint = Waypoints.Points[wavePointIndex];
+            // 讓敵人旋轉
+          transform.eulerAngles=Waypoints.RotationPoints[wavePointIndex];
         }
 
-        private void ReachEnd()
-        {
-            // 怪物到達終點：玩家扣血並銷毀怪物
-            Debug.Log("怪物進入終點！玩家受傷。");
-            Destroy(gameObject);
-        }
-
+        
         public void TakeDamage(float amount)
         {
             currentHealth -= amount;

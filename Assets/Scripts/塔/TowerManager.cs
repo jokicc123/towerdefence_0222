@@ -42,7 +42,9 @@ namespace CHANG
 
         public void SelectTower(TowerData data)
         {
+            //避免多個預覽
             CancelSelection();
+            //設定當前防禦塔資料
             selectedTowerData = data;
 
             if (data.towerModelPrefab == null)
@@ -50,7 +52,7 @@ namespace CHANG
                 Debug.LogError("TowerData 裡缺少 Prefab！");
                 return;
             }
-
+            //實例化預覽物件
             previewInstance = Instantiate(data.towerModelPrefab);
 
             // 取得渲染器以更改顏色 (包含子物件)
@@ -104,12 +106,21 @@ namespace CHANG
 
         private void TryPlaceTower()
         {
+            // 確保預覽物件存在且有選擇的塔資料
             if (previewInstance == null || selectedTowerData == null) return;
 
             Vector3 pos = previewInstance.transform.position;
 
+            // 最終確認建造位置是否合法
             if (CheckBuildLocation(pos))
             {
+                if(!GameManager.Instance.SpendGold(selectedTowerData.cost))
+                { 
+                    Debug.LogWarning("金幣不足，無法建造！");
+                    return;
+                }
+
+                //在合法位置實例化真正的塔
                 GameObject newTower = Instantiate(selectedTowerData.towerModelPrefab, pos, Quaternion.identity);
 
                 if (newTower.TryGetComponent(out Tower towerScript))
@@ -122,12 +133,14 @@ namespace CHANG
             }
         }
 
+        //建塔限制：檢查半徑 0.4 內是否有其它塔
         private bool CheckBuildLocation(Vector3 pos)
         {
             // 檢查半徑 0.4 內是否有其它塔
             return !Physics.CheckSphere(pos, 0.4f, LayerMask.GetMask("Tower"));
         }
 
+        // 取消選擇並清理預覽
         private void CancelSelection()
         {
             selectedTowerData = null;

@@ -4,7 +4,10 @@ namespace CHANG
 {
     public class Waypoints : MonoBehaviour
     {
-       public static Transform[] Points;
+        public static Transform[] Points;
+        public static Vector3[] RotationPoints = { new Vector3(0,0,0),new Vector3(0,0,0),
+                new Vector3(0,0,0),new Vector3(0,0,0),new Vector3(0,90,0),new Vector3(0,90,0) };
+
         void Awake()
         {
             InitializePoints();
@@ -12,6 +15,7 @@ namespace CHANG
 
         public void InitializePoints()
         {
+
             // 如果已經抓過了就跳過
             if (Points != null && Points.Length > 0) return;
 
