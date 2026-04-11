@@ -82,7 +82,7 @@ public class GameManager : MonoBehaviour
         }
         return false;
     }
-    public void StarNextWave()
+    public void StartNextWave()
     {
         //防止重複觸發
         if (currentState!=GameState.Playing)return;

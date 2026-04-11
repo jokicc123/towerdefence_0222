@@ -16,10 +16,12 @@ namespace CHANG
         private TowerData selectedTowerData;
         private GameObject previewInstance;
         private MeshRenderer previewRenderer;
+        private RangeCircle previewRange;
 
         void Awake()
         {
             Instance = this;
+           
         }
 
         void Update()
@@ -54,6 +56,12 @@ namespace CHANG
             }
             //實例化預覽物件
             previewInstance = Instantiate(data.towerModelPrefab);
+            // 嘗試取得 RangeCircle 組件以顯示攻擊範圍
+            previewRange = previewInstance.GetComponentInChildren<RangeCircle>();
+            if (previewRange != null)
+            {
+                previewRange.DrawCircle(data.attackRange);
+            } 
 
             // 取得渲染器以更改顏色 (包含子物件)
             previewRenderer = previewInstance.GetComponentInChildren<MeshRenderer>();
@@ -91,10 +99,20 @@ namespace CHANG
 
                 // 檢查是否可建造並更新顏色
                 bool canBuild = CheckBuildLocation(snapPos);
+
+                // 決定顏色
+                Color color = canBuild ? canBuildColor : cantBuildColor;
+
+                // 改塔顏色
                 if (previewRenderer != null)
                 {
-                    // 注意：這會更換材質顏色，Prefab 的 Shader 必須支援 _Color 屬性
-                    previewRenderer.material.color = canBuild ? canBuildColor : cantBuildColor;
+                    previewRenderer.material.color = color;
+                }
+
+                // ⭐ 同步範圍顏色
+                if (previewRange != null)
+                {
+                    previewRange.SetColor(color);
                 }
             }
             else
@@ -143,6 +161,7 @@ namespace CHANG
         // 取消選擇並清理預覽
         private void CancelSelection()
         {
+            previewRange = null;
             selectedTowerData = null;
             if (previewInstance != null) Destroy(previewInstance);
         }

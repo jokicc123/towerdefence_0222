@@ -2349,7 +2349,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4995668684119280, guid: a651768eef45c6e44934af0de1bff2b8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 6.89
+      value: 8.24
       objectReference: {fileID: 0}
     - target: {fileID: 4995668684119280, guid: a651768eef45c6e44934af0de1bff2b8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2883,7 +2883,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4053172985625758, guid: f687a11fd1f970d47909292a047f919a, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -18.37
+      value: -17.12
       objectReference: {fileID: 0}
     - target: {fileID: 4053172985625758, guid: f687a11fd1f970d47909292a047f919a, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2938,9 +2938,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4fa6f9300dc1914bba441c288fb677e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.EnemySpawner
-  enemyPrefab: {fileID: 1258991314359982, guid: 3749b9edee740c44ea7455a4fa1b7382, type: 3}
-  spawnInterval: 2
-  enemiesPerWave: 10
+  waves:
+  - enemies:
+    - enemyPrefab: {fileID: 8187015543198388644, guid: 6b12735268a70114186cb0ea66d06763, type: 3}
+      count: 10
+      spawnDelay: 1
 --- !u!1 &1275723137
 GameObject:
   m_ObjectHideFlags: 0
@@ -3167,7 +3169,7 @@ Transform:
   m_GameObject: {fileID: 1470248301}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 12.35, y: 7.09, z: 7.24}
+  m_LocalPosition: {x: 12.35, y: 7.09, z: 9.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3437,7 +3439,7 @@ Transform:
   m_GameObject: {fileID: 1642410862}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.7, y: 0, z: 0}
+  m_LocalPosition: {x: -0.7, y: 0, z: 1.369}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
