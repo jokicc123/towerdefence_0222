@@ -7,6 +7,7 @@ namespace CHANG
     {
         [SerializeField] private EnemyData data;
         private float currentHealth;
+        private bool isDead = false;
 
         // --- 路徑相關 ---
         private Transform targetPoint;
@@ -18,7 +19,7 @@ namespace CHANG
         private void Awake()
         {
             if (data != null) currentHealth = data.maxHealth;
-                rb = GetComponent<Rigidbody>();
+            rb = GetComponent<Rigidbody>();
         }
 
         private void Start()
@@ -83,10 +84,10 @@ namespace CHANG
             wavePointIndex++;
             targetPoint = Waypoints.Points[wavePointIndex];
             // 讓敵人旋轉
-          transform.eulerAngles=Waypoints.RotationPoints[wavePointIndex];
+            transform.eulerAngles = Waypoints.RotationPoints[wavePointIndex];
         }
 
-        
+
         public void TakeDamage(float amount)
         {
             currentHealth -= amount;
@@ -95,6 +96,17 @@ namespace CHANG
 
         private void Die()
         {
+            if (isDead) return;
+            isDead = true;
+            // 確保只有敵人會被摧毀，避免誤刪其他物件
+            if (!CompareTag("敵人"))
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            GameManager.Instance.AddGold(data.goldReward);
+
             Debug.Log($"{data.enemyName} 死亡");
             Destroy(gameObject);
         }

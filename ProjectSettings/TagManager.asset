@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Castle
   - "\u57CE\u5821"
+  - "\u6575\u4EBA"
+  - "\u9053\u8DEF"
   layers:
   - Default
   - TransparentFX
@@ -16,7 +18,7 @@ TagManager:
   - Tower
   - Enemy
   - "\u57CE\u5821"
-  - 
+  - "\u9053\u8DEF"
   - 
   - 
   - 

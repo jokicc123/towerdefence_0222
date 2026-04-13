@@ -475,8 +475,8 @@ GameObject:
   - component: {fileID: 7196894250991670031}
   - component: {fileID: 459425364891363126}
   m_Layer: 7
-  m_Name: Goblin_test
-  m_TagString: Untagged
+  m_Name: "\u54E5\u5E03\u6797"
+  m_TagString: "\u6575\u4EBA"
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

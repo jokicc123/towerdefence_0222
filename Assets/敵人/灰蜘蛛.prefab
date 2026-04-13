@@ -769,7 +769,7 @@ GameObject:
   - component: {fileID: 8633975208077388638}
   m_Layer: 7
   m_Name: "\u7070\u8718\u86DB"
-  m_TagString: Untagged
+  m_TagString: "\u6575\u4EBA"
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
