@@ -12,10 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fae2c384834793c409e75e367a88eb31, type: 3}
   m_Name: "\u706B\u70AE\u58541\u968E"
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerData
-  attackRange: 4
-  damage: 20
-  attackSpeed: 0.5
-  bulletPrefab: {fileID: 1240887441953726, guid: 8a976dcd328a4664c85144f33b9c46b0, type: 3}
-  cost: 100
-  towerModelPrefab: {fileID: 8176955694538809051, guid: 70aa759aec53b0c40b3eb94e778b0284, type: 3}
-  towerName: "\u706B\u70AE\u58541\u968E"
+  attackType: 0
+  levels:
+  - attackRange: 10
+    damage: 10
+    attackSpeed: 1
+    cost: 30
+    bulletPrefab: {fileID: 1240887441953726, guid: 8a976dcd328a4664c85144f33b9c46b0, type: 3}
+  - attackRange: 10
+    damage: 15
+    attackSpeed: 1
+    cost: 35
+    bulletPrefab: {fileID: 1986884198281658, guid: cc41f1ebc8f2e674aa03516f1473662d, type: 3}
+  - attackRange: 10
+    damage: 20
+    attackSpeed: 1
+    cost: 40
+    bulletPrefab: {fileID: 1191811519933358, guid: 274f043ea1351e74887b9465be612e2b, type: 3}
+  levelPrefabs:
+  - {fileID: 8176955694538809051, guid: 70aa759aec53b0c40b3eb94e778b0284, type: 3}
+  - {fileID: 1829664690148712, guid: 0dfb945d3f30f114ca2ad3191228b665, type: 3}
+  - {fileID: 1297006832363006, guid: 37ed12dc69d861b48893cfb9169a4382, type: 3}
+  levelModelPrefabs:
+  - {fileID: 8176955694538809051, guid: d058fa568935c434c8eeddede1f0bf0a, type: 3}
+  - {fileID: 1829664690148712, guid: f8d31f63e18e85b4fafc6e727aaf15ae, type: 3}
+  - {fileID: 1297006832363006, guid: 330798a5018eec44db1ad728989c32e0, type: 3}
+  towerName: "\u706B\u70AE\u5854"

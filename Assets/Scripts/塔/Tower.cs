@@ -1,32 +1,44 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using static CHANG.TowerData;
+using UnityEngine.EventSystems;
 
 namespace CHANG
 {
     public class Tower : CharacterTower
     {
-        // 1. 引入數據容器
+        [Header("資料")]
         [SerializeField] public TowerData data;
 
-        #region 屬性對接 (將原本寫死的數值轉向 Data)
-        // 使用 => 讓這些屬性去讀取 ScriptableObject 的數值
-        public float attackRange => data != null ? data.attackRange : 5f;
-        public float damage => data != null ? data.damage : 10f;
-        public float attackSpeed => data != null ? data.attackSpeed : 2f;
-        public  float cost => data != null ? data.cost : 100f;
-        
-        // 子彈與點位
-        private GameObject bulletPrefab => data?.bulletPrefab;
-        [SerializeField] public Transform firePoint;
+        // ⭐ 等級
+        public int currentLevel = 0;
+
+        // ⭐ 當前等級資料
+        private TowerLevel CurrenData => data.levels[currentLevel];
+
+        #region 屬性（全部改成吃等級）
+        public float attackRange => CurrenData.attackRange;
+        public float damage => CurrenData.damage;
+        public float attackSpeed => CurrenData.attackSpeed;
+        public float cost => CurrenData.cost;
+
+        private GameObject bulletPrefab => CurrenData.bulletPrefab;
+
+        [SerializeField] private Transform firePoint;
         public Transform FirePoint => firePoint;
+
         [SerializeField] private Transform head;
         public Transform Head => head;
         #endregion
 
+        // ⭐ 攻擊計時
         private float attackTimer;
         private float AttackInterval => 1f / attackSpeed;
+
+        // ⭐ 模型（外觀）
+        [Header("模型")]
+        [SerializeField] private Transform modelRoot;
+        private GameObject currentModel;
 
         #region 狀態機
         public TowerIdle Idle { get; private set; }
@@ -45,7 +57,6 @@ namespace CHANG
             if (rangeCollider != null)
             {
                 rangeCollider.isTrigger = true;
-                rangeCollider.radius = attackRange; // 這裡會自動讀到 data 的數值
             }
 
             Idle = new TowerIdle("待機", stateMachine, this);
@@ -53,21 +64,75 @@ namespace CHANG
             Cooldown = new TowerCooldown("冷卻", stateMachine, this);
             stateMachine.Initialize(Idle);
         }
-       
-        // 2. 新增一個初始化方法，讓 Manager 生成後可以注入 Data
+
+        // ⭐ 初始化（由 TowerManager 呼叫）
         public void Initialize(TowerData towerData)
         {
-            this.data = towerData;
-            if (rangeCollider != null) rangeCollider.radius = attackRange;
+            data = towerData;
+
+            currentLevel = 0;          // 初始等級
+            ApplyLevel();       // ⭐ 套用數值
+        }
+
+        // ⭐ 套用等級（核心）
+        private void ApplyLevel()
+        {
+            // 更新範圍碰撞器
+            if (rangeCollider != null)
+            {
+                rangeCollider.radius = attackRange;
+            }
+
+            // 重置攻擊節奏
+            attackTimer = 0f;
+
+            // 更新外觀
+            UpdateModel();
+
+            Debug.Log($"套用等級 {currentLevel + 1}");
+        }
+        public bool CanUpgrade()
+        {
+            return currentLevel < data.levels.Length - 1;
+        }
+
+        // ⭐ 取得升級費用（下一級）
+        public int GetUpgradeCost()
+        {
+            if (!CanUpgrade()) return 0;
+
+            return data.levels[currentLevel + 1].cost;
+        }
+        // ⭐ 升級
+        public void Upgrade()
+        {
+            if (currentLevel >= data.levels.Length - 1)
+            {
+                Debug.Log("已滿級");
+                return;
+            }
+
+            int upgradeCost = data.levels[currentLevel + 1].cost;
+
+            if (!GameManager.Instance.SpendGold(upgradeCost))
+            {
+                Debug.Log("金幣不足");
+                return;
+            }
+
+            currentLevel++;
+
+            ApplyLevel();
+
+            Debug.Log($"升級完成 → 等級 {currentLevel + 1}");
         }
 
         public override void Update()
         {
             base.Update();
-            // 偵測範圍內敵人
+
             UpdateEnemiesInRange();
 
-            // 攻擊邏輯
             if (HasTarget())
             {
                 if (IsAttackReady())
@@ -75,24 +140,19 @@ namespace CHANG
                     Fire(GetTarget());
                     ResetAttackTimer();
                 }
+
                 TickAttackTimer();
             }
         }
+
+        #region 攻擊邏輯
         public bool HasTarget()
         {
             enemiesInRange.RemoveAll(e => e == null);
-
-            bool has = enemiesInRange.Count > 0;
-
-            if (has)
-            {
-                Debug.Log("塔偵測到敵人");
-            }
-
-            return has;
+            return enemiesInRange.Count > 0;
         }
-        public Enemy GetTarget() => HasTarget() ? enemiesInRange[0] : null;
 
+        public Enemy GetTarget() => HasTarget() ? enemiesInRange[0] : null;
 
         private void UpdateEnemiesInRange()
         {
@@ -106,13 +166,8 @@ namespace CHANG
                     enemiesInRange.Add(enemy);
                 }
             }
-
-            if (enemiesInRange.Count > 0)
-            {
-                Debug.Log("OverlapSphere 偵測到敵人: " + enemiesInRange.Count);
-            }
         }
-    
+
         public void ResetAttackTimer()
         {
             attackTimer = AttackInterval;
@@ -132,29 +187,46 @@ namespace CHANG
         {
             if (target == null || bulletPrefab == null || firePoint == null)
             {
-                Debug.LogWarning("塔無法攻擊：target 或 bulletPrefab 或 firePoint 為空");
+                Debug.LogWarning("塔無法攻擊");
                 return;
             }
 
-            Debug.Log("塔發射子彈攻擊: " + target.name);
+            GameObject bulletObj = Instantiate(
+                bulletPrefab,
+                firePoint.position,
+                firePoint.rotation
+            );
 
-            GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-
-            Bullet b = bulletObj.GetComponent<Bullet>();
-
-            if (b != null)
+            if (bulletObj.TryGetComponent(out Bullet b))
             {
-                b.SetTarget(target, damage);
+                b.SetTarget(target, damage); // ⭐ 用當前等級 damage
             }
-           
         }
+        #endregion
+
+        #region 外觀系統
+        private void UpdateModel()
+        {
+            if (modelRoot == null || data.levelModelPrefabs == null) return;
+
+            if (currentModel != null)
+                Destroy(currentModel);
+
+            if (currentLevel >= data.levelModelPrefabs.Length)
+            {
+                Debug.LogWarning("沒有對應等級模型");
+                return;
+            }
+
+            currentModel = Instantiate(
+                data.levelModelPrefabs[currentLevel],
+                modelRoot.position,
+                modelRoot.rotation,
+                modelRoot
+            );
+        }
+        #endregion
+
 
     }
- }
-
-    
-  
-
-
-
-        
+}

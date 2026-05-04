@@ -27,6 +27,8 @@ namespace CHANG
 
         void Update()
         {
+
+            HandleTowerClick(); // 處理點擊塔的事件（升級 UI）
             // ================================
             // 如果有預覽塔，就更新位置
             // ================================
@@ -64,20 +66,20 @@ namespace CHANG
 
             selectedTowerData = data;
 
-            if (data.towerModelPrefab == null)
+            if (data.levelPrefabs[0] == null)
             {
                 Debug.LogError("TowerData 缺少 Prefab！");
                 return;
             }
 
             // 建立預覽塔
-            previewInstance = Instantiate(data.towerModelPrefab);
+            previewInstance = Instantiate(data.levelPrefabs[0]);
 
             // 顯示攻擊範圍
             previewRange = previewInstance.GetComponentInChildren<RangeCircle>();
             if (previewRange != null)
             {
-                previewRange.DrawCircle(data.attackRange);
+                previewRange.DrawCircle(data.levels[0].attackRange);
             }
 
             // 取得渲染器（用來改顏色）
@@ -162,7 +164,7 @@ namespace CHANG
             if (CanBuild(pos))
             {
                 // 檢查金幣是否足夠
-                if (!GameManager.Instance.SpendGold(selectedTowerData.cost))
+                if (!GameManager.Instance.SpendGold(selectedTowerData.levels[0].cost))
                 {
                     Debug.LogWarning("金幣不足！");
                     return;
@@ -170,7 +172,7 @@ namespace CHANG
 
                 // 建立正式塔
                 GameObject newTower = Instantiate(
-                    selectedTowerData.towerModelPrefab,
+                    selectedTowerData.levelPrefabs[0],
                     pos,
                     Quaternion.identity
                 );
@@ -216,6 +218,50 @@ namespace CHANG
 
             if (previewInstance != null)
                 Destroy(previewInstance);
+        }
+        void HandleTowerClick()
+        {
+            if (previewInstance != null)
+            {
+                Debug.Log("❌ 有預覽塔，跳出");
+                return;
+            }
+
+            if (!Mouse.current.leftButton.wasPressedThisFrame) return;
+
+            if (EventSystem.current.IsPointerOverGameObject())
+            {
+                Debug.Log("❌ 點到UI，跳出");
+                return;
+            }
+
+            Debug.Log("✅ 開始射線");
+
+            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity,
+                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide))
+            {
+                Debug.Log($"✅ 射線打到: {hit.collider.name} | Tag: {hit.collider.tag}");
+
+                Tower tower = hit.collider.GetComponentInParent<Tower>();
+                if (tower != null)
+                {
+                    Debug.Log("✅ 找到 Tower，開啟UI");
+                    UiManager.Instance.ShowUpgradeUI(tower);
+                    return;
+                }
+                else
+                {
+                    Debug.Log("❌ 打到物件但沒有 Tower 腳本");
+                }
+            }
+            else
+            {
+                Debug.Log("❌ 射線沒有打到任何東西");
+            }
+
+            UiManager.Instance.HideUpgradeUI();
         }
     }
 }

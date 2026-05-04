@@ -68,8 +68,11 @@ public class GameManager : MonoBehaviour
     }
     public void AddGold(int amount)
     {
+        if (currentState != GameState.Playing) return;
+
         gold += amount;
         if (gold < 0) gold = 0;
+
         OnGoldChanged?.Invoke(gold);
     }
     public bool SpendGold(int amout)
@@ -92,14 +95,25 @@ public class GameManager : MonoBehaviour
         OnWaveChanged?.Invoke(currentWave);
         Debug.Log($"第{currentWave}波開始");
     }
+    public void EndWave()
+    {
+        if (currentState != GameState.Playing) return;
+
+        CheckWin();
+
+        if (currentState == GameState.Playing)
+        {
+            StartNextWave();
+        }
+    }
     public void CheckWin()
     {
         if (currentWave >= totalWaves)
         {
-            win();
+            Win();
         }
     }
-    public void win()
+    public void Win()
     {
         
         if (currentState != GameState.Playing) return;
@@ -114,6 +128,7 @@ public class GameManager : MonoBehaviour
         currentState = GameState.GameOver;
 
         Debug.Log("遊戲結束!");
-
+        OnGameOver?.Invoke(); // ⭐ UI 才會出現
     }
+
 } 

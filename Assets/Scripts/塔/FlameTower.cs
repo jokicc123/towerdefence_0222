@@ -22,9 +22,9 @@ namespace CHANG
                     enemy.TakeDamage(damage * Time.deltaTime);
                 }
             }
-            if (data.bulletPrefab != null && firePoint != null)
+            if (data.levels[currentLevel].bulletPrefab != null && FirePoint != null)
             {
-                GameObject effect = Instantiate(data.bulletPrefab, firePoint.position, firePoint.rotation);
+                GameObject effect = Instantiate(data.levels[currentLevel].bulletPrefab, FirePoint.position, FirePoint.rotation);
                 ParticleSystem ps = effect.GetComponent<ParticleSystem>();
                 if (ps != null) ps.Play(); // 確保粒子播放
                 Destroy(effect, 1f);       // 1秒後刪除

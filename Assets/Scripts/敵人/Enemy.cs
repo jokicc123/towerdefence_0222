@@ -76,7 +76,7 @@ namespace CHANG
             if (wavePointIndex >= Waypoints.Points.Length - 1)
             {
                 GameManager.Instance.TakeDamege(data.damage);
-                Die();
+                ReachGoal();
 
                 return;
             }
@@ -91,23 +91,18 @@ namespace CHANG
         public void TakeDamage(float amount)
         {
             currentHealth -= amount;
-            if (currentHealth <= 0) Die();
+            if (currentHealth <= 0) KillByTower();
         }
 
-        private void Die()
+        public void KillByTower()
         {
-            if (isDead) return;
-            isDead = true;
-            // 確保只有敵人會被摧毀，避免誤刪其他物件
-            if (!CompareTag("敵人"))
-            {
-                Destroy(gameObject);
-                return;
-            }
-
             GameManager.Instance.AddGold(data.goldReward);
+            Destroy(gameObject);
+        }
 
-            Debug.Log($"{data.enemyName} 死亡");
+        public void ReachGoal()
+        {
+            GameManager.Instance.TakeDamege(data.damage);
             Destroy(gameObject);
         }
     }

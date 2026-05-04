@@ -1,10 +1,14 @@
-﻿using UnityEngine;
+﻿using System.Collections;
 using TMPro;
-using System.Collections;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 namespace CHANG
 {
     public class UiManager : MonoBehaviour
     {
+        private Tower currentTower; //目前選擇的塔
         public static UiManager Instance;
 
         private void Awake()
@@ -16,9 +20,9 @@ namespace CHANG
                 DontDestroyOnLoad(gameObject);
             }
             else
-            { 
-                Destroy(gameObject); 
-            } 
+            {
+                Destroy(gameObject);
+            }
         }
         #region  UI文字
         //UI文字
@@ -33,8 +37,22 @@ namespace CHANG
         private CanvasGroup gameOverUI;
         [SerializeField]
         private CanvasGroup winUI;
+
         #endregion
-        private void Start() 
+        #region  升級UI
+        [Header("升級UI")]
+        [SerializeField]
+        private GameObject upgradePanel;
+        [SerializeField]
+        private TMP_Text towerNameText;
+        [SerializeField]
+        private TMP_Text levelText;
+        [SerializeField]
+        private TMP_Text costText;
+        [SerializeField]
+        private Button upgradeButton;
+        #endregion
+        private void Start()
         {
             //更新UI
             GameManager.Instance.OnHpChanged += UpdateHp;
@@ -57,6 +75,14 @@ namespace CHANG
             GameManager.Instance.OnGameOver -= ShowGameOver;
             GameManager.Instance.Onwin -= ShowWin;
         }
+
+        public void ShowUpgradeUI(Tower tower)
+        {
+            currentTower = tower;
+            upgradePanel.SetActive(true);
+            RefreshUpgradeUI();
+        }
+
         //更新血量 UI
         private void UpdateHp(int hp)
         {
@@ -68,16 +94,21 @@ namespace CHANG
         {
 
             goldText.text = gold.ToString();
+            // ⭐ 如果升級UI開著 → 更新
+            if (upgradePanel.activeSelf)
+            {
+                RefreshUpgradeUI();
+            }
         }
         //更新波數 UI
         private void UpdateWave(int wave)
         {
-           waveText.text = $"{wave}";
+            waveText.text = $"{wave}";
         }
         //顯示遊戲結束 UI
         private void ShowGameOver()
         {
-           StopAllCoroutines();//停止所有協程，確保不會同時顯示遊戲結束和勝利 UI
+            StopAllCoroutines();//停止所有協程，確保不會同時顯示遊戲結束和勝利 UI
             StartCoroutine(FadeSystem.Fade(gameOverUI, true));
         }
         //顯示勝利 UI
@@ -86,5 +117,47 @@ namespace CHANG
             StopAllCoroutines();
             StartCoroutine(FadeSystem.Fade(winUI, true));
         }
+        void RefreshUpgradeUI()
+        {
+            if (currentTower == null) return;
+
+            var data = currentTower.data;
+
+            towerNameText.text = data.towerName;
+            levelText.text = "Next Lv." + (currentTower.currentLevel + 1);
+
+            if (currentTower.CanUpgrade())
+            {
+                int cost = currentTower.GetUpgradeCost();
+                costText.text = "Cost: " + cost;
+
+                // 判斷錢夠不夠
+                if (GameManager.Instance.gold >= cost)
+                {
+                    upgradeButton.interactable = true;
+                }
+                else
+                {
+                    upgradeButton.interactable = false;
+                }
+            }
+            else
+            {
+                costText.text = "MAX";
+                upgradeButton.interactable = false;
+            }
+        }
+        public void HideUpgradeUI()
+        {
+            upgradePanel.SetActive(false);
+        }
+        public void OnClickUpgrade()
+        {
+            if (currentTower == null) return;
+
+            currentTower.Upgrade();
+            RefreshUpgradeUI();
+        }
+
     }
 }
