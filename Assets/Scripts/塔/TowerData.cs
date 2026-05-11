@@ -15,7 +15,6 @@ namespace CHANG
 
         [Header("等級資料")]
         public TowerLevel[] levels; // ⭐ 核心
-
         [Header("模型（每級外觀）")]
         public GameObject[] levelPrefabs;
         [Header("視覺模型（每級換外觀用）")]

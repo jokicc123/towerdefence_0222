@@ -264,11 +264,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a08d3cc15a3f2c438921ffef676b126, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.Tower
-  data: {fileID: 0}
-  currentLevel: 0
-  firePoint: {fileID: 0}
-  head: {fileID: 0}
-  modelRoot: {fileID: 0}
+  data: {fileID: 11400000, guid: 5f696f8b2d9defb4a931fb371d8fa6b9, type: 2}
+  currentLevel: 2
+  modelRoot: {fileID: 4722492196543158}
 --- !u!120 &-1852212008629308104
 LineRenderer:
   serializedVersion: 3
@@ -295,7 +293,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 74e66366109201e45b69501f5a02889c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

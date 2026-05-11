@@ -90,6 +90,8 @@ namespace CHANG
 
         public void TakeDamage(float amount)
         {
+            Debug.Log($"受到傷害: {amount}");
+            Debug.Log($"目前血量: {currentHealth}");
             currentHealth -= amount;
             if (currentHealth <= 0) KillByTower();
         }

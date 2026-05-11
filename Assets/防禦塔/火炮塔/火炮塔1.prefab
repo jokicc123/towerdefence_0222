@@ -263,7 +263,7 @@ MonoBehaviour:
   currentLevel: 0
   firePoint: {fileID: 4320021540836047014}
   head: {fileID: 7095372117292475254}
-  modelRoot: {fileID: 0}
+  modelRoot: {fileID: 7773576650341474233}
 --- !u!120 &-1480610016938684766
 LineRenderer:
   serializedVersion: 3

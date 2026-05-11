@@ -7,7 +7,7 @@ namespace CHANG
 
         public StateTower(string name, StateMachine stateMachine, Tower tower)
         {
-            this.name = name;
+            this.Name = name;
             this.tower = tower;
             this.stateMachine = stateMachine;
 

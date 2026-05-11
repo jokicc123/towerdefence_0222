@@ -46,9 +46,9 @@ GameObject:
   - component: {fileID: 4653801878752730}
   - component: {fileID: 33585650521197512}
   - component: {fileID: 23629352850693992}
-  - component: {fileID: 1582513340499670346}
   - component: {fileID: -1069092033091257693}
   - component: {fileID: -3520661615168028012}
+  - component: {fileID: -4415653107162616387}
   m_Layer: 6
   m_Name: "\u706B\u7130\u58543"
   m_TagString: Untagged
@@ -65,7 +65,7 @@ Transform:
   m_GameObject: {fileID: 1079211923614252}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.484}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -131,21 +131,6 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &1582513340499670346
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1079211923614252}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a08d3cc15a3f2c438921ffef676b126, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CHANG.Tower
-  data: {fileID: 0}
-  firePoint: {fileID: 0}
-  head: {fileID: 0}
 --- !u!120 &-1069092033091257693
 LineRenderer:
   serializedVersion: 3
@@ -172,7 +157,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 0}
+  - {fileID: 2100000, guid: 74e66366109201e45b69501f5a02889c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -269,6 +254,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.RangeCircle
   segments: 50
+--- !u!114 &-4415653107162616387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1079211923614252}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a08d3cc15a3f2c438921ffef676b126, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.Tower
+  data: {fileID: 11400000, guid: 7e6feed00ddcf83458f650fae0da2ad7, type: 2}
+  currentLevel: 2
+  modelRoot: {fileID: 4653801878752730}
 --- !u!1 &1144223382155930
 GameObject:
   m_ObjectHideFlags: 0

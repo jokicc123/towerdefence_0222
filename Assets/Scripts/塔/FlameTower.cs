@@ -19,17 +19,26 @@ namespace CHANG
                 if (hit.TryGetComponent(out Enemy enemy))
                 {
                     Debug.Log("對敵人造成傷害: " + enemy.name); // ✅ 確認有找到 Enemy
-                    enemy.TakeDamage(damage * Time.deltaTime);
+                    enemy.TakeDamage(damage);
                 }
             }
-            if (data.levels[currentLevel].bulletPrefab != null && FirePoint != null)
+            if (data.levels[currentLevel].bulletPrefab != null)
             {
-                GameObject effect = Instantiate(data.levels[currentLevel].bulletPrefab, FirePoint.position, FirePoint.rotation);
-                ParticleSystem ps = effect.GetComponent<ParticleSystem>();
-                if (ps != null) ps.Play(); // 確保粒子播放
-                Destroy(effect, 1f);       // 1秒後刪除
-            }
+                GameObject effect = Instantiate(
+                data.levels[currentLevel].bulletPrefab,
+                target.transform.position + Vector3.up * 1f,
+                Quaternion.identity,
+                target.transform
+            );
 
+                ParticleSystem ps = effect.GetComponentInChildren<ParticleSystem>();
+
+                if (ps != null)
+                {
+                    ps.Play();
+                    Destroy(effect, 2f); // 不要太長，避免堆積
+                }
+            }
         }
     }
 }

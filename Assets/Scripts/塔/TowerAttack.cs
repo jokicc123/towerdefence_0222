@@ -29,7 +29,7 @@ namespace CHANG
 
             if (target != null && tower.Head != null)
             {
-                // ⭐ 讓塔頭旋轉
+                Debug.Log($"轉向目標：{target.name}");  // ⭐ 加這行
                 Vector3 dir = target.transform.position - tower.Head.position;
                 Quaternion rot = Quaternion.LookRotation(dir);
                 tower.Head.rotation = Quaternion.Lerp(

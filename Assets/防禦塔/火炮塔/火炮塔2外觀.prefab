@@ -308,6 +308,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4168932714287992}
+  - component: {fileID: -2370832303057637344}
   m_Layer: 6
   m_Name: "\u706B\u70AE\u58542\u5916\u89C0"
   m_TagString: Untagged
@@ -331,6 +332,20 @@ Transform:
   - {fileID: 4680636701678832}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-2370832303057637344
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1829664690148712}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b7b28bc1b06e6b48bbabe3a6bff5423, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerModelRef
+  FirePoint: {fileID: 4188590568255158}
+  Head: {fileID: 4190500450512216}
 --- !u!1 &1989008322473734
 GameObject:
   m_ObjectHideFlags: 0

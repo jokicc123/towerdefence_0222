@@ -21,15 +21,14 @@ namespace CHANG
         public float damage => CurrenData.damage;
         public float attackSpeed => CurrenData.attackSpeed;
         public float cost => CurrenData.cost;
+        #endregion
 
         private GameObject bulletPrefab => CurrenData.bulletPrefab;
 
-        [SerializeField] private Transform firePoint;
-        public Transform FirePoint => firePoint;
+     
+        public Transform FirePoint { get; private set; }
+        public Transform Head { get; private set; }
 
-        [SerializeField] private Transform head;
-        public Transform Head => head;
-        #endregion
 
         // ⭐ 攻擊計時
         private float attackTimer;
@@ -68,8 +67,8 @@ namespace CHANG
         // ⭐ 初始化（由 TowerManager 呼叫）
         public void Initialize(TowerData towerData)
         {
+            Debug.Log($"Initialize 被呼叫於 {gameObject.name}"); // ✅ 加這行
             data = towerData;
-
             currentLevel = 0;          // 初始等級
             ApplyLevel();       // ⭐ 套用數值
         }
@@ -130,18 +129,16 @@ namespace CHANG
         public override void Update()
         {
             base.Update();
-
             UpdateEnemiesInRange();
-
-            if (HasTarget())
+            // ✅ 交給狀態機，不要自己處理攻擊
+            Debug.Log($"State={stateMachine.currentState?.Name}, Head={Head}, HasTarget={HasTarget()}");
+            if (HasTarget() && stateMachine.currentState == Idle)
             {
-                if (IsAttackReady())
-                {
-                    Fire(GetTarget());
-                    ResetAttackTimer();
-                }
-
-                TickAttackTimer();
+                stateMachine.ChangeState(Attack);
+            }
+            else if (!HasTarget() && stateMachine.currentState == Attack)
+            {
+                stateMachine.ChangeState(Idle);
             }
         }
 
@@ -185,7 +182,7 @@ namespace CHANG
 
         public virtual void Fire(Enemy target)
         {
-            if (target == null || bulletPrefab == null || firePoint == null)
+            if (target == null || bulletPrefab == null || FirePoint == null)
             {
                 Debug.LogWarning("塔無法攻擊");
                 return;
@@ -193,8 +190,8 @@ namespace CHANG
 
             GameObject bulletObj = Instantiate(
                 bulletPrefab,
-                firePoint.position,
-                firePoint.rotation
+                FirePoint.position,
+                FirePoint.rotation
             );
 
             if (bulletObj.TryGetComponent(out Bullet b))
@@ -209,21 +206,29 @@ namespace CHANG
         {
             if (modelRoot == null || data.levelModelPrefabs == null) return;
 
-            if (currentModel != null)
-                Destroy(currentModel);
-
-            if (currentLevel >= data.levelModelPrefabs.Length)
+            // ⭐ 直接清掉所有舊模型（最重要）
+            for (int i = modelRoot.childCount - 1; i >= 0; i--)
             {
-                Debug.LogWarning("沒有對應等級模型");
+                Destroy(modelRoot.GetChild(i).gameObject);
+            }
+
+            GameObject prefab = data.levelModelPrefabs[currentLevel];
+
+            if (prefab == null)
+            {
+                Debug.LogWarning("沒有模型 prefab");
                 return;
             }
 
-            currentModel = Instantiate(
-                data.levelModelPrefabs[currentLevel],
-                modelRoot.position,
-                modelRoot.rotation,
-                modelRoot
-            );
+            currentModel = Instantiate(prefab, modelRoot);
+            currentModel.transform.localPosition = Vector3.zero;
+            currentModel.transform.localRotation = Quaternion.identity;
+
+            if (currentModel.TryGetComponent(out TowerModelRef modelRef))
+            {
+                FirePoint = modelRef.FirePoint;
+                Head = modelRef.Head;
+            }
         }
         #endregion
 
