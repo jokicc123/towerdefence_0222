@@ -13,22 +13,35 @@ MonoBehaviour:
   m_Name: "\u706B\u7130\u58541"
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerData
   attackType: 0
+  effectType: 1
   levels:
   - attackRange: 5
-    damage: 2
-    attackSpeed: 10
+    damage: 5
+    attackSpeed: 1
     cost: 30
     bulletPrefab: {fileID: 1570095931659952, guid: 06bbf55df0b7f7c44a8396ab29b0c736, type: 3}
+    effectType: 1
+    effectDuration: 5
+    effectDamagePerSecond: 1
+    slowPercent: 0
   - attackRange: 6
     damage: 4
-    attackSpeed: 1
+    attackSpeed: 2
     cost: 35
     bulletPrefab: {fileID: 1190723072478672, guid: 44dbc5b6bf4b16d45a6ec14ec0efcf0a, type: 3}
+    effectType: 1
+    effectDuration: 1.5
+    effectDamagePerSecond: 2
+    slowPercent: 0
   - attackRange: 7
-    damage: 6
-    attackSpeed: 1
+    damage: 5
+    attackSpeed: 3
     cost: 40
     bulletPrefab: {fileID: 1637505527600324, guid: eb4333bb69df76c4986cf8a132359589, type: 3}
+    effectType: 1
+    effectDuration: 2
+    effectDamagePerSecond: 3
+    slowPercent: 0
   levelPrefabs:
   - {fileID: 1111581069580094, guid: 1ced8274635d6354e9da6572dcbb911d, type: 3}
   levelModelPrefabs:

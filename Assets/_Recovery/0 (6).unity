@@ -144,7 +144,7 @@ Transform:
   m_GameObject: {fileID: 44513279}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 12.47, y: 7.09, z: -2.75}
+  m_LocalPosition: {x: 12.08, y: 7.09, z: -2.75}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3584,13 +3584,7 @@ MonoBehaviour:
   waves:
   - enemies:
     - enemyPrefab: {fileID: 8187015543198388644, guid: 6b12735268a70114186cb0ea66d06763, type: 3}
-      count: 1
-      spawnDelay: 1
-    - enemyPrefab: {fileID: 7122654101855521591, guid: 91d4749f098c66442b36767a17342765, type: 3}
-      count: 1
-      spawnDelay: 1
-    - enemyPrefab: {fileID: 7978624207812556279, guid: 7a1e02b4e3e3cde4da6a58f6c596f9b7, type: 3}
-      count: 1
+      count: 10
       spawnDelay: 1
 --- !u!1 &1275723137
 GameObject:
@@ -4711,7 +4705,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.RenderPipelines.Core.Runtime::UnityEngine.Rendering.ProbeVolumePerSceneData
   serializedBakingSet: {fileID: 11400000, guid: c28dd682663db634e875af75b1cc9113, type: 2}
-  sceneGUID: 99c9720ab356a0642a771bea13969a05
+  sceneGUID: 9b6aa7a0b5801934d9374ae7692e1580
   obsoleteAsset: {fileID: 0}
   obsoleteCellSharedDataAsset: {fileID: 0}
   obsoleteCellSupportDataAsset: {fileID: 0}

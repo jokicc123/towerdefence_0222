@@ -299,8 +299,8 @@ Transform:
   m_GameObject: {fileID: 1148713388231996}
   serializedVersion: 2
   m_LocalRotation: {x: -0.50000036, y: 0.49999967, z: 0.49999967, w: 0.50000036}
-  m_LocalPosition: {x: -0.000000001917179, y: 0.44181675, z: -0.036020517}
-  m_LocalScale: {x: 0.99999994, y: 0.99999994, z: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4826594316099966}
@@ -473,7 +473,7 @@ GameObject:
   - component: {fileID: 95760122612387900}
   - component: {fileID: 135975656248482850}
   - component: {fileID: 7196894250991670031}
-  - component: {fileID: 459425364891363126}
+  - component: {fileID: 5267245499667810503}
   m_Layer: 7
   m_Name: "\u54E5\u5E03\u6797"
   m_TagString: "\u6575\u4EBA"
@@ -566,9 +566,9 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 80
   m_CollisionDetection: 0
---- !u!114 &459425364891363126
+--- !u!114 &5267245499667810503
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -581,6 +581,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.Enemy
   data: {fileID: 11400000, guid: 2f82ea9736c6ce846aea1d8b7a3f11f5, type: 2}
+  statusUI: {fileID: 0}
 --- !u!1 &1300070071406548
 GameObject:
   m_ObjectHideFlags: 0

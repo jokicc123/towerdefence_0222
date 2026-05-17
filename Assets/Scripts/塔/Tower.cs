@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static CHANG.TowerData;
 
 namespace CHANG
 {
@@ -131,7 +132,7 @@ namespace CHANG
             base.Update();
             UpdateEnemiesInRange();
             // ✅ 交給狀態機，不要自己處理攻擊
-            Debug.Log($"State={stateMachine.currentState?.Name}, Head={Head}, HasTarget={HasTarget()}");
+        
             if (HasTarget() && stateMachine.currentState == Idle)
             {
                 stateMachine.ChangeState(Attack);
@@ -185,6 +186,7 @@ namespace CHANG
             if (target == null || bulletPrefab == null || FirePoint == null)
             {
                 Debug.LogWarning("塔無法攻擊");
+                ApplyEffect(target);
                 return;
             }
 
@@ -193,15 +195,33 @@ namespace CHANG
                 FirePoint.position,
                 FirePoint.rotation
             );
-
             if (bulletObj.TryGetComponent(out Bullet b))
             {
-                b.SetTarget(target, damage); // ⭐ 用當前等級 damage
+                b.SetTarget(
+                    target,
+                    damage,
+                    CurrenData.effectType,
+                    CurrenData.effectDuration,
+                    CurrenData.effectDamagePerSecond
+                );
+            }
+        }
+        protected void ApplyEffect(Enemy enemy)
+        {
+            switch (CurrenData.effectType)  
+            {
+                case TowerEffectType.Burn:
+                    enemy.AddEffect(new BurnEffect(enemy, CurrenData.effectDuration, CurrenData.effectDamagePerSecond));
+                    break;
+                case TowerEffectType.Poison:
+                    enemy.AddEffect(new PoisonEffect(enemy, CurrenData.effectDuration, CurrenData.effectDamagePerSecond, CurrenData.slowPercent));
+                    break;
+
             }
         }
         #endregion
 
-        #region 外觀系統
+        #region 外觀系統    
         private void UpdateModel()
         {
             if (modelRoot == null || data.levelModelPrefabs == null) return;

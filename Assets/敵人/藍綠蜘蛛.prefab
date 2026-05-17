@@ -1,5 +1,38 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4658097093825331891
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1207049434657190368}
+  m_Layer: 7
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1207049434657190368
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4658097093825331891}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7978624207812061653}
+  - {fileID: 7978624207812061649}
+  m_Father: {fileID: 7978624207812061655}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7978624207812556193
 GameObject:
   m_ObjectHideFlags: 0
@@ -1049,11 +1082,11 @@ Transform:
   m_GameObject: {fileID: 7978624207812556273}
   serializedVersion: 2
   m_LocalRotation: {x: -6.123234e-17, y: 1, z: 6.123234e-17, w: -3.7493994e-33}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 7978624207812061655}
+  m_Father: {fileID: 1207049434657190368}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &7978624207798892725
 SkinnedMeshRenderer:
@@ -1172,12 +1205,12 @@ Transform:
   m_GameObject: {fileID: 7978624207812556277}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071067, y: 5.302452e-33, z: 5.302451e-33, w: 0.7071068}
-  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7978624207812061589}
-  m_Father: {fileID: 7978624207812061655}
+  m_Father: {fileID: 1207049434657190368}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7978624207812556279
 GameObject:
@@ -1189,9 +1222,9 @@ GameObject:
   m_Component:
   - component: {fileID: 7978624207812061655}
   - component: {fileID: 7978624207803025015}
-  - component: {fileID: 8672734448827304797}
   - component: {fileID: -7979495105033778286}
   - component: {fileID: -7088038236494024374}
+  - component: {fileID: 6321515047444937703}
   m_Layer: 7
   m_Name: "\u85CD\u7DA0\u8718\u86DB"
   m_TagString: "\u6575\u4EBA"
@@ -1212,8 +1245,7 @@ Transform:
   m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 7978624207812061653}
-  - {fileID: 7978624207812061649}
+  - {fileID: 1207049434657190368}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &7978624207803025015
@@ -1238,19 +1270,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &8672734448827304797
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7978624207812556279}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: df4fe9f5934967244a183f2337720a73, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CHANG.Enemy
-  data: {fileID: 11400000, guid: 0722bac6489804d498142bb0668fa8ba, type: 2}
 --- !u!135 &-7979495105033778286
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1297,5 +1316,19 @@ Rigidbody:
   m_UseGravity: 0
   m_IsKinematic: 1
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 80
   m_CollisionDetection: 0
+--- !u!114 &6321515047444937703
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7978624207812556279}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df4fe9f5934967244a183f2337720a73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.Enemy
+  data: {fileID: 11400000, guid: 0722bac6489804d498142bb0668fa8ba, type: 2}
+  statusUI: {fileID: 0}
