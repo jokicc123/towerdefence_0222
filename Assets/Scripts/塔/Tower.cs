@@ -183,18 +183,13 @@ namespace CHANG
 
         public virtual void Fire(Enemy target)
         {
-            if (target == null || bulletPrefab == null || FirePoint == null)
+            if (bulletPrefab == null || FirePoint == null)
             {
                 Debug.LogWarning("塔無法攻擊");
-                ApplyEffect(target);
                 return;
             }
 
-            GameObject bulletObj = Instantiate(
-                bulletPrefab,
-                FirePoint.position,
-                FirePoint.rotation
-            );
+            GameObject bulletObj = Instantiate(bulletPrefab, FirePoint.position, FirePoint.rotation);
             if (bulletObj.TryGetComponent(out Bullet b))
             {
                 b.SetTarget(
@@ -202,7 +197,8 @@ namespace CHANG
                     damage,
                     CurrenData.effectType,
                     CurrenData.effectDuration,
-                    CurrenData.effectDamagePerSecond
+                    CurrenData.effectDamagePerSecond,
+                    CurrenData.blastRadius  // ⭐ 告訴子彈是否為 AoE
                 );
             }
         }
@@ -219,6 +215,7 @@ namespace CHANG
 
             }
         }
+       
         #endregion
 
         #region 外觀系統    

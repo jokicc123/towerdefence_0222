@@ -41,6 +41,8 @@ namespace CHANG
         public float effectDuration; // 特效持續時間（如果有）
         public float effectDamagePerSecond; // 特效每秒傷害（如果有）
         public float slowPercent; // 毒藥減速百分比（如果有）
+        public float blastRadius;
+        public float minDamageRatio = 0.4f; // 邊緣傷害 = maxDamage × 這個值
     }
 
 }

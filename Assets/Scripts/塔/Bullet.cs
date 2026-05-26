@@ -16,14 +16,17 @@ namespace CHANG
         private TowerEffectType effectType;
         private float effectDuration;
         private float effectDps;
+        private float blastRadius;
+        private bool isAoE;
         // 由 Tower 在 Instantiate 後呼叫
         public void SetTarget(
-              Enemy newTarget,
-              float dmg,
-              TowerEffectType type,
-              float duration,
-              float dps
-        )
+     Enemy newTarget,
+     float dmg,
+     TowerEffectType type,
+     float duration,
+     float dps,
+     float blastRadius
+ )
         {
             target = newTarget;
             damage = dmg;
@@ -31,6 +34,9 @@ namespace CHANG
             effectType = type;
             effectDuration = duration;
             effectDps = dps;
+
+            this.blastRadius = blastRadius;
+            isAoE = blastRadius > 0f;
         }
         private void Update()
         {
@@ -57,16 +63,40 @@ namespace CHANG
 
         private void HitTarget()
         {
-            if (target == null) return;
-            Debug.Log($"💥 子彈命中！effectType = {effectType}"); // ⭐ 新增
-            target.TakeDamage(damage);
+            if (isAoE)
+            {
+                Collider[] hits = Physics.OverlapSphere(
+                    transform.position,
+                    blastRadius
+                );
 
+                foreach (Collider hit in hits)
+                {
+                    Enemy enemy = hit.GetComponent<Enemy>();
+
+                    if (enemy != null)
+                    {
+                        DamageEnemy(enemy);
+                    }
+                }
+            }
+            else
+            {
+                DamageEnemy(target);
+            }
+
+            Destroy(gameObject);
+        }
+        private void DamageEnemy(Enemy enemy)
+        {
+            enemy.TakeDamage(damage);
+            Debug.Log($"💥 打到敵人：{enemy.name}");
             switch (effectType)
             {
                 case TowerEffectType.Burn:
-                    target.AddEffect(
+                    enemy.AddEffect(
                         new BurnEffect(
-                            target,
+                            enemy,
                             effectDuration,
                             effectDps
                         )
@@ -74,13 +104,16 @@ namespace CHANG
                     break;
 
                 case TowerEffectType.Poison:
-                    target.AddEffect(
-                        new PoisonEffect(target, effectDuration, effectDps, slowPercent)
+                    enemy.AddEffect(
+                        new PoisonEffect(
+                            enemy,
+                            effectDuration,
+                            effectDps,
+                            slowPercent
+                        )
                     );
                     break;
             }
-
-            Destroy(gameObject);
         }
     }
 }
