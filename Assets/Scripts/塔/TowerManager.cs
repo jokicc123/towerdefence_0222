@@ -193,16 +193,38 @@ namespace CHANG
         // =========================================
         // 建造規則判斷（核心邏輯）
         // =========================================
+        // =========================================
+        // 建造規則判斷（核心邏輯 - 完美修正版）
+        // =========================================
         private bool CanBuild(Vector3 pos)
         {
-            // 如果射線打到的是道路 → 不能建造
-            if (currentHit.collider != null &&
-                currentHit.collider.CompareTag("道路"))
-                return false;
+            // 1. 使用物理球體偵測，找出這個網格點 (pos) 半徑 0.4f 內的所有碰撞體
+            // 這裡不設 LayerMask，代表所有圖層（道路、裝飾、塔）都會被掃描到
+            Collider[] colliders = Physics.OverlapSphere(pos, 0.4f);
 
-            // 如果範圍內已有塔 → 不能建造
-            if (Physics.CheckSphere(pos, 0.4f, LayerMask.GetMask("Tower")))
-                return false;
+            foreach (var col in colliders)
+            {
+                // 排除掉地面本身（如果地面有 Collider 的話，避免誤判）
+                // 假設你的地面 Layer 叫 "Ground"，或者你可以用 Tag 排除
+                if (((1 << col.gameObject.layer) & groundLayer) != 0)
+                    continue;
+
+                // 2. 檢查範圍內有沒有不能蓋的 Tag
+                if (col.CompareTag("道路") || col.CompareTag("環境裝飾"))
+                {
+                    // Debug.Log($"❌ 無法建造：範圍內有阻擋物 {col.name} (Tag: {col.tag})");
+                    return false;
+                }
+
+                // 3. 檢查範圍內有沒有已經存在的防禦塔
+                // 如果你的防禦塔是用 Tag 辨識，可以直接加在這裡；
+                // 如果是用 Layer 辨識，可以檢查 col.gameObject.layer
+                if ( col.gameObject.layer == LayerMask.NameToLayer("Tower"))
+                {
+                    // Debug.Log($"❌ 無法建造：此處已有防禦塔 {col.name}");
+                    return false;
+                }
+            }
 
             // 其他情況都可以建造
             return true;
