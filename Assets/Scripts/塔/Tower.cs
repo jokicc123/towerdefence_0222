@@ -26,10 +26,8 @@ namespace CHANG
 
         private GameObject bulletPrefab => CurrenData.bulletPrefab;
 
-     
         public Transform FirePoint { get; private set; }
         public Transform Head { get; private set; }
-
 
         // ⭐ 攻擊計時
         private float attackTimer;
@@ -39,6 +37,10 @@ namespace CHANG
         [Header("模型")]
         [SerializeField] private Transform modelRoot;
         private GameObject currentModel;
+
+        // ✨【新增】範圍圓圈組件連結
+        [Header("範圍顯示")]
+        [SerializeField] private RangeCircle rangeCircle;
 
         #region 狀態機
         public TowerIdle Idle { get; private set; }
@@ -65,13 +67,16 @@ namespace CHANG
             stateMachine.Initialize(Idle);
         }
 
-        // ⭐ 初始化（由 TowerManager 呼叫）
+        // ⭐ 初始化（由 TowerManager 呼召）
         public void Initialize(TowerData towerData)
         {
-            Debug.Log($"Initialize 被呼叫於 {gameObject.name}"); // ✅ 加這行
+            Debug.Log($"Initialize 被呼叫於 {gameObject.name}");
             data = towerData;
             currentLevel = 0;          // 初始等級
             ApplyLevel();       // ⭐ 套用數值
+
+            // ✨【新增】初始化時預設把範圍圈隱藏
+            HideRangeCircle();
         }
 
         // ⭐ 套用等級（核心）
@@ -80,7 +85,15 @@ namespace CHANG
             // 更新範圍碰撞器
             if (rangeCollider != null)
             {
+                rangeCollider.isTrigger = true; // 確保一定是 Trigger
                 rangeCollider.radius = attackRange;
+            }
+
+            // ✨【新增】讓 UI 圓圈動態去畫出當前等級的攻擊範圍大小
+            if (rangeCircle != null)
+            {
+                rangeCircle.DrawCircle(attackRange);
+                rangeCircle.SetColor(new Color(0f, 1f, 0f, 0.4f)); // 預設給牠半透明綠色
             }
 
             // 重置攻擊節奏
@@ -91,6 +104,7 @@ namespace CHANG
 
             Debug.Log($"套用等級 {currentLevel + 1}");
         }
+
         public bool CanUpgrade()
         {
             return currentLevel < data.levels.Length - 1;
@@ -100,9 +114,9 @@ namespace CHANG
         public int GetUpgradeCost()
         {
             if (!CanUpgrade()) return 0;
-
             return data.levels[currentLevel + 1].cost;
         }
+
         // ⭐ 升級
         public void Upgrade()
         {
@@ -131,8 +145,7 @@ namespace CHANG
         {
             base.Update();
             UpdateEnemiesInRange();
-            // ✅ 交給狀態機，不要自己處理攻擊
-        
+
             if (HasTarget() && stateMachine.currentState == Idle)
             {
                 stateMachine.ChangeState(Attack);
@@ -202,9 +215,10 @@ namespace CHANG
                 );
             }
         }
+
         protected void ApplyEffect(Enemy enemy)
         {
-            switch (CurrenData.effectType)  
+            switch (CurrenData.effectType)
             {
                 case TowerEffectType.Burn:
                     enemy.AddEffect(new BurnEffect(enemy, CurrenData.effectDuration, CurrenData.effectDamagePerSecond));
@@ -212,10 +226,9 @@ namespace CHANG
                 case TowerEffectType.Poison:
                     enemy.AddEffect(new PoisonEffect(enemy, CurrenData.effectDuration, CurrenData.effectDamagePerSecond, CurrenData.slowPercent));
                     break;
-
             }
         }
-       
+
         #endregion
 
         #region 外觀系統    
@@ -249,6 +262,23 @@ namespace CHANG
         }
         #endregion
 
+        // ✨【新增】給外部（如 TowerManager 或點擊事件）呼叫的開關方法
+        #region 範圍顯示控制
+        public void ShowRangeCircle()
+        {
+            if (rangeCircle != null)
+            {
+                rangeCircle.gameObject.SetActive(true);
+            }
+        }
 
+        public void HideRangeCircle()
+        {
+            if (rangeCircle != null)
+            {
+                rangeCircle.gameObject.SetActive(false);
+            }
+        }
+        #endregion
     }
 }
