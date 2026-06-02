@@ -12,6 +12,7 @@ namespace CHANG
         private Color originalColor;
 
         // --- 路徑相關 ---
+        private Transform[] myPath;    // ✨ 新增：儲存這隻怪物專屬的路徑點
         private Transform targetPoint;
         private int wavePointIndex = 0;
         Rigidbody rb;
@@ -32,9 +33,21 @@ namespace CHANG
                 originalColor = renderers[0].material.color;
             }
         }
+
+        // ✨ 新增：提供給 Spawner 在生成怪物時，動態塞入專屬路線的方法
+        public void InitializePath(Transform[] specificPath)
+        {
+            myPath = specificPath;
+            wavePointIndex = 0;
+            if (myPath != null && myPath.Length > 0)
+            {
+                targetPoint = myPath[0];
+            }
+        }
+
         public void SetEffectColor(Color color)
         {
-            foreach(var r in renderers)
+            foreach (var r in renderers)
             {
                 r.material.color = color;
             }
@@ -42,26 +55,37 @@ namespace CHANG
 
         public void ResetColor()
         {
-            foreach(var r in renderers)
+            foreach (var r in renderers)
             {
                 r.material.color = originalColor;
             }
         }
+
         private void Start()
         {
-            if (Waypoints.Points == null || Waypoints.Points.Length == 0)
+            // ✨ 擴充：如果 Spawner 還沒透過 InitializePath 餵路線進來（相容原本的舊做法）
+            if (myPath == null || myPath.Length == 0)
             {
-                Waypoints wp = Object.FindFirstObjectByType<Waypoints>();
-                if (wp != null) wp.InitializePoints();
+                if (Waypoints.Points == null || Waypoints.Points.Length == 0)
+                {
+                    Waypoints wp = Object.FindFirstObjectByType<Waypoints>();
+                    if (wp != null) wp.InitializePoints();
+                }
+
+                if (Waypoints.Points != null && Waypoints.Points.Length > 0)
+                {
+                    myPath = Waypoints.Points; // 沒設定就用全域預設路線
+                }
             }
 
-            if (Waypoints.Points != null && Waypoints.Points.Length > 0)
+            // 初始化第一個目標點
+            if (myPath != null && myPath.Length > 0)
             {
-                targetPoint = Waypoints.Points[0];
+                targetPoint = myPath[0];
             }
             else
             {
-                Debug.LogError("場景中找不到任何路徑點！");
+                Debug.LogError($"{gameObject.name} 找不到任何可以前進的路徑點！");
             }
         }
 
@@ -159,21 +183,23 @@ namespace CHANG
                 GetNextWaypoint();
             }
         }
+
         private void GetNextWaypoint()
         {
-            if (wavePointIndex >= Waypoints.Points.Length - 1)
+            // ✨ 修改：改用我自己的路徑 myPath 來做長度判定
+            if (myPath == null || myPath.Length == 0) return;
+
+            if (wavePointIndex >= myPath.Length - 1)
             {
-                GameManager.Instance.TakeDamege(data.damage);
+                // 💡 幫你抓個小蟲：你原本這裡呼叫了 TakeDamege，然後又呼叫 ReachGoal()
+                // 但 ReachGoal 裡面本來就會扣血了，這樣會變成點到終點時扣兩次血喔！
+                // 調整後：直接交給 ReachGoal 處理即可
                 ReachGoal();
                 return;
             }
             wavePointIndex++;
-            targetPoint = Waypoints.Points[wavePointIndex];
-         
+            targetPoint = myPath[wavePointIndex];
         }
-
-
-        
 
         public void TakeDamage(float amount)
         {
