@@ -18,14 +18,16 @@ namespace CHANG
 
         public TowerAttackType attackType;
         public TowerEffectType effectType;
-
+        [Header("文字說明")]
+        public string towerName;      // 防禦塔名稱（例如：火焰祭壇）
+        [TextArea(3, 5)]
+        public string description;    // 防禦塔詳細介紹（例如：噴射出熊熊烈火，造成持續性範圍傷害。）
         [Header("等級資料")]
         public TowerLevel[] levels; // ⭐ 核心
         [Header("模型（每級外觀）")]
         public GameObject[] levelPrefabs;
         [Header("視覺模型（每級換外觀用）")]
         public GameObject[] levelModelPrefabs; // 純模型 Prefab（換外觀用）
-        public string towerName;
 
     }
 

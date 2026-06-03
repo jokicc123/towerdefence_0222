@@ -10,20 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fae2c384834793c409e75e367a88eb31, type: 3}
-  m_Name: "\u706B\u7130\u58541"
+  m_Name: "\u706B\u7130\u5854"
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerData
   attackType: 0
   effectType: 1
+  towerName: "\u706B\u7130\u5854"
+  description: 
   levels:
   - attackRange: 5
     damage: 5
     attackSpeed: 1
-    cost: 30
+    cost: 140
     bulletPrefab: {fileID: 1570095931659952, guid: 06bbf55df0b7f7c44a8396ab29b0c736, type: 3}
     effectType: 1
     effectDuration: 5
     effectDamagePerSecond: 1
     slowPercent: 0
+    blastRadius: 0
+    minDamageRatio: 0.4
   - attackRange: 6
     damage: 4
     attackSpeed: 2
@@ -33,6 +37,8 @@ MonoBehaviour:
     effectDuration: 1.5
     effectDamagePerSecond: 2
     slowPercent: 0
+    blastRadius: 0
+    minDamageRatio: 0.4
   - attackRange: 7
     damage: 5
     attackSpeed: 3
@@ -42,10 +48,11 @@ MonoBehaviour:
     effectDuration: 2
     effectDamagePerSecond: 3
     slowPercent: 0
+    blastRadius: 0
+    minDamageRatio: 0.4
   levelPrefabs:
   - {fileID: 1111581069580094, guid: 1ced8274635d6354e9da6572dcbb911d, type: 3}
   levelModelPrefabs:
   - {fileID: 1111581069580094, guid: 96620a07f9fb9d5479a83c84033f6bc2, type: 3}
   - {fileID: 1144989041015720, guid: 76ce305eee15be04b9c49c956fcd2a52, type: 3}
   - {fileID: 1079211923614252, guid: 2d137d943a9b47f49aa3314a91eda658, type: 3}
-  towerName: "\u706B\u7130\u5854"

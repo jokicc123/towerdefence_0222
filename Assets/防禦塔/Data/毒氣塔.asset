@@ -14,16 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerData
   attackType: 0
   effectType: 2
+  towerName: "\u6BD2\u6C23\u5854"
+  description: 
   levels:
   - attackRange: 5
     damage: 5
     attackSpeed: 0.5
-    cost: 20
+    cost: 140
     bulletPrefab: {fileID: 1887534789471412, guid: 9a8b1f243cc74b1419fca36adc77e05b, type: 3}
     effectType: 2
     effectDuration: 5
     effectDamagePerSecond: 2
     slowPercent: 1
+    blastRadius: 0
+    minDamageRatio: 0.4
   - attackRange: 6
     damage: 8
     attackSpeed: 0.5
@@ -33,6 +37,8 @@ MonoBehaviour:
     effectDuration: 5
     effectDamagePerSecond: 3
     slowPercent: 1.6
+    blastRadius: 0
+    minDamageRatio: 0.4
   - attackRange: 7
     damage: 10
     attackSpeed: 0.5
@@ -42,10 +48,11 @@ MonoBehaviour:
     effectDuration: 5
     effectDamagePerSecond: 4
     slowPercent: 1.7
+    blastRadius: 0
+    minDamageRatio: 0.4
   levelPrefabs:
   - {fileID: 1261893928371566, guid: 99ece9e9b0f569e47b4f7e25409c82d7, type: 3}
   levelModelPrefabs:
   - {fileID: 1261893928371566, guid: b2594f71a03b73d449d0bba8635df34d, type: 3}
   - {fileID: 1618792508222544, guid: cfb8d15d8a737d147bb0749aa23d3b08, type: 3}
   - {fileID: 1695960375590364, guid: ec9edae6d87347a408f7a06a7cc68926, type: 3}
-  towerName: "\u6BD2\u6C23\u5854"
