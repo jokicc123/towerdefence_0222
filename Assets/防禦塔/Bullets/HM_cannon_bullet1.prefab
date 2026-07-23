@@ -129,7 +129,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.Bullet
   speed: 5
   reachDistance: 1
-  hitEffectPrefab: {fileID: 1240887441953726}
+  hitEffectPrefab: {fileID: 2080831988222161942, guid: 1e629f92e7e1fae40940fb5288228504, type: 3}
+  slowPercent: 0.5
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!1 &1420486808462880
 GameObject:
   m_ObjectHideFlags: 0
@@ -5201,7 +5205,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.6886792, g: 0.39500773, b: 0, a: 0.07058824}
+      maxColor: {r: 0.7169812, g: 0.27303565, b: 0.22659309, a: 0.07058824}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}

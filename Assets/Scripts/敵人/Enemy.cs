@@ -97,7 +97,7 @@ namespace CHANG
         }
 
         // ⭐ 新增效果
-        [SerializeField] private EnemyStatusUI statusUI;
+        
         public void AddEffect(StatusEffect effect)
         {
             var existing = effects.Find(e => e.GetType() == effect.GetType());
@@ -108,7 +108,7 @@ namespace CHANG
             }
             effect.OnApply();
             effects.Add(effect);
-            RefreshStatusUI();
+           
         }
 
         // ⭐ 每幀 Tick
@@ -121,16 +121,11 @@ namespace CHANG
                 {
                     effects[i].OnExpire();
                     effects.RemoveAt(i);
-                    RefreshStatusUI();
+                  
                 }
             }
         }
-        private void RefreshStatusUI()
-        {
-            if (statusUI == null) return;
-            statusUI.SetBurn(effects.Exists(e => e is BurnEffect));
-            statusUI.SetPoison(effects.Exists(e => e is PoisonEffect));
-        }
+        
 
         // ⭐ 減速
         public void ApplySlow(float percent)
@@ -147,36 +142,26 @@ namespace CHANG
         {
             if (targetPoint == null) return;
 
-            Vector3 direction =
-                (targetPoint.position - transform.position).normalized;
-
-            // ⭐ 只轉 Y 軸
+            Vector3 direction = (targetPoint.position - transform.position).normalized;
             direction.y = 0;
 
-            // ⭐ 面向移動方向
             if (direction != Vector3.zero)
             {
-                Quaternion lookRotation =
-                    Quaternion.LookRotation(direction);
-
-                transform.rotation = Quaternion.Slerp(
-                    transform.rotation,
-                    lookRotation,
-                    10f * Time.deltaTime
-                );
+                Quaternion lookRotation = Quaternion.LookRotation(direction);
+                transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, 10f * Time.deltaTime);
             }
+
+            // ⭐ 目標點強制拉平到敵人自己當前的 Y，徹底跟 waypoint 高度脫鉤
+            Vector3 flatTargetPos = new Vector3(targetPoint.position.x, transform.position.y, targetPoint.position.z);
 
             transform.position = Vector3.MoveTowards(
                 transform.position,
-                targetPoint.position,
+                flatTargetPos,
                 MoveSpeed * Time.deltaTime
             );
 
-            Vector3 flatPosition =
-                new Vector3(transform.position.x, 0, transform.position.z);
-
-            Vector3 flatTarget =
-                new Vector3(targetPoint.position.x, 0, targetPoint.position.z);
+            Vector3 flatPosition = new Vector3(transform.position.x, 0, transform.position.z);
+            Vector3 flatTarget = new Vector3(targetPoint.position.x, 0, targetPoint.position.z);
 
             if (Vector3.Distance(flatPosition, flatTarget) <= 0.2f)
             {
@@ -191,8 +176,8 @@ namespace CHANG
 
             if (wavePointIndex >= myPath.Length - 1)
             {
-                // 💡 幫你抓個小蟲：你原本這裡呼叫了 TakeDamege，然後又呼叫 ReachGoal()
-                // 但 ReachGoal 裡面本來就會扣血了，這樣會變成點到終點時扣兩次血喔！
+                
+               
                 // 調整後：直接交給 ReachGoal 處理即可
                 ReachGoal();
                 return;

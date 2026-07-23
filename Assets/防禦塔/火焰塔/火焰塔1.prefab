@@ -14731,7 +14731,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4017774328649912}
   - component: {fileID: 135258617932420732}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Zone
   m_TagString: Untagged
   m_Icon: {fileID: 0}

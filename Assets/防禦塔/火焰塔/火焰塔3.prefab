@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4430128477630212}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect_parent_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,7 +47,7 @@ GameObject:
   - component: {fileID: 33585650521197512}
   - component: {fileID: 23629352850693992}
   - component: {fileID: -4415653107162616387}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: "\u706B\u7130\u58543"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -157,7 +157,7 @@ GameObject:
   - component: {fileID: 4913283235628502}
   - component: {fileID: 198607931946608404}
   - component: {fileID: 199753206315042680}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect_light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5004,7 +5004,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4126636819920754}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: shootElement3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5036,7 +5036,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4023231558317660}
   - component: {fileID: 135007984540990562}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Zone3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5090,7 +5090,7 @@ GameObject:
   - component: {fileID: 4558248612363398}
   - component: {fileID: 198670331812932426}
   - component: {fileID: 199205341214688492}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect shadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9939,7 +9939,7 @@ GameObject:
   - component: {fileID: 4466737145507438}
   - component: {fileID: 198364839262120180}
   - component: {fileID: 199877264707750322}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect_ADD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14787,7 +14787,7 @@ GameObject:
   - component: {fileID: 4635947251813802}
   - component: {fileID: 198271711447910210}
   - component: {fileID: 199785483428266218}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19636,7 +19636,7 @@ GameObject:
   - component: {fileID: 1011887334098729072}
   - component: {fileID: 508447607634599545}
   - component: {fileID: 50198532747504270}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RangeCircle
   m_TagString: Untagged
   m_Icon: {fileID: 0}

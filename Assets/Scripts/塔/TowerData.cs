@@ -15,7 +15,7 @@ namespace CHANG
             Burn, // 燒傷（持續傷害）
             Poison  , // 毒（持續傷害 + 減速）
         }
-
+        public Vector3 buildFootprint = new Vector3(1f, 1f, 1f); // 手動在 Inspector 設定塔的佔地大小
         public TowerAttackType attackType;
         public TowerEffectType effectType;
         [Header("文字說明")]

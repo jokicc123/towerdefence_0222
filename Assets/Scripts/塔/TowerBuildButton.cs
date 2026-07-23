@@ -59,11 +59,16 @@ namespace CHANG
 
             // 錢夠就可以點（true），錢不夠就反灰（false）
             button.interactable = currentGold >= buildCost;
+            // 遊戲不在進行中時，按鈕一律鎖死
+            bool isPlaying = GameManager.Instance != null && GameManager.Instance.CanBuildTower();
+
+            // 錢夠 且 遊戲進行中，才能點
+            button.interactable = isPlaying && currentGold >= buildCost;
         }
 
         private void OnDestroy()
         {
-            // ?? 養成好習慣，物件被銷毀時取消訂閱事件，防止記憶體漏失
+            // ，物件被銷毀時取消訂閱事件，防止記憶體漏失
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.OnGoldChanged -= CheckMoney;

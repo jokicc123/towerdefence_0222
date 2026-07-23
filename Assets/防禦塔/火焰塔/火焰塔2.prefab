@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4249737782010098}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: shootElement2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -42,7 +42,7 @@ GameObject:
   - component: {fileID: 4843192754246082}
   - component: {fileID: 198837189738029942}
   - component: {fileID: 199137444044640706}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect_ADD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4891,7 +4891,7 @@ GameObject:
   - component: {fileID: 33451725343029294}
   - component: {fileID: 23925771884632188}
   - component: {fileID: -8915926488002011201}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: "\u706B\u7130\u58542"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5001,7 +5001,7 @@ GameObject:
   - component: {fileID: 4870132216301118}
   - component: {fileID: 198920036516030990}
   - component: {fileID: 199171001707049434}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect shadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9849,7 +9849,7 @@ GameObject:
   - component: {fileID: 4194968633999842}
   - component: {fileID: 198860473574722824}
   - component: {fileID: 199143228026884288}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect_parent_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14759,7 +14759,7 @@ GameObject:
   - component: {fileID: 4736060298388398}
   - component: {fileID: 198770565646905942}
   - component: {fileID: 199877808961048916}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19606,7 +19606,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4485292105258098}
   - component: {fileID: 135367814797736572}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Zone2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19660,7 +19660,7 @@ GameObject:
   - component: {fileID: 4459603031866688}
   - component: {fileID: 198756720645265254}
   - component: {fileID: 199069982654519714}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Fire_effect_light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24508,7 +24508,7 @@ GameObject:
   - component: {fileID: 2180761989987844756}
   - component: {fileID: 8974986237717157028}
   - component: {fileID: 7343292583528400093}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: RangeCircle
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4044019252688636}
   - component: {fileID: 33014062357048158}
   - component: {fileID: 23270779637498190}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: HM_cannon3_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4921200218209560}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: SCALED
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 4741528975815466}
   - component: {fileID: 33685685290047240}
   - component: {fileID: 23974710529354110}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: HM_cannon_pivot3
   m_TagString: Castle
   m_Icon: {fileID: 0}
@@ -229,7 +229,7 @@ GameObject:
   - component: {fileID: -1852212008629308104}
   - component: {fileID: 362522004475612342}
   - component: {fileID: 4110656149499150093}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: "\u706B\u70AE\u58543"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -267,6 +267,7 @@ MonoBehaviour:
   data: {fileID: 11400000, guid: 5f696f8b2d9defb4a931fb371d8fa6b9, type: 2}
   currentLevel: 2
   modelRoot: {fileID: 4722492196543158}
+  rangeCircle: {fileID: 0}
 --- !u!120 &-1852212008629308104
 LineRenderer:
   serializedVersion: 3
@@ -422,7 +423,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4070194564888780}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: shootElement_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -454,7 +455,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4699573065628936}
   - component: {fileID: 135210297929407256}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Zone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -508,7 +509,7 @@ GameObject:
   - component: {fileID: 4921175691804570}
   - component: {fileID: 33425171843475234}
   - component: {fileID: 23690802125530388}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: HM_cannon3
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
-namespace CHANG 
+namespace CHANG
 {
     /// <summary>
     /// 淡入淡出系統
@@ -20,20 +20,30 @@ namespace CHANG
         public static IEnumerator Fade(CanvasGroup group, bool fadIn = true, float interval = 0.03f, float delay = 0, Action finish = null)
         {
 
-            yield return new WaitForSeconds(delay);
+            yield return new WaitForSecondsRealtime(delay);
 
+            if (fadIn)
+            {
+                group.interactable = true;
+                group.blocksRaycasts = true;
+            }
+
+            Debug.Log($"[Fade] fadIn={fadIn}, blocksRaycasts={group.blocksRaycasts}");
             float increase = fadIn ? +0.1f : -0.1f;
             for (int i = 0; i < 10; i++)
 
             {
-
                 group.alpha += increase;
-                yield return new WaitForSeconds(interval);
-
-
+                yield return new WaitForSecondsRealtime(interval);
             }
-            group.interactable = fadIn;
-            group.blocksRaycasts = fadIn;
+            if (!fadIn)
+            {
+                group.interactable = false;
+                group.blocksRaycasts = false;
+                
+            }
+
+            
             finish?.Invoke();
         }
     }

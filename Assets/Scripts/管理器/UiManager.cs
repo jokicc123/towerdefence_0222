@@ -8,6 +8,8 @@ namespace CHANG
 {
     public class UiManager : MonoBehaviour
     {
+        [Header("UI 總開關")]
+        [SerializeField] private Canvas mainCanvas;   // 在 Inspector 手動拖曳指定
         private Tower currentTower; //目前選擇的塔
         public static UiManager Instance;
 
@@ -17,13 +19,15 @@ namespace CHANG
             if (Instance == null)
             {
                 Instance = this;
-                DontDestroyOnLoad(gameObject);
+                
             }
             else
             {
                 Destroy(gameObject);
             }
+          
         }
+       
         #region  UI文字
         //UI文字
         [Header("UI")]
@@ -51,7 +55,14 @@ namespace CHANG
         private TMP_Text costText;
         [SerializeField]
         private Button upgradeButton;
+
+
+
         #endregion
+        [Header("遊戲控制")]
+        [SerializeField] private Button playPauseButton;
+        [SerializeField] private Sprite playSprite;
+        [SerializeField] private Sprite pauseSprite;
         private void Start()
         {
             //更新UI
@@ -60,10 +71,12 @@ namespace CHANG
             GameManager.Instance.OnWaveChanged += UpdateWave;
             GameManager.Instance.OnGameOver += ShowGameOver;
             GameManager.Instance.Onwin += ShowWin;
+            GameManager.Instance.OnGameOver += OnGameEnd;
+            GameManager.Instance.Onwin += OnGameEnd;
             UpdateHp(GameManager.Instance.castleHp);
             UpdateGold(GameManager.Instance.gold);
             UpdateWave(GameManager.Instance.currentWave);
-
+            UpdatePlayPauseUI();
         }
         private void OnDestroy()
         {
@@ -74,6 +87,9 @@ namespace CHANG
             GameManager.Instance.OnWaveChanged -= UpdateWave;
             GameManager.Instance.OnGameOver -= ShowGameOver;
             GameManager.Instance.Onwin -= ShowWin;
+
+            GameManager.Instance.OnGameOver -= OnGameEnd;
+            GameManager.Instance.Onwin -= OnGameEnd;
         }
 
         public void ShowUpgradeUI(Tower tower)
@@ -114,6 +130,8 @@ namespace CHANG
         //顯示勝利 UI
         private void ShowWin()
         {
+            Debug.Log("ShowWin");
+
             StopAllCoroutines();
             StartCoroutine(FadeSystem.Fade(winUI, true));
         }
@@ -158,6 +176,47 @@ namespace CHANG
             currentTower.Upgrade();
             RefreshUpgradeUI();
         }
+        private void OnGameEnd()
+        {
+            HideUpgradeUI();   // 強制關閉升級面板
+            currentTower = null;
+        }
+        public void OnClickPlayPause()
+        {
+            switch (GameManager.Instance.currentState)
+            {
+                case GameManager.GameState.Build:
+                    GameManager.Instance.StartGame();
+                    break;
 
+                case GameManager.GameState.Playing:
+                    GameManager.Instance.PauseGame();
+                    break;
+
+                case GameManager.GameState.Paused:
+                    GameManager.Instance.ResumeGame();
+                    break;
+            }
+
+            UpdatePlayPauseUI();
+        }
+        private void UpdatePlayPauseUI()
+        {
+            switch (GameManager.Instance.currentState)
+            {
+                case GameManager.GameState.Build:
+                    playPauseButton.image.sprite = playSprite;
+                    break;
+
+                case GameManager.GameState.Playing:
+                    playPauseButton.image.sprite = pauseSprite;
+                    break;
+
+                case GameManager.GameState.Paused:
+                    playPauseButton.image.sprite = playSprite;
+                    break;
+            }
+        }
     }
-}
+ }
+

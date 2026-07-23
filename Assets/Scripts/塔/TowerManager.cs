@@ -12,6 +12,8 @@ namespace CHANG
         [SerializeField] private LayerMask groundLayer; // 可放置塔的地面 Layer
         [SerializeField] private Color canBuildColor = new Color(0, 1, 0, 0.5f); // 可建造顏色（綠）
         [SerializeField] private Color cantBuildColor = new Color(1, 0, 0, 0.5f); // 不可建造顏色（紅）
+        [Header("建造判定用 LayerMask")]
+        [SerializeField] private LayerMask buildCheckLayers; // Inspector 裡勾選：TowerBody、道路、環境裝飾
 
         private TowerData selectedTowerData;   // 目前選擇的塔資料
         private GameObject previewInstance;     // 預覽塔物件
@@ -62,6 +64,7 @@ namespace CHANG
         // =========================================
         public void SelectTower(TowerData data)
         {
+            if (!GameManager.Instance.CanBuildTower()) return;
             CancelSelection(); // 先清掉舊預覽
 
             selectedTowerData = data;
@@ -101,6 +104,7 @@ namespace CHANG
         // =========================================
         private void UpdatePreview()
         {
+            if (!GameManager.Instance.CanBuildTower()) return;
             // 取得滑鼠位置
             Vector2 mousePosition = Pointer.current != null
                 ? Pointer.current.position.ReadValue()
@@ -126,7 +130,7 @@ namespace CHANG
                 previewInstance.transform.position = snapPos;
 
                 // 判斷是否可以建造
-                bool canBuild = CanBuild(snapPos);
+                bool canBuild = CanBuild(snapPos,selectedTowerData);
 
                 // 決定顏色（綠 or 紅）
                 Color stateColor = canBuild ? canBuildColor : cantBuildColor;
@@ -155,13 +159,14 @@ namespace CHANG
         // =========================================
         private void TryPlaceTower()
         {
+            if (!GameManager.Instance.CanBuildTower()) return;
             if (previewInstance == null || selectedTowerData == null)
                 return;
 
             Vector3 pos = previewInstance.transform.position;
 
             // 再次確認能不能建造
-            if (CanBuild(pos))
+            if (CanBuild(pos,selectedTowerData))
             {
                 // 檢查金幣是否足夠
                 if (!GameManager.Instance.SpendGold(selectedTowerData.levels[0].cost))
@@ -187,6 +192,7 @@ namespace CHANG
 
                 // 清除預覽
                 CancelSelection();
+
             }
         }
 
@@ -196,37 +202,46 @@ namespace CHANG
         // =========================================
         // 建造規則判斷（核心邏輯 - 完美修正版）
         // =========================================
-        private bool CanBuild(Vector3 pos)
+        public bool CanBuild(Vector3 buildPosition, TowerData towerData)
         {
-            // 1. 使用物理球體偵測，找出這個網格點 (pos) 半徑 0.4f 內的所有碰撞體
-            // 這裡不設 LayerMask，代表所有圖層（道路、裝飾、塔）都會被掃描到
-            Collider[] colliders = Physics.OverlapSphere(pos, 0.4f);
+            Vector3 halfExtents = towerData.buildFootprint / 2f;
+
+            Collider[] colliders = Physics.OverlapBox(
+                buildPosition,
+                halfExtents,
+                Quaternion.identity,
+                buildCheckLayers,
+                QueryTriggerInteraction.Collide
+            );
+
+            Debug.Log($"🔍 OverlapBox 抓到 {colliders.Length} 個 Collider");
+            foreach (var c in colliders)
+            {
+                Debug.Log($"   - {c.name} | Layer: {LayerMask.LayerToName(c.gameObject.layer)} | Tag: {c.tag} | IsTrigger: {c.isTrigger}");
+            }
 
             foreach (var col in colliders)
             {
-                // 排除掉地面本身（如果地面有 Collider 的話，避免誤判）
-                // 假設你的地面 Layer 叫 "Ground"，或者你可以用 Tag 排除
                 if (((1 << col.gameObject.layer) & groundLayer) != 0)
+                {
+                    Debug.Log($"   ⏭️ 跳過地面: {col.name}");
                     continue;
+                }
 
-                // 2. 檢查範圍內有沒有不能蓋的 Tag
                 if (col.CompareTag("道路") || col.CompareTag("環境裝飾"))
                 {
-                    // Debug.Log($"❌ 無法建造：範圍內有阻擋物 {col.name} (Tag: {col.tag})");
+                    Debug.Log($"   ❌ 擋住：{col.name} (Tag: {col.tag})");
                     return false;
                 }
 
-                // 3. 檢查範圍內有沒有已經存在的防禦塔
-                // 如果你的防禦塔是用 Tag 辨識，可以直接加在這裡；
-                // 如果是用 Layer 辨識，可以檢查 col.gameObject.layer
-                if ( col.gameObject.layer == LayerMask.NameToLayer("Tower"))
+                if (col.GetComponentInParent<Tower>() != null)
                 {
-                    // Debug.Log($"❌ 無法建造：此處已有防禦塔 {col.name}");
+                    Debug.Log($"   ❌ 擋住：已有塔 {col.name}");
                     return false;
                 }
             }
 
-            // 其他情況都可以建造
+            Debug.Log("   ✅ 可以建造");
             return true;
         }
 
@@ -243,6 +258,7 @@ namespace CHANG
         }
         void HandleTowerClick()
         {
+            if (!GameManager.Instance.CanBuildTower()) return;
             if (previewInstance != null)
             {
                 Debug.Log("❌ 有預覽塔，跳出");

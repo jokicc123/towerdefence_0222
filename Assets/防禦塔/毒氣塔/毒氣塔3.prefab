@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4057781896448104}
   - component: {fileID: 33526714988867586}
   - component: {fileID: 23553540922550512}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: HM_poison3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -101,7 +101,7 @@ GameObject:
   - component: {fileID: 4089580559036058}
   - component: {fileID: 198580502854916396}
   - component: {fileID: 199540839106688432}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: poison_glow 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4949,7 +4949,7 @@ GameObject:
   - component: {fileID: 4584944067049798}
   - component: {fileID: 198415539011173482}
   - component: {fileID: 199436642407985664}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: poison_base_blended_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9797,7 +9797,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4047200237069062}
   - component: {fileID: -5076095976729964841}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: "\u6BD2\u6C23\u58543"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9851,7 +9851,7 @@ GameObject:
   - component: {fileID: 4990786410320340}
   - component: {fileID: 198780419404766120}
   - component: {fileID: 199438514332524278}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: poison_base_additive
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -14699,7 +14699,7 @@ GameObject:
   - component: {fileID: 4533407040006504}
   - component: {fileID: 198579856189107662}
   - component: {fileID: 199320491565872254}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: posion_sparcles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -19547,7 +19547,7 @@ GameObject:
   - component: {fileID: 4989424499529670}
   - component: {fileID: 198728686277697912}
   - component: {fileID: 199216783045413664}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: poison_glow_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24393,7 +24393,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4638949879529044}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: PoisonEffect_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24428,7 +24428,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4298378878922574}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: shootElement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24460,7 +24460,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4074135052697514}
   - component: {fileID: 135423493218161856}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: Zone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -24514,7 +24514,7 @@ GameObject:
   - component: {fileID: 2624348676589253841}
   - component: {fileID: 6215006539026054905}
   - component: {fileID: 5587706986062978659}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RangeCircle
   m_TagString: Untagged
   m_Icon: {fileID: 0}

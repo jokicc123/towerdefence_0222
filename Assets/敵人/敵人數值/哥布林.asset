@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: "\u54E5\u5E03\u6797"
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.EnemyData
   enemyName: "\u54E5\u5E03\u6797"
-  maxHealth: 100
+  maxHealth: 80
   moveSpeed: 1
   damage: 10
   goldReward: 10

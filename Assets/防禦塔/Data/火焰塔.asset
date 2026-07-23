@@ -12,41 +12,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fae2c384834793c409e75e367a88eb31, type: 3}
   m_Name: "\u706B\u7130\u5854"
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerData
+  buildFootprint: {x: 1, y: 1, z: 1}
   attackType: 0
   effectType: 1
   towerName: "\u706B\u7130\u5854"
   description: 
   levels:
-  - attackRange: 5
-    damage: 5
-    attackSpeed: 1
-    cost: 140
+  - attackRange: 3.5
+    damage: 6
+    attackSpeed: 1.2
+    cost: 70
     bulletPrefab: {fileID: 1570095931659952, guid: 06bbf55df0b7f7c44a8396ab29b0c736, type: 3}
     effectType: 1
-    effectDuration: 5
-    effectDamagePerSecond: 1
+    effectDuration: 3
+    effectDamagePerSecond: 4
     slowPercent: 0
     blastRadius: 0
     minDamageRatio: 0.4
-  - attackRange: 6
-    damage: 4
-    attackSpeed: 2
-    cost: 35
+  - attackRange: 3.8
+    damage: 12
+    attackSpeed: 1.25
+    cost: 150
     bulletPrefab: {fileID: 1190723072478672, guid: 44dbc5b6bf4b16d45a6ec14ec0efcf0a, type: 3}
     effectType: 1
-    effectDuration: 1.5
-    effectDamagePerSecond: 2
+    effectDuration: 3.3
+    effectDamagePerSecond: 8
     slowPercent: 0
     blastRadius: 0
     minDamageRatio: 0.4
-  - attackRange: 7
-    damage: 5
-    attackSpeed: 3
-    cost: 40
+  - attackRange: 4.1
+    damage: 22
+    attackSpeed: 1.3
+    cost: 180
     bulletPrefab: {fileID: 1637505527600324, guid: eb4333bb69df76c4986cf8a132359589, type: 3}
     effectType: 1
-    effectDuration: 2
-    effectDamagePerSecond: 3
+    effectDuration: 3.6
+    effectDamagePerSecond: 14
     slowPercent: 0
     blastRadius: 0
     minDamageRatio: 0.4

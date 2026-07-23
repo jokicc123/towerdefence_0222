@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4137937741455444}
   - component: {fileID: 1991389674400616853}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: "\u7BAD\u58542"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -61,7 +61,7 @@ GameObject:
   - component: {fileID: 4685122782874224}
   - component: {fileID: 33020685340827676}
   - component: {fileID: 23112924198465468}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: HM_crossbow_pivot2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -151,7 +151,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4168700509242470}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: ShootElement2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -184,7 +184,7 @@ GameObject:
   - component: {fileID: 4348086102447204}
   - component: {fileID: 33933924895633564}
   - component: {fileID: 23377549504705992}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: HM_crossbow2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -272,7 +272,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4621218886232894}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: SCALED
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -309,7 +309,7 @@ GameObject:
   - component: {fileID: 33676008919266056}
   - component: {fileID: 23946188704973792}
   - component: {fileID: 135883854205948396}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Zone2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -420,7 +420,7 @@ GameObject:
   - component: {fileID: 4601888498336628}
   - component: {fileID: 33052682160261620}
   - component: {fileID: 23872077096841568}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: HM_crossbow_bullet2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -510,7 +510,7 @@ GameObject:
   - component: {fileID: 7872809104664259693}
   - component: {fileID: 5420456075820121432}
   - component: {fileID: 7205170381220730670}
-  m_Layer: 6
+  m_Layer: 10
   m_Name: RangeCircle
   m_TagString: Untagged
   m_Icon: {fileID: 0}

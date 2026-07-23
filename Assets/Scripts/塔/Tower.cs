@@ -120,6 +120,13 @@ namespace CHANG
         // ⭐ 升級
         public void Upgrade()
         {
+            // ⭐ 遊戲不在進行中時，禁止升級
+            if (GameManager.Instance != null && !GameManager.Instance.IsGameRunning())
+            {
+                Debug.Log("遊戲已結束，無法升級");
+                return;
+            }
+
             if (currentLevel >= data.levels.Length - 1)
             {
                 Debug.Log("已滿級");
@@ -135,14 +142,15 @@ namespace CHANG
             }
 
             currentLevel++;
-
             ApplyLevel();
 
             Debug.Log($"升級完成 → 等級 {currentLevel + 1}");
         }
-
         public override void Update()
         {
+            if (GameManager.Instance != null && !GameManager.Instance.CanBuildTower())
+                return;   // 遊戲結束就不再更新攻擊邏輯
+
             base.Update();
             UpdateEnemiesInRange();
 

@@ -9767,7 +9767,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.Bullet
   speed: 15
   reachDistance: 0.2
-  hitEffectPrefab: {fileID: 0}
+  hitEffectPrefab: {fileID: 8886712057026592532, guid: 7725020be6827d14282ef9e429622bb2, type: 3}
+  slowPercent: 0.5
+  enemyLayer:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!1 &1441062018569844
 GameObject:
   m_ObjectHideFlags: 0

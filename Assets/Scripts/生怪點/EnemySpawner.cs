@@ -24,30 +24,35 @@ namespace CHANG
 
         private int currentWaveIndex = 0;
 
-        void Start()
+   
+        IEnumerator Start()
         {
+            yield return new WaitUntil(() =>
+                GameManager.Instance.currentState == GameManager.GameState.Playing);
+                GameManager.Instance.totalWaves = waves.Count;
             StartCoroutine(SpawnWaves());
         }
-
         private IEnumerator SpawnWaves()
         {
             while (currentWaveIndex < waves.Count)
             {
+                GameManager.Instance.StartNextWave();
                 yield return StartCoroutine(SpawnWave());
 
                 // 每波間隔
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(10f);
+                yield return new WaitUntil(() =>
+                FindObjectsByType<Enemy>(FindObjectsSortMode.None).Length == 0);
+                Debug.Log("所有波數生成完成");
+              currentWaveIndex++;
             }
-
-            Debug.Log("所有波數生成完成");
-
             GameManager.Instance.CheckWin();
         }
 
         private IEnumerator SpawnWave()
         {
             // 🔥 更新波數 UI
-            GameManager.Instance.StartNextWave();
+           
 
             Wave wave = waves[currentWaveIndex];
 
@@ -67,7 +72,7 @@ namespace CHANG
                     {
                         PortalRoute selectedRoute = routes[pIndex];
 
-                        // ✨ 修改：不在 spawner 本身位置生成，改在「指定傳送門」的位置生成
+                        //  修改：不在 spawner 本身位置生成，改在「指定傳送門」的位置生成
                         GameObject enemyObj = Instantiate(
                             enemyData.enemyPrefab,
                             selectedRoute.spawnPortal.position,
@@ -82,7 +87,7 @@ namespace CHANG
                     }
                     else
                     {
-                        // 備援方案：如果 Index 超出範圍，就用原本 Spawner 的位置防呆
+                        // ：如果 Index 超出範圍，就用原本 Spawner 的位置防呆
                         Instantiate(enemyData.enemyPrefab, transform.position, Quaternion.identity);
                         Debug.LogWarning($"Portal Index 找不到對應路線，已使用預設位置生成！");
                     }
@@ -91,7 +96,6 @@ namespace CHANG
                 }
             }
 
-            currentWaveIndex++;
         }
     }
 }

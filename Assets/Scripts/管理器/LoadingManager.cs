@@ -25,13 +25,17 @@ namespace CHANG
             group = GetComponent<CanvasGroup>();
             textprogress = transform.Find("文字_載入進度").GetComponent<TMP_Text>();
             imageprogress = transform.Find("圖片_載入進度").GetComponent<Image>();
+            group.blocksRaycasts = true;
+            group.interactable = true;
         }
 
 
-        public void StartLoad(string scneName)
-        {
-            StartCoroutine(Loading(scneName));
-        }
+       public void StartLoad(string scneName)
+{
+    Debug.Log("④StartLoad被呼叫，場景名稱=" + scneName);
+    StartCoroutine(Loading(scneName));
+    Debug.Log("⑤StartCoroutine已呼叫");
+}
         /// <summary>
         /// 載入
         /// </summary>
@@ -48,13 +52,15 @@ namespace CHANG
                 imageprogress.fillAmount = option.progress / 0.9f;
                 yield return null;
 
-                if (option.progress == 0.9f) option.allowSceneActivation = true;//允許載入
+                if (option.progress >= 0.9f) option.allowSceneActivation = true;//允許載入
             }
 
             option.allowSceneActivation = true;
             yield return new WaitForSeconds(3);
-            yield return StartCoroutine(FadeSystem.Fade(group, false));
+          
 
+            yield return StartCoroutine(FadeSystem.Fade(group, false));
+          
         }
 
 
