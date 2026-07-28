@@ -54,7 +54,10 @@ VisualEffect:
     m_Vector2f:
       m_Array: []
     m_Vector3f:
-      m_Array: []
+      m_Array:
+      - m_Value: {x: 20, y: 10, z: 10}
+        m_Name: Bounds_size
+        m_Overridden: 1
     m_Vector4f:
       m_Array: []
     m_Uint:

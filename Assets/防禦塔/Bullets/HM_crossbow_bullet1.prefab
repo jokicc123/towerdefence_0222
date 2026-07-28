@@ -69,7 +69,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.Bullet
   speed: 15
   reachDistance: 0.2
-  hitEffectPrefab: {fileID: 0}
+  hitEffectPrefab: {fileID: 6263782476919498309, guid: 1fd2749f2a4056446881dce86ed70c39, type: 3}
   slowPercent: 0.5
   enemyLayer:
     serializedVersion: 2

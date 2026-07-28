@@ -8,6 +8,7 @@ namespace CHANG
 {
     public class Tower : CharacterTower
     {
+        #region 資料
         [Header("資料")]
         [SerializeField] public TowerData data;
 
@@ -16,16 +17,28 @@ namespace CHANG
 
         // ⭐ 當前等級資料
         private TowerLevel CurrenData => data.levels[currentLevel];
+        #endregion
 
-        #region 屬性（全部改成吃等級）
-        public float attackRange => CurrenData.attackRange;
-        public float damage => CurrenData.damage;
-        public float attackSpeed => CurrenData.attackSpeed;
+        // ============================================================
+        // ⭐【英雄系統新增】被動光環倍率
+        // 不快取原始數值，改用倍率相乘，這樣塔升級中途被buff也不會出錯，
+        // 且天然支援多重buff疊加（連乘）。
+        // ============================================================
+        #region 被動光環倍率
+        private float damageMultiplier = 1f;
+        private float attackSpeedMultiplier = 1f;
+        private float rangeMultiplier = 1f;
+        #endregion
+
+        #region 屬性（全部改成吃等級 + 被動光環倍率）
+        public float attackRange => CurrenData.attackRange * rangeMultiplier;
+        public float damage => CurrenData.damage * damageMultiplier;
+        public float attackSpeed => CurrenData.attackSpeed * attackSpeedMultiplier;
         public float cost => CurrenData.cost;
+        public TowerEffectType EffectType => CurrenData.effectType; // ⭐給英雄被動光環判斷屬性用
         #endregion
 
         private GameObject bulletPrefab => CurrenData.bulletPrefab;
-
         public Transform FirePoint { get; private set; }
         public Transform Head { get; private set; }
 
@@ -236,7 +249,54 @@ namespace CHANG
                     break;
             }
         }
+        #endregion
 
+        // ============================================================
+        // ⭐【英雄系統新增】被動光環套用/移除
+        // ============================================================
+        #region 被動光環（英雄系統）
+        public void ApplyBuff(PassiveBuffType buffType, float multiplier)
+        {
+            switch (buffType)
+            {
+                case PassiveBuffType.Damage:
+                    damageMultiplier *= multiplier;
+                    break;
+                case PassiveBuffType.AttackSpeed:
+                    attackSpeedMultiplier *= multiplier;
+                    break;
+                case PassiveBuffType.Range:
+                    rangeMultiplier *= multiplier;
+                    RefreshRangeCollider();
+                    break;
+            }
+        }
+
+        public void RemoveBuff(PassiveBuffType buffType, float multiplier)
+        {
+            switch (buffType)
+            {
+                case PassiveBuffType.Damage:
+                    damageMultiplier /= multiplier;
+                    break;
+                case PassiveBuffType.AttackSpeed:
+                    attackSpeedMultiplier /= multiplier;
+                    break;
+                case PassiveBuffType.Range:
+                    rangeMultiplier /= multiplier;
+                    RefreshRangeCollider();
+                    break;
+            }
+        }
+
+        private void RefreshRangeCollider()
+        {
+            if (rangeCollider != null)
+                rangeCollider.radius = attackRange;
+
+            if (rangeCircle != null)
+                rangeCircle.DrawCircle(attackRange);
+        }
         #endregion
 
         #region 外觀系統    
@@ -270,8 +330,8 @@ namespace CHANG
         }
         #endregion
 
-        // ✨【新增】給外部（如 TowerManager 或點擊事件）呼叫的開關方法
         #region 範圍顯示控制
+        // ✨【新增】給外部（如 TowerManager 或點擊事件）呼叫的開關方法
         public void ShowRangeCircle()
         {
             if (rangeCircle != null)

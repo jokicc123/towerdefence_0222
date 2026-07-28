@@ -691,7 +691,6 @@ RectTransform:
   m_Children:
   - {fileID: 28549157}
   - {fileID: 1254986185}
-  - {fileID: 1110273163}
   - {fileID: 1525394328}
   - {fileID: 1334740505}
   m_Father: {fileID: 0}
@@ -903,8 +902,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
+  m_fontSize: 20
+  m_fontSizeBase: 20
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -942,7 +941,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: -30.218872, y: 0, z: -29.550125, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -963,17 +962,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1110273160}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 761060652}
+  m_Father: {fileID: 1525394328}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.9222831}
-  m_AnchoredPosition: {x: -227.87598, y: 52.307007}
-  m_SizeDelta: {x: 109.6967, y: -143.616}
+  m_AnchoredPosition: {x: -2.1759644, y: 35}
+  m_SizeDelta: {x: 109.6967, y: 15.065094}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1170911109
 GameObject:
@@ -1088,7 +1087,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.9222831}
-  m_AnchoredPosition: {x: 8, y: 83}
+  m_AnchoredPosition: {x: 34, y: 218}
   m_SizeDelta: {x: 200, y: -135}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1254986186
@@ -1138,15 +1137,15 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 36
-  m_fontSizeBase: 36
+  m_fontSize: 60
+  m_fontSizeBase: 60
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 256
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_characterHorizontalScale: 1
@@ -1177,7 +1176,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: -76.050964, y: 0, z: -36.46643, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1220,7 +1219,7 @@ RectTransform:
   m_GameObject: {fileID: 1334740504}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 70970781}
@@ -1228,7 +1227,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -324, y: -177}
+  m_AnchoredPosition: {x: -704, y: 410}
   m_SizeDelta: {x: 49.2886, y: 35.4006}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1334740506
@@ -1367,15 +1366,16 @@ RectTransform:
   m_GameObject: {fileID: 1525394327}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 3, y: 3, z: 3}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1110273163}
   - {fileID: 378946927}
   m_Father: {fileID: 761060652}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -225.7, y: 90}
+  m_AnchoredPosition: {x: -352, y: 146}
   m_SizeDelta: {x: 90.5272, y: 68.2306}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1525394329
@@ -1486,7 +1486,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.LevelSelectButton
   levelData: {fileID: 11400000, guid: df2f9b0aed2aeca4fb95af44f9087371, type: 2}
   levelNameText: {fileID: 1110273161}
-  thumbnailImage: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

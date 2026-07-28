@@ -11,5 +11,6 @@ namespace CHANG
         public int damage=10; // 對城堡造成的傷害
         public int goldReward = 10;// 擊殺獎勵
         public GameObject modelPrefab; // 敵人的模型
+        public int xpReward = 10; // 擊殺獎勵經驗值
     }
 }

@@ -28,7 +28,8 @@ namespace CHANG
         public GameObject[] levelPrefabs;
         [Header("視覺模型（每級換外觀用）")]
         public GameObject[] levelModelPrefabs; // 純模型 Prefab（換外觀用）
-
+        [Header("圖示")]
+        public Sprite icon; // 防禦塔圖示
     }
 
     [System.Serializable]

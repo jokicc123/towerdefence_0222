@@ -12,7 +12,6 @@ namespace CHANG
 
         [Header("UI 元件連結")]
         [SerializeField] private TextMeshProUGUI levelNameText;
-        [SerializeField] private Image thumbnailImage;
 
         private Button button;
 
@@ -32,8 +31,11 @@ namespace CHANG
             if (levelNameText != null)
                 levelNameText.text = levelData.levelName;
 
-            if (thumbnailImage != null && levelData.thumbnail != null)
-                thumbnailImage.sprite = levelData.thumbnail;
+            if (LoadingManager.Instance == null)
+            {
+                Debug.LogError("LoadingManager 尚未初始化，請確認場景載入順序");
+                return;
+            }
 
             button.onClick.AddListener(OnClickSelectLevel);
         }

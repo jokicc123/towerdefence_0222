@@ -197,6 +197,7 @@ namespace CHANG
         {
             isDead = true;
             GameManager.Instance.AddGold(data.goldReward);
+            HeroManager.Instance.OnEnemyKilled(data.xpReward);
             Destroy(gameObject);
         }
 

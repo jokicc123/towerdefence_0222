@@ -57,3 +57,4 @@ MonoBehaviour:
   - {fileID: 1162075595987228, guid: feb92283d5ff3a845b52ad5200a977d6, type: 3}
   - {fileID: 1085163797507038, guid: 2ac3688c98e11ff4d94328a6fc244efb, type: 3}
   - {fileID: 1625777184147098, guid: 20b66575fa81596498fb68ed0a6574cc, type: 3}
+  icon: {fileID: 21300000, guid: 7fc91d2574bc3204abd02bd98e624dc2, type: 3}
