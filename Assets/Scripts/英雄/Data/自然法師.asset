@@ -30,23 +30,29 @@ MonoBehaviour:
     unlockDescription: 
   skill1:
     skillName: "\u85E4\u8513\u7981\u932E"
-    description: 3
+    description: 1
     cooldown: 5
     radius: 5
-    value: 3
+    value: 100
     icon: {fileID: 0}
     vfxPrefab: {fileID: 4772634663576830964, guid: e1385af346f4e624eb313ec1ea4fcd7e, type: 3}
+    summonPrefab: {fileID: 0}
+    duration: 0
+    summonAttackSpeed: 0
   skill2:
-    skillName: "\u9ED1\u6697\u7206\u88C2"
-    description: 10
+    skillName: "\u6A39\u4EBA\u964D\u81E8"
+    description: 1
     cooldown: 20
-    radius: 10
+    radius: 20
     value: 200
     icon: {fileID: 0}
-    vfxPrefab: {fileID: 7226888052703040409, guid: 7ec363c8df426644ea85f8d6d570561c, type: 3}
+    vfxPrefab: {fileID: 5861408975432239828, guid: f0ed1f339b24aa2468354fcd9c37b9a0, type: 3}
+    summonPrefab: {fileID: 3283772792485048793, guid: 01c01a332b6411340b38cf34001dfa10, type: 3}
+    duration: 30
+    summonAttackSpeed: 100
   passive:
     skillName: "\u68EE\u6797\u4E4B\u5B50"
-    description: 
+    description: 1
     auraRadius: 20
     buffMultiplier: 1.15
     buffType: 1

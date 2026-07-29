@@ -27,6 +27,9 @@ namespace CHANG
         public float value; // 傷害量 / 治療量 / 增益數值，依技能類型使用
         public Sprite icon; // 給UI按鈕用
         public GameObject vfxPrefab; // 技能特效（帶ParticleSystem的prefab）
+        public GameObject summonPrefab; // 召喚物的prefab（如果技能是召喚類型）
+        public int duration; // 召喚物持續時間（秒）
+        public float summonAttackSpeed; // 召喚物攻擊速度
     }
 
     [System.Serializable]
@@ -68,7 +71,10 @@ namespace CHANG
         public ActiveSkillData skill1;
         public ActiveSkillData skill2;
 
+  
+
         [Header("被動技能 × 1（光環）")]
         public PassiveSkillData passive;
+
     }
 }

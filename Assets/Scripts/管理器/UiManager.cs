@@ -1,78 +1,57 @@
 ﻿using System.Collections;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
+
 namespace CHANG
 {
     public class UiManager : MonoBehaviour
     {
-        [Header("UI 總開關")]
-        [SerializeField] private Canvas mainCanvas;   // 在 Inspector 手動拖曳指定
-        private Tower currentTower; //目前選擇的塔
-        private Hero currentHero; //目前選擇的英雄
         public static UiManager Instance;
 
-        private void Awake()
-        {
-            //確保場上只有一個 UIManager
-            if (Instance == null)
-            {
-                Instance = this;
+        [Header("UI 總開關")]
+        [SerializeField] private Canvas mainCanvas;
 
-            }
-            else
-            {
-                Destroy(gameObject);
-            }
+        // currentTower：目前打開升級面板的塔
+        private Tower currentTower;
 
+        // currentHero：目前打開英雄資訊面板的英雄
+        private Hero currentHero;
 
-        }
+        // activeHero：場上真正負責施放技能的英雄
+        private Hero activeHero;
 
-        #region  UI文字
-        //UI文字
-        [Header("UI")]
-        [SerializeField]
-        private TMP_Text hpText;
-        [SerializeField]
-        private TMP_Text goldText;
-        [SerializeField]
-        private TMP_Text waveText;
-        [SerializeField]
-        private CanvasGroup gameOverUI;
-        [SerializeField]
-        private CanvasGroup winUI;
+        #region 一般 UI
+
+        [Header("一般 UI")]
+        [SerializeField] private TMP_Text hpText;
+        [SerializeField] private TMP_Text goldText;
+        [SerializeField] private TMP_Text waveText;
+        [SerializeField] private CanvasGroup gameOverUI;
+        [SerializeField] private CanvasGroup winUI;
 
         #endregion
-        #region  升級UI
-        [Header("升級UI")]
-        [SerializeField]
-        private GameObject upgradePanel;
-        [SerializeField]
-        private Image towerIcon;
-        [SerializeField]
-        private TMP_Text towerNameText;
-        [SerializeField]
-        private TMP_Text levelText;
-        [SerializeField]
-        private TMP_Text costText;
-        [SerializeField]
-        private TMP_Text rangeText;
-        [SerializeField]
-        private TMP_Text damageText;
-        [SerializeField]
-        private TMP_Text attackSpeedText;
-        [SerializeField]
-        private Button upgradeButton;
-        [SerializeField]
-        private Button upgradecloseButton;
-        [SerializeField]
-        private TMP_Text upgradeText;
+
+        #region 升級 UI
+
+        [Header("升級 UI")]
+        [SerializeField] private GameObject upgradePanel;
+        [SerializeField] private Image towerIcon;
+        [SerializeField] private TMP_Text towerNameText;
+        [SerializeField] private TMP_Text levelText;
+        [SerializeField] private TMP_Text costText;
+        [SerializeField] private TMP_Text rangeText;
+        [SerializeField] private TMP_Text damageText;
+        [SerializeField] private TMP_Text attackSpeedText;
+        [SerializeField] private Button upgradeButton;
+        [SerializeField] private Button upgradecloseButton;
+        [SerializeField] private TMP_Text upgradeText;
+
         #endregion
-        #region 英雄UI
-        [Header("英雄UI")]
+
+        #region 英雄資訊 UI
+
+        [Header("英雄資訊 UI")]
         [SerializeField] private GameObject heroPanel;
         [SerializeField] private Image heroIcon;
         [SerializeField] private TMP_Text heroNameText;
@@ -84,15 +63,52 @@ namespace CHANG
         [SerializeField] private TMP_Text heroExpText;
 
         #endregion
+
+        #region 英雄技能 UI
+
+        [Header("英雄技能 UI")]
+        [SerializeField] private Button skill1Button;
+        [SerializeField] private Button skill2Button;
+
+        // 技能圖示本身
+        [SerializeField] private Image skill1Icon;
+        [SerializeField] private Image skill2Icon;
+
+        // 疊在技能圖示上方的黑色冷卻遮罩
+        [SerializeField] private Image skill1CooldownImage;
+        [SerializeField] private Image skill2CooldownImage;
+
+        #endregion
+
         #region 遊戲控制
+
         [Header("遊戲控制")]
         [SerializeField] private Button playPauseButton;
         [SerializeField] private Sprite playSprite;
         [SerializeField] private Sprite pauseSprite;
+
         #endregion
+
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
+        }
+
         private void Start()
         {
-            //更新UI
+            if (GameManager.Instance == null)
+            {
+                Debug.LogError("找不到 GameManager");
+                return;
+            }
+
             GameManager.Instance.OnHpChanged += UpdateHp;
             GameManager.Instance.OnGoldChanged += UpdateGold;
             GameManager.Instance.OnWaveChanged += UpdateWave;
@@ -100,148 +116,279 @@ namespace CHANG
             GameManager.Instance.Onwin += ShowWin;
             GameManager.Instance.OnGameOver += OnGameEnd;
             GameManager.Instance.Onwin += OnGameEnd;
+
             UpdateHp(GameManager.Instance.castleHp);
             UpdateGold(GameManager.Instance.gold);
             UpdateWave(GameManager.Instance.currentWave);
             UpdatePlayPauseUI();
+
+            // 遊戲開始尚未放置英雄時，技能不能使用
+            SetSkillButtonsEnabled(false);
+
+            if (skill1CooldownImage != null)
+                skill1CooldownImage.fillAmount = 0f;
+
+            if (skill2CooldownImage != null)
+                skill2CooldownImage.fillAmount = 0f;
         }
+
+        private void Update()
+        {
+            // 每幀更新技能冷卻遮罩及按鈕狀態
+            UpdateHeroSkillCooldownUI();
+        }
+
         private void OnDestroy()
         {
-            if (GameManager.Instance == null) return;
-            //取消訂閱事件
-            GameManager.Instance.OnHpChanged -= UpdateHp;
-            GameManager.Instance.OnGoldChanged -= UpdateGold;
-            GameManager.Instance.OnWaveChanged -= UpdateWave;
-            GameManager.Instance.OnGameOver -= ShowGameOver;
-            GameManager.Instance.Onwin -= ShowWin;
-            GameManager.Instance.OnGameOver -= OnGameEnd;
-            GameManager.Instance.Onwin -= OnGameEnd;
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnHpChanged -= UpdateHp;
+                GameManager.Instance.OnGoldChanged -= UpdateGold;
+                GameManager.Instance.OnWaveChanged -= UpdateWave;
+                GameManager.Instance.OnGameOver -= ShowGameOver;
+                GameManager.Instance.Onwin -= ShowWin;
+                GameManager.Instance.OnGameOver -= OnGameEnd;
+                GameManager.Instance.Onwin -= OnGameEnd;
+            }
+
             if (currentHero != null)
             {
                 currentHero.OnHeroDataChanged -= RefreshHeroUI;
             }
+
+            if (Instance == this)
+            {
+                Instance = null;
+            }
         }
 
-        public void ShowUpgradeUI(Tower tower)
-        {
-            currentTower = tower;
-            upgradePanel.SetActive(true);
-            RefreshUpgradeUI();
-        }
-        public void ShowHeroUI(Hero hero)
-        {
-            if (currentHero != null)
-                currentHero.OnHeroDataChanged -= RefreshHeroUI;
+        #region 一般 UI 更新
 
-            currentHero = hero;
-
-            heroPanel.SetActive(true);
-
-            currentHero.OnHeroDataChanged += RefreshHeroUI;
-
-            RefreshHeroUI();
-        }
-        #region  UI更新與顯示
-        //更新血量 UI
         private void UpdateHp(int hp)
         {
-            //顯示數值
-            hpText.text = hp.ToString();
+            if (hpText != null)
+                hpText.text = hp.ToString();
         }
-        //更新金錢 UI
+
         private void UpdateGold(int gold)
         {
+            if (goldText != null)
+                goldText.text = gold.ToString();
 
-            goldText.text = gold.ToString();
-            // ⭐ 如果升級UI開著 → 更新
-            if (upgradePanel.activeSelf)
+            if (upgradePanel != null && upgradePanel.activeSelf)
             {
                 RefreshUpgradeUI();
             }
         }
-        //更新波數 UI
+
         private void UpdateWave(int wave)
         {
-            waveText.text = $"{wave}";
+            if (waveText != null)
+                waveText.text = wave.ToString();
         }
-        //顯示遊戲結束 UI
+
         private void ShowGameOver()
         {
-            StopAllCoroutines();//停止所有協程，確保不會同時顯示遊戲結束和勝利 UI
-            StartCoroutine(FadeSystem.Fade(gameOverUI, true));
+            StopAllCoroutines();
+
+            if (gameOverUI != null)
+            {
+                StartCoroutine(
+                    FadeSystem.Fade(gameOverUI, true)
+                );
+            }
         }
-        //顯示勝利 UI
+
         private void ShowWin()
         {
             Debug.Log("ShowWin");
 
             StopAllCoroutines();
-            StartCoroutine(FadeSystem.Fade(winUI, true));
+
+            if (winUI != null)
+            {
+                StartCoroutine(
+                    FadeSystem.Fade(winUI, true)
+                );
+            }
         }
+
         #endregion
 
-        void RefreshUpgradeUI()
+        #region 塔升級 UI
+
+        public void ShowUpgradeUI(Tower tower)
         {
-            if (currentTower == null) return;
+            if (tower == null)
+                return;
+
+            currentTower = tower;
+
+            if (upgradePanel != null)
+                upgradePanel.SetActive(true);
+
+            RefreshUpgradeUI();
+        }
+
+        private void RefreshUpgradeUI()
+        {
+            if (currentTower == null)
+                return;
 
             var data = currentTower.data;
 
-            towerNameText.text = data.towerName;
-            levelText.text = "等級:" + (currentTower.currentLevel + 1);
-            towerIcon.sprite = data.icon;
-            rangeText.text = "射程: " + currentTower.attackRange.ToString("0.0");
-            damageText.text = "傷害: " + currentTower.damage.ToString("0");
-            attackSpeedText.text = "攻速" + $"{currentTower.attackSpeed:0.0}/秒";
+            if (data == null)
+                return;
+
+            if (towerNameText != null)
+                towerNameText.text = data.towerName;
+
+            if (levelText != null)
+                levelText.text =
+                    "等級:" + (currentTower.currentLevel + 1);
+
+            if (towerIcon != null)
+                towerIcon.sprite = data.icon;
+
+            if (rangeText != null)
+                rangeText.text =
+                    "射程: " + currentTower.attackRange.ToString("0.0");
+
+            if (damageText != null)
+                damageText.text =
+                    "傷害: " + currentTower.damage.ToString("0");
+
+            if (attackSpeedText != null)
+            {
+                attackSpeedText.text =
+                    $"攻速: {currentTower.attackSpeed:0.0}/秒";
+            }
+
             if (currentTower.CanUpgrade())
             {
                 int cost = currentTower.GetUpgradeCost();
-                upgradeText.text = "升級";
-                costText.text = $"{cost} 金幣";
 
-                // 判斷錢夠不夠
-                if (GameManager.Instance.gold >= cost)
+                if (upgradeText != null)
+                    upgradeText.text = "升級";
+
+                if (costText != null)
+                    costText.text = $"{cost} 金幣";
+
+                if (upgradeButton != null)
                 {
-                    upgradeButton.interactable = true;
-                }
-                else
-                {
-                    upgradeButton.interactable = false;
+                    upgradeButton.interactable =
+                        GameManager.Instance.gold >= cost;
                 }
             }
             else
             {
-                costText.text = "已滿級";
-                upgradeButton.interactable = false;
+                if (costText != null)
+                    costText.text = "已滿級";
+
+                if (upgradeButton != null)
+                    upgradeButton.interactable = false;
             }
         }
-        private void RefreshHeroUI()
+
+        public void OnClickUpgrade()
         {
-            if (currentHero == null) return;
+            if (currentTower == null)
+                return;
 
-            heroNameText.text = currentHero.data.heroName;
-
-            heroIcon.sprite = currentHero.data.icon; // ⭐ 修正：之前漏了這行，Icon欄位填了也不會顯示
-
-            heroLevelText.text = $"Lv.{currentHero.currentLevel}";
-
-            heroAttackText.text = "傷害:" + currentHero.CurrentStats.damage.ToString();
-
-            heroRangeText.text = "射程:" + currentHero.CurrentStats.range.ToString("0.0");
-
-            heroAttackSpeedText.text = "攻速:" + currentHero.CurrentStats.attackSpeed.ToString("0.0");
-
-            heroExpSlider.maxValue = currentHero.CurrentStats.xpToNextLevel;
-
-            heroExpSlider.value = currentHero.currentXP;
-
-            heroExpText.text =
-                $"{currentHero.currentXP}/{currentHero.CurrentStats.xpToNextLevel}";
+            currentTower.Upgrade();
+            RefreshUpgradeUI();
         }
+
         public void HideUpgradeUI()
         {
             currentTower = null;
-            upgradePanel.SetActive(false);
+
+            if (upgradePanel != null)
+                upgradePanel.SetActive(false);
         }
+
+        public void OnClickColseUpgradePanel()
+        {
+            HideUpgradeUI();
+        }
+
+        #endregion
+
+        #region 英雄資訊面板
+
+        public void ShowHeroUI(Hero hero)
+        {
+            if (hero == null)
+                return;
+
+            // 解除上一個資訊面板英雄的事件
+            if (currentHero != null)
+            {
+                currentHero.OnHeroDataChanged -= RefreshHeroUI;
+            }
+
+            currentHero = hero;
+
+            if (heroPanel != null)
+                heroPanel.SetActive(true);
+
+            currentHero.OnHeroDataChanged += RefreshHeroUI;
+
+            RefreshHeroUI();
+        }
+
+        private void RefreshHeroUI()
+        {
+            if (currentHero == null || currentHero.data == null)
+                return;
+
+            if (heroNameText != null)
+                heroNameText.text = currentHero.data.heroName;
+
+            if (heroIcon != null)
+                heroIcon.sprite = currentHero.data.icon;
+
+            if (heroLevelText != null)
+                heroLevelText.text = $"Lv.{currentHero.currentLevel}";
+
+            if (heroAttackText != null)
+            {
+                heroAttackText.text =
+                    "傷害:" +
+                    currentHero.CurrentStats.damage.ToString("0");
+            }
+
+            if (heroRangeText != null)
+            {
+                heroRangeText.text =
+                    "射程:" +
+                    currentHero.CurrentStats.range.ToString("0.0");
+            }
+
+            if (heroAttackSpeedText != null)
+            {
+                heroAttackSpeedText.text =
+                    "攻速:" +
+                    currentHero.CurrentStats.attackSpeed.ToString("0.0");
+            }
+
+            if (heroExpSlider != null)
+            {
+                heroExpSlider.maxValue =
+                    currentHero.CurrentStats.xpToNextLevel;
+
+                heroExpSlider.value =
+                    currentHero.currentXP;
+            }
+
+            if (heroExpText != null)
+            {
+                heroExpText.text =
+                    $"{currentHero.currentXP}/" +
+                    $"{currentHero.CurrentStats.xpToNextLevel}";
+            }
+        }
+
         public void HideHeroUI()
         {
             if (currentHero != null)
@@ -249,24 +396,155 @@ namespace CHANG
                 currentHero.OnHeroDataChanged -= RefreshHeroUI;
             }
 
+            // 只清除資訊面板選擇
+            // 不要清除 activeHero
             currentHero = null;
-            heroPanel.SetActive(false);
-        }
-        public void OnClickUpgrade()
-        {
-            if (currentTower == null) return;
 
-            currentTower.Upgrade();
-            RefreshUpgradeUI();
+            if (heroPanel != null)
+                heroPanel.SetActive(false);
         }
-        private void OnGameEnd()
-        {
-            HideUpgradeUI();
-            HideHeroUI();
 
-            currentTower = null;
-            currentHero = null;
+        #endregion
+
+        #region 場上英雄與技能
+
+        /// <summary>
+        /// 英雄生成後呼叫。
+        /// 將英雄設定成技能按鈕要控制的英雄。
+        /// </summary>
+        public void SetActiveHero(Hero hero)
+        {
+            activeHero = hero;
+
+            if (activeHero == null || activeHero.data == null)
+            {
+                SetSkillButtonsEnabled(false);
+                return;
+            }
+
+            if (skill1Icon != null)
+            {
+                skill1Icon.sprite =
+                    activeHero.data.skill1.icon;
+            }
+
+            if (skill2Icon != null)
+            {
+                skill2Icon.sprite =
+                    activeHero.data.skill2.icon;
+            }
+
+            UpdateHeroSkillCooldownUI();
+
+            Debug.Log(
+                $"已設定技能英雄：{activeHero.data.heroName}"
+            );
         }
+
+        /// <summary>
+        /// 英雄被移除或銷毀時呼叫。
+        /// </summary>
+        public void ClearActiveHero(Hero hero)
+        {
+            // 避免其他英雄誤清除目前英雄
+            if (activeHero != hero)
+                return;
+
+            activeHero = null;
+
+            SetSkillButtonsEnabled(false);
+
+            if (skill1CooldownImage != null)
+                skill1CooldownImage.fillAmount = 0f;
+
+            if (skill2CooldownImage != null)
+                skill2CooldownImage.fillAmount = 0f;
+        }
+
+        public void OnClickSkill1()
+        {
+            if (activeHero == null)
+            {
+                Debug.LogWarning("場上沒有可使用技能的英雄");
+                return;
+            }
+
+            if (!activeHero.CanUseSkill1())
+            {
+                Debug.Log("技能1仍在冷卻中");
+                return;
+            }
+
+            activeHero.UseSkill1();
+            UpdateHeroSkillCooldownUI();
+        }
+
+        public void OnClickSkill2()
+        {
+            if (activeHero == null)
+            {
+                Debug.LogWarning("場上沒有可使用技能的英雄");
+                return;
+            }
+
+            if (!activeHero.CanUseSkill2())
+            {
+                Debug.Log("技能2仍在冷卻中");
+                return;
+            }
+
+            activeHero.UseSkill2();
+            UpdateHeroSkillCooldownUI();
+        }
+
+        private void UpdateHeroSkillCooldownUI()
+        {
+            if (activeHero == null)
+            {
+                SetSkillButtonsEnabled(false);
+                return;
+            }
+
+            // Ratio：
+            // 剛施放時為 1，冷卻完成時為 0
+            if (skill1CooldownImage != null)
+            {
+                skill1CooldownImage.fillAmount =
+                    activeHero.Skill1CooldownRatio;
+            }
+
+            if (skill2CooldownImage != null)
+            {
+                skill2CooldownImage.fillAmount =
+                    activeHero.Skill2CooldownRatio;
+            }
+
+            if (skill1Button != null)
+            {
+                skill1Button.interactable =
+                    activeHero.CanUseSkill1();
+            }
+
+            if (skill2Button != null)
+            {
+                skill2Button.interactable =
+                    activeHero.CanUseSkill2();
+            }
+        }
+
+        private void SetSkillButtonsEnabled(bool enabled)
+        {
+            if (skill1Button != null)
+                skill1Button.interactable = enabled;
+
+            if (skill2Button != null)
+                skill2Button.interactable = enabled;
+        }
+
+        #endregion
+
+        #region 遊戲控制
+
         public void OnClickPlayPause()
         {
             switch (GameManager.Instance.currentState)
@@ -286,12 +564,12 @@ namespace CHANG
 
             UpdatePlayPauseUI();
         }
-        public void OnClickColseUpgradePanel()
-        {
-            HideUpgradeUI();
-        }
+
         private void UpdatePlayPauseUI()
         {
+            if (playPauseButton == null)
+                return;
+
             switch (GameManager.Instance.currentState)
             {
                 case GameManager.GameState.Build:
@@ -307,5 +585,25 @@ namespace CHANG
                     break;
             }
         }
+
+        private void OnGameEnd()
+        {
+            HideUpgradeUI();
+            HideHeroUI();
+
+            currentTower = null;
+            currentHero = null;
+            activeHero = null;
+
+            SetSkillButtonsEnabled(false);
+
+            if (skill1CooldownImage != null)
+                skill1CooldownImage.fillAmount = 0f;
+
+            if (skill2CooldownImage != null)
+                skill2CooldownImage.fillAmount = 0f;
+        }
+
+        #endregion
     }
 }

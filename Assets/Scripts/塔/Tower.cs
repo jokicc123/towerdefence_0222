@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using static CHANG.TowerData;
 
 namespace CHANG
@@ -44,7 +42,7 @@ namespace CHANG
 
         // ⭐ 攻擊計時
         private float attackTimer;
-        private float AttackInterval => 1f / attackSpeed;
+        private float AttackInterval => 1f / Mathf.Max(attackSpeed, 0.01f);
 
         // ⭐ 模型（外觀）
         [Header("模型")]
@@ -83,12 +81,35 @@ namespace CHANG
         // ⭐ 初始化（由 TowerManager 呼召）
         public void Initialize(TowerData towerData)
         {
-            Debug.Log($"Initialize 被呼叫於 {gameObject.name}");
-            data = towerData;
-            currentLevel = 0;          // 初始等級
-            ApplyLevel();       // ⭐ 套用數值
+            if (towerData == null)
+            {
+                Debug.LogError($"{name} 初始化失敗：TowerData 為空");
+                enabled = false;
+                return;
+            }
 
-            // ✨【新增】初始化時預設把範圍圈隱藏
+            if (towerData.levels == null ||
+                towerData.levels.Length == 0)
+            {
+                Debug.LogError(
+                    $"{towerData.name} 沒有設定任何塔等級資料"
+                );
+
+                enabled = false;
+                return;
+            }
+
+            Debug.Log($"Initialize 被呼叫於 {gameObject.name}");
+
+            data = towerData;
+            currentLevel = 0;
+
+            // 初始化時重置所有倍率
+            damageMultiplier = 1f;
+            attackSpeedMultiplier = 1f;
+            rangeMultiplier = 1f;
+
+            ApplyLevel();
             HideRangeCircle();
         }
 
@@ -161,17 +182,29 @@ namespace CHANG
         }
         public override void Update()
         {
-            if (GameManager.Instance != null && !GameManager.Instance.CanBuildTower())
-                return;   // 遊戲結束就不再更新攻擊邏輯
+            if (GameManager.Instance != null &&
+                !GameManager.Instance.IsGameRunning())
+            {
+                return;
+            }
+
+            if (data == null ||
+                data.levels == null ||
+                data.levels.Length == 0)
+            {
+                return;
+            }
 
             base.Update();
+
             UpdateEnemiesInRange();
 
             if (HasTarget() && stateMachine.currentState == Idle)
             {
                 stateMachine.ChangeState(Attack);
             }
-            else if (!HasTarget() && stateMachine.currentState == Attack)
+            else if (!HasTarget() &&
+                     stateMachine.currentState == Attack)
             {
                 stateMachine.ChangeState(Idle);
             }
@@ -190,14 +223,38 @@ namespace CHANG
         {
             enemiesInRange.Clear();
 
-            Collider[] hits = Physics.OverlapSphere(transform.position, attackRange);
-            foreach (var hit in hits)
+            Collider[] hits = Physics.OverlapSphere(
+                transform.position,
+                attackRange
+            );
+
+            HashSet<Enemy> foundEnemies = new HashSet<Enemy>();
+
+            foreach (Collider hit in hits)
             {
-                if (hit.TryGetComponent(out Enemy enemy))
+                Enemy enemy = hit.GetComponentInParent<Enemy>();
+
+                if (enemy == null)
+                    continue;
+
+                // 防止同一個敵人有多個 Collider 而重複加入
+                if (foundEnemies.Add(enemy))
                 {
                     enemiesInRange.Add(enemy);
                 }
             }
+
+            // 依照距離排序，優先攻擊最近的敵人
+            enemiesInRange.Sort((a, b) =>
+            {
+                float distanceA =
+                    (a.transform.position - transform.position).sqrMagnitude;
+
+                float distanceB =
+                    (b.transform.position - transform.position).sqrMagnitude;
+
+                return distanceA.CompareTo(distanceB);
+            });
         }
 
         public void ResetAttackTimer()
@@ -217,23 +274,51 @@ namespace CHANG
 
         public virtual void Fire(Enemy target)
         {
+            if (target == null)
+                return;
+
             if (bulletPrefab == null || FirePoint == null)
             {
-                Debug.LogWarning("塔無法攻擊");
+                Debug.LogWarning(
+                    $"{name} 無法攻擊，缺少 Bullet Prefab 或 FirePoint"
+                );
+
                 return;
             }
 
-            GameObject bulletObj = Instantiate(bulletPrefab, FirePoint.position, FirePoint.rotation);
-            if (bulletObj.TryGetComponent(out Bullet b))
+            Vector3 direction =
+                target.transform.position - FirePoint.position;
+
+            if (direction.sqrMagnitude > 0.001f)
             {
-                b.SetTarget(
+                FirePoint.rotation =
+                    Quaternion.LookRotation(direction.normalized);
+            }
+
+            GameObject bulletObj = Instantiate(
+                bulletPrefab,
+                FirePoint.position,
+                FirePoint.rotation
+            );
+
+            if (bulletObj.TryGetComponent(out Bullet bullet))
+            {
+                bullet.SetTarget(
                     target,
                     damage,
                     CurrenData.effectType,
                     CurrenData.effectDuration,
                     CurrenData.effectDamagePerSecond,
-                    CurrenData.blastRadius  // ⭐ 告訴子彈是否為 AoE
+                    CurrenData.blastRadius
                 );
+            }
+            else
+            {
+                Debug.LogWarning(
+                    $"{bulletObj.name} 沒有 Bullet 腳本"
+                );
+
+                Destroy(bulletObj);
             }
         }
 
@@ -254,78 +339,150 @@ namespace CHANG
         // ============================================================
         // ⭐【英雄系統新增】被動光環套用/移除
         // ============================================================
-        #region 被動光環（英雄系統）
-        public void ApplyBuff(PassiveBuffType buffType, float multiplier)
+        public void ApplyBuff(
+       PassiveBuffType buffType,
+       float multiplier)
         {
+            if (multiplier <= 0f)
+            {
+                Debug.LogWarning($"{name} 收到無效 Buff 倍率：{multiplier}");
+                return;
+            }
+
             switch (buffType)
             {
                 case PassiveBuffType.Damage:
                     damageMultiplier *= multiplier;
                     break;
+
                 case PassiveBuffType.AttackSpeed:
                     attackSpeedMultiplier *= multiplier;
                     break;
+
                 case PassiveBuffType.Range:
                     rangeMultiplier *= multiplier;
                     RefreshRangeCollider();
                     break;
             }
+
+            Debug.Log(
+                $"{name} 套用 {buffType} Buff，倍率：{multiplier}，" +
+                $"目前傷害：{damage:0.0}，攻速：{attackSpeed:0.00}，射程：{attackRange:0.0}"
+            );
         }
 
-        public void RemoveBuff(PassiveBuffType buffType, float multiplier)
+        public void RemoveBuff(
+            PassiveBuffType buffType,
+            float multiplier)
         {
+            if (multiplier <= 0f)
+            {
+                Debug.LogWarning($"{name} 收到無效 Buff 倍率：{multiplier}");
+                return;
+            }
+
             switch (buffType)
             {
                 case PassiveBuffType.Damage:
                     damageMultiplier /= multiplier;
                     break;
+
                 case PassiveBuffType.AttackSpeed:
                     attackSpeedMultiplier /= multiplier;
                     break;
+
                 case PassiveBuffType.Range:
                     rangeMultiplier /= multiplier;
                     RefreshRangeCollider();
                     break;
             }
-        }
 
+            Debug.Log(
+                $"{name} 移除 {buffType} Buff，" +
+                $"目前傷害：{damage:0.0}，攻速：{attackSpeed:0.00}，射程：{attackRange:0.0}"
+            );
+        }
         private void RefreshRangeCollider()
         {
             if (rangeCollider != null)
+            {
+                rangeCollider.isTrigger = true;
                 rangeCollider.radius = attackRange;
+            }
 
             if (rangeCircle != null)
+            {
                 rangeCircle.DrawCircle(attackRange);
+            }
         }
-        #endregion
-
         #region 外觀系統    
         private void UpdateModel()
         {
-            if (modelRoot == null || data.levelModelPrefabs == null) return;
+            if (modelRoot == null)
+            {
+                Debug.LogWarning($"{name} 沒有設定 Model Root");
+                return;
+            }
 
-            // ⭐ 直接清掉所有舊模型（最重要）
+            if (data == null ||
+                data.levelModelPrefabs == null ||
+                data.levelModelPrefabs.Length == 0)
+            {
+                Debug.LogWarning($"{name} 沒有設定等級模型 Prefab");
+                return;
+            }
+
+            if (currentLevel < 0 ||
+                currentLevel >= data.levelModelPrefabs.Length)
+            {
+                Debug.LogError(
+                    $"{name} 找不到第 {currentLevel + 1} 級模型，" +
+                    $"模型陣列只有 {data.levelModelPrefabs.Length} 個"
+                );
+
+                return;
+            }
+
             for (int i = modelRoot.childCount - 1; i >= 0; i--)
             {
                 Destroy(modelRoot.GetChild(i).gameObject);
             }
 
-            GameObject prefab = data.levelModelPrefabs[currentLevel];
+            GameObject prefab =
+                data.levelModelPrefabs[currentLevel];
 
             if (prefab == null)
             {
-                Debug.LogWarning("沒有模型 prefab");
+                Debug.LogWarning(
+                    $"{name} 第 {currentLevel + 1} 級模型 Prefab 為空"
+                );
+
                 return;
             }
 
             currentModel = Instantiate(prefab, modelRoot);
+
             currentModel.transform.localPosition = Vector3.zero;
             currentModel.transform.localRotation = Quaternion.identity;
+            currentModel.transform.localScale = Vector3.one;
 
-            if (currentModel.TryGetComponent(out TowerModelRef modelRef))
+            TowerModelRef modelRef =
+                currentModel.GetComponentInChildren<TowerModelRef>();
+
+            if (modelRef != null)
             {
                 FirePoint = modelRef.FirePoint;
                 Head = modelRef.Head;
+            }
+            else
+            {
+                FirePoint = null;
+                Head = null;
+
+                Debug.LogWarning(
+                    $"{currentModel.name} 找不到 TowerModelRef",
+                    currentModel
+                );
             }
         }
         #endregion
