@@ -285,6 +285,13 @@ namespace CHANG
 
                 return;
             }
+            if (SoundManager.Instance != null &&
+                    data.attackSFX != null)
+            {
+                SoundManager.Instance.PlaySFX(
+                    data.attackSFX
+                );
+            }
 
             Vector3 direction =
                 target.transform.position - FirePoint.position;
@@ -505,5 +512,18 @@ namespace CHANG
             }
         }
         #endregion
+        // ⭐ 賣塔取得回收價格（70%）    
+        public int GetSellPrice()
+        {
+            int totalCost = 0;
+
+            for (int i = 0; i <= currentLevel; i++)
+            {
+                totalCost += data.levels[i].cost;
+            }
+
+            // 回收 70%
+            return Mathf.RoundToInt(totalCost * 0.7f);
+        }
     }
 }

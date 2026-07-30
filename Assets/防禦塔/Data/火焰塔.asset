@@ -58,3 +58,4 @@ MonoBehaviour:
   - {fileID: 1144989041015720, guid: 76ce305eee15be04b9c49c956fcd2a52, type: 3}
   - {fileID: 1079211923614252, guid: 2d137d943a9b47f49aa3314a91eda658, type: 3}
   icon: {fileID: 21300000, guid: 5441c48f4e4e72b4280ea701886bea71, type: 3}
+  attackSFX: {fileID: 8300000, guid: 71a3b287e05f9554eb6899fac86855fb, type: 3}

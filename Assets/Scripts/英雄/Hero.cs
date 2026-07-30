@@ -23,8 +23,6 @@ namespace CHANG
         [SerializeField] private Animator animator; // ⭐ 攻擊動畫
         public Coroutine attackCoroutine; // ⭐ 攻擊協程，給動畫事件呼叫
 
-        public HeroLevelStats CurrentStats => data.levelStats[currentLevel - 1]; // ⭐ 改成public，給UiManager讀取
-
         // ⭐ 給UiManager訂閱：經驗值/等級變動時通知面板刷新
         public event System.Action OnHeroDataChanged;
 
@@ -40,6 +38,26 @@ namespace CHANG
         private float AttackInterval => 1f / CurrentStats.attackSpeed;
         private Enemy pendingFireTarget; // ⭐ 等動畫事件觸發時要打誰
 
+        public HeroLevelStats CurrentStats
+        {
+            get
+            {
+                if (data == null ||
+                    data.levelStats == null ||
+                    data.levelStats.Length == 0)
+                {
+                    return default;
+                }
+
+                int safeIndex = Mathf.Clamp(
+                    currentLevel - 1,
+                    0,
+                    data.levelStats.Length - 1
+                );
+
+                return data.levelStats[safeIndex];
+            }
+        }
         #region 生命週期
 
         private void Awake()
@@ -117,7 +135,10 @@ namespace CHANG
             Collider[] hits = Physics.OverlapSphere(transform.position, CurrentStats.range);
             foreach (var hit in hits)
             {
-                if (hit.TryGetComponent(out Enemy enemy))
+                Enemy enemy =
+                hit.GetComponentInParent<Enemy>();
+
+                if (enemy != null)
                 {
                     enemiesInRange.Add(enemy);
                 }
@@ -147,9 +168,11 @@ namespace CHANG
                     // 沒掛Animator就退回舊行為：立刻發射，避免完全打不出去
                     Fire(pendingFireTarget);
                 }
+                
 
                 attackTimer = AttackInterval;
             }
+
         }
 
         // ⭐ 給Animation Event呼叫：在丟石頭動畫「甩出去」那一幀觸發
@@ -157,7 +180,17 @@ namespace CHANG
         // Function選這個方法名稱：FireFromAnimationEvent
         public void FireFromAnimationEvent()
         {
-            if (pendingFireTarget == null || pendingFireTarget.Equals(null)) return; // 敵人可能已經死亡/被銷毀
+            if (pendingFireTarget == null || 
+                pendingFireTarget.Equals(null)) return; // 敵人可能已經死亡/被銷毀
+
+            if (SoundManager.Instance != null &&
+                        data.attackSFX != null)
+            {
+                SoundManager.Instance.PlaySFX(
+                    data.attackSFX
+                );
+            }
+
             Fire(pendingFireTarget);
         }
 
@@ -232,47 +265,167 @@ namespace CHANG
         #region 經驗值 / 升級
         public void GainXP(int amount)
         {
-            if (currentLevel >= data.levelStats.Length) return; // 已滿級
+            if (data == null ||
+                data.levelStats == null ||
+                data.levelStats.Length == 0)
+            {
+                return;
+            }
+
+            int maxLevel = data.levelStats.Length;
+
+            // 已經滿級就不再增加經驗
+            if (currentLevel >= maxLevel)
+            {
+                currentLevel = maxLevel;
+                currentXP = 0;
+                OnHeroDataChanged?.Invoke();
+                return;
+            }
 
             currentXP += amount;
-            while (currentLevel <= data.levelStats.Length &&
-                   currentXP >= CurrentStats.xpToNextLevel)
+
+            while (currentLevel < maxLevel)
             {
-                currentXP -= CurrentStats.xpToNextLevel;
+                int requiredXP =
+                    data.levelStats[currentLevel - 1].xpToNextLevel;
+
+                if (requiredXP <= 0)
+                {
+                    Debug.LogWarning(
+                        $"Lv.{currentLevel} 的 XP To Next Level 必須大於 0"
+                    );
+                    break;
+                }
+
+                if (currentXP < requiredXP)
+                    break;
+
+                currentXP -= requiredXP;
+
+                // 先升級
                 currentLevel++;
+
+                // currentLevel 現在一定不會超過 maxLevel
                 OnLevelUp();
 
-                if (currentLevel > data.levelStats.Length)
+                // 升到最高級後停止
+                if (currentLevel >= maxLevel)
                 {
-                    currentLevel = data.levelStats.Length; // 封頂
+                    currentLevel = maxLevel;
+                    currentXP = 0;
                     break;
                 }
             }
 
-            OnHeroDataChanged?.Invoke(); // ⭐ 不管有沒有升級，經驗值都變了，通知面板刷新
+            OnHeroDataChanged?.Invoke();
         }
-
         private void OnLevelUp()
         {
-            // TODO: 播放升級特效、更新UI等級條
-            Debug.Log($"{data.heroName} 升到 {currentLevel} 級：{CurrentStats.unlockDescription}");
+            if (data == null ||
+                data.levelStats == null ||
+                data.levelStats.Length == 0)
+            {
+                return;
+            }
+
+            int safeIndex = Mathf.Clamp(
+                currentLevel - 1,
+                0,
+                data.levelStats.Length - 1
+            );
+
+            HeroLevelStats stats =
+                data.levelStats[safeIndex];
+
+            Debug.Log(
+                $"{data.heroName} 升到 {currentLevel} 級：" +
+                $"{stats.unlockDescription}"
+            );
         }
         #endregion
+        private SkillLevelStats CurrentSkill1Stats
+        {
+            get
+            {
+                if (data == null ||
+                    data.skill1.levelStats == null ||
+                    data.skill1.levelStats.Length == 0)
+                {
+                    Debug.LogError(
+                        $"{name} 的技能1沒有設定 Level Stats",
+                        this
+                    );
 
+                    return default;
+                }
+
+                int index = Mathf.Clamp(
+                    currentLevel - 1,
+                    0,
+                    data.skill1.levelStats.Length - 1
+                );
+
+                return data.skill1.levelStats[index];
+            }
+        }
+
+        private SkillLevelStats CurrentSkill2Stats
+        {
+            get
+            {
+                if (data == null ||
+                    data.skill2.levelStats == null ||
+                    data.skill2.levelStats.Length == 0)
+                {
+                    Debug.LogError(
+                        $"{name} 的技能2沒有設定 Level Stats",
+                        this
+                    );
+
+                    return default;
+                }
+
+                int index = Mathf.Clamp(
+                    currentLevel - 1,
+                    0,
+                    data.skill2.levelStats.Length - 1
+                );
+
+                return data.skill2.levelStats[index];
+            }
+        }
         // ⭐【自然系英雄】技能1：荊棘蔓延 —— 範圍暈眩（纏繞），CD短，用來控場拖延
         #region 主動技能1：荊棘蔓延（暈眩控場）
-        public bool CanUseSkill1() => skill1Timer <= 0f;
+        public bool CanUseSkill1()
+        {
+            return currentLevel >= data.skill1.unlockLevel &&
+                   skill1Timer <= 0f;
+        }
+
 
         public void UseSkill1()
         {
+            if (currentLevel < data.skill1.unlockLevel)
+            {
+                Debug.Log(
+                    $"技能1需要 Lv.{data.skill1.unlockLevel} 才能使用"
+                );
+
+                return;
+            }
+
             if (!CanUseSkill1())
                 return;
 
-            skill1Timer = data.skill1.cooldown;
+            SkillLevelStats skillStats =
+                CurrentSkill1Stats;
+
+            skill1Timer = skillStats.cooldown;
 
             Collider[] hits = Physics.OverlapSphere(
                 transform.position,
-                data.skill1.radius
+                skillStats.radius
             );
 
             HashSet<Enemy> affectedEnemies =
@@ -286,40 +439,58 @@ namespace CHANG
                 if (enemy == null)
                     continue;
 
-                // 已經處理過這隻敵人就跳過
                 if (!affectedEnemies.Add(enemy))
                     continue;
 
                 enemy.AddEffect(
                     new StunEffect(
                         enemy,
-                        data.skill1.value
+                        skillStats.value
                     )
                 );
 
-                Vector3 effectPosition =
-                    enemy.transform.position;
-
                 PlayVFX(
                     data.skill1.vfxPrefab,
-                    effectPosition
+                    enemy.transform.position
                 );
             }
         }
 
-        public float Skill1CooldownRatio =>
-            data.skill1.cooldown <= 0 ? 0 : Mathf.Clamp01(skill1Timer / data.skill1.cooldown);
+        public float Skill1CooldownRatio
+        {
+            get
+            {
+                float cooldown =
+                    CurrentSkill1Stats.cooldown;
+
+                if (cooldown <= 0f)
+                    return 0f;
+
+                return Mathf.Clamp01(
+                    skill1Timer / cooldown
+                );
+            }
+        }
         #endregion
 
         #region 主動技能2：樹人降臨
 
         public bool CanUseSkill2()
         {
-            return skill2Timer <= 0f;
+            return currentLevel >= data.skill2.unlockLevel &&
+                   skill2Timer <= 0f;
         }
 
         public void UseSkill2()
         {
+            if (currentLevel < data.skill2.unlockLevel)
+            {
+                Debug.Log(
+                    $"樹人降臨需要英雄 Lv.{data.skill2.unlockLevel} 才能使用"
+                );
+
+                return;
+            }
             if (!CanUseSkill2())
             {
                 Debug.Log(
@@ -373,11 +544,24 @@ namespace CHANG
                 return;
             }
 
+            if (creature == null)
+            {
+                Debug.LogError(
+                    "樹人 Prefab 沒有 SummonedCreature 腳本"
+                );
+
+                Destroy(summonedObject);
+                return;
+            }
+
+            SkillLevelStats skillStats =
+                CurrentSkill2Stats;
+
             creature.Initialize(
-                data.skill2.value,
-                data.skill2.duration,
-                data.skill2.summonAttackSpeed,
-                data.skill2.radius
+                skillStats.value,
+                skillStats.duration,
+                skillStats.attackSpeed,
+                skillStats.radius
             );
 
             PlayVFX(
@@ -385,20 +569,35 @@ namespace CHANG
                 spawnPosition
             );
 
-            // 確定召喚成功後才進入冷卻
-            skill2Timer = data.skill2.cooldown;
+            skill2Timer =
+                skillStats.cooldown;
 
-            Debug.Log("樹人降臨施放成功");
+            Debug.Log(
+                $"樹人降臨施放成功：" +
+                $"傷害 {skillStats.value}，" +
+                $"持續 {skillStats.duration} 秒，" +
+                $"攻速 {skillStats.attackSpeed}，" +
+                $"搜尋範圍 {skillStats.radius}"
+            );
         }
 
         #endregion
 
+        public float Skill2CooldownRatio
+        {
+            get
+            {
+                float cooldown =
+                    CurrentSkill2Stats.cooldown;
 
+                if (cooldown <= 0f)
+                    return 0f;
 
-
-
-        public float Skill2CooldownRatio =>
-            data.skill2.cooldown <= 0 ? 0 : Mathf.Clamp01(skill2Timer / data.skill2.cooldown);
+                return Mathf.Clamp01(
+                    skill2Timer / cooldown
+                );
+            }
+        }
 
 
         // ⭐【自然系英雄】被動：森林共鳴 —— 只增強「毒塔」跟「火塔」的傷害
@@ -497,7 +696,7 @@ namespace CHANG
             }
         }
 
-     
+
         private bool IsBuffableTower(Tower tower)
         {
             if (tower == null || data == null)
@@ -550,6 +749,6 @@ namespace CHANG
             );
         }
         #endregion
-     } 
+    }
 
 }

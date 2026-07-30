@@ -32,36 +32,40 @@ namespace CHANG
 
         #endregion
 
-        #region 升級 UI
+        #region 防禦塔資訊UI
 
         [Header("升級 UI")]
-        [SerializeField] private GameObject upgradePanel;
-        [SerializeField] private Image towerIcon;
         [SerializeField] private TMP_Text towerNameText;
         [SerializeField] private TMP_Text levelText;
         [SerializeField] private TMP_Text costText;
         [SerializeField] private TMP_Text rangeText;
         [SerializeField] private TMP_Text damageText;
         [SerializeField] private TMP_Text attackSpeedText;
+        [SerializeField] private TMP_Text upgradeText;
+        [SerializeField] private TMP_Text sellText;
+        [SerializeField] private TMP_Text moveText;
         [SerializeField] private Button upgradeButton;
         [SerializeField] private Button upgradecloseButton;
-        [SerializeField] private TMP_Text upgradeText;
+        [SerializeField] private Button sellButton;
+        [SerializeField] private Button moveTowerButton;
+        [SerializeField] private GameObject upgradePanel;
+        [SerializeField] private Image towerIcon;
 
         #endregion
 
         #region 英雄資訊 UI
 
         [Header("英雄資訊 UI")]
-        [SerializeField] private GameObject heroPanel;
-        [SerializeField] private Image heroIcon;
         [SerializeField] private TMP_Text heroNameText;
         [SerializeField] private TMP_Text heroLevelText;
         [SerializeField] private TMP_Text heroAttackText;
         [SerializeField] private TMP_Text heroRangeText;
         [SerializeField] private TMP_Text heroAttackSpeedText;
-        [SerializeField] private Slider heroExpSlider;
         [SerializeField] private TMP_Text heroExpText;
-
+        [SerializeField] private TMP_Text heroUnlockDescriptionText;
+        [SerializeField] private GameObject heroPanel;
+        [SerializeField] private Slider heroExpSlider;
+        [SerializeField] private Image heroIcon;
         #endregion
 
         #region 英雄技能 UI
@@ -86,7 +90,6 @@ namespace CHANG
         [SerializeField] private Button playPauseButton;
         [SerializeField] private Sprite playSprite;
         [SerializeField] private Sprite pauseSprite;
-
         #endregion
 
         private void Awake()
@@ -215,7 +218,7 @@ namespace CHANG
 
         #endregion
 
-        #region 塔升級 UI
+        #region 防禦塔資訊 UI
 
         public void ShowUpgradeUI(Tower tower)
         {
@@ -288,6 +291,14 @@ namespace CHANG
                 if (upgradeButton != null)
                     upgradeButton.interactable = false;
             }
+
+            {
+                if (sellText != null)
+                    sellText.text = "出售";
+
+                if (moveText != null)
+                    moveText.text = "移動";
+            }
         }
 
         public void OnClickUpgrade()
@@ -309,6 +320,30 @@ namespace CHANG
 
         public void OnClickColseUpgradePanel()
         {
+            HideUpgradeUI();
+        }
+        public void OnClickMoveTower()
+        {
+            if (currentTower == null)
+                return;
+
+
+            BuildManager.Instance.StartMoveTower(currentTower);
+
+            HideUpgradeUI();
+        }
+        public void OnClickSell()
+        {
+            if (currentTower == null)
+                return;
+
+            int sellPrice =
+                currentTower.GetSellPrice();
+
+            GameManager.Instance.AddGold(sellPrice);
+
+            Destroy(currentTower.gameObject);
+
             HideUpgradeUI();
         }
 
@@ -371,21 +406,60 @@ namespace CHANG
                     "攻速:" +
                     currentHero.CurrentStats.attackSpeed.ToString("0.0");
             }
+            if (heroUnlockDescriptionText != null)
+            {
+                string unlockDescription =
+                    currentHero.CurrentStats.unlockDescription;
+
+                if (string.IsNullOrWhiteSpace(unlockDescription))
+                {
+                    heroUnlockDescriptionText.text =
+                        "本級沒有新的解鎖效果";
+                }
+                else
+                {
+                    heroUnlockDescriptionText.text =
+                        $"等級效果：\n{unlockDescription}";
+                }
+            }
+
+
+            int maxLevel = currentHero.data.levelStats.Length;
+
+            bool isMaxLevel =
+                currentHero.currentLevel >= maxLevel;
+
+            if (heroLevelText != null)
+            {
+                heroLevelText.text = isMaxLevel
+                    ? $"Lv.{currentHero.currentLevel} MAX"
+                    : $"Lv.{currentHero.currentLevel}";
+            }
 
             if (heroExpSlider != null)
             {
-                heroExpSlider.maxValue =
-                    currentHero.CurrentStats.xpToNextLevel;
+                if (isMaxLevel)
+                {
+                    heroExpSlider.minValue = 0;
+                    heroExpSlider.maxValue = 1;
+                    heroExpSlider.value = 1;
+                }
+                else
+                {
+                    heroExpSlider.minValue = 0;
+                    heroExpSlider.maxValue =
+                        currentHero.CurrentStats.xpToNextLevel;
 
-                heroExpSlider.value =
-                    currentHero.currentXP;
+                    heroExpSlider.value =
+                        currentHero.currentXP;
+                }
             }
 
             if (heroExpText != null)
             {
-                heroExpText.text =
-                    $"{currentHero.currentXP}/" +
-                    $"{currentHero.CurrentStats.xpToNextLevel}";
+                heroExpText.text = isMaxLevel
+                    ? "MAX"
+                    : $"{currentHero.currentXP}/{currentHero.CurrentStats.xpToNextLevel}";
             }
         }
 

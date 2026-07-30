@@ -17,9 +17,10 @@ namespace CHANG
         [SerializeField] private float attackAnimationDuration = 1.2f;
 
         private Coroutine attackCoroutine;
+        [Header("音效")]
+        [SerializeField] private AudioClip attackSFX;
 
-        [Header("消失特效")]
-        [SerializeField] private GameObject disappearVFX;
+        
 
         private Animator ani;
 
@@ -112,7 +113,7 @@ namespace CHANG
             MoveOrAttack();
         }
 
-      
+
 
         private void FindNearestEnemy()
         {
@@ -296,12 +297,18 @@ namespace CHANG
             damageDealt = true;
 
             currentTarget.TakeDamage(damage);
+            if (SoundManager.Instance != null &&
+                attackSFX != null)
+            {
+                SoundManager.Instance.PlaySFX(
+                attackSFX
+                );
 
-            Debug.Log(
+                Debug.Log(
                 $"樹人攻擊 {currentTarget.name}，造成 {damage} 傷害"
             );
+            }
         }
-
         /// <summary>
         /// 放在攻擊動畫最後一幀。
         /// </summary>
@@ -353,14 +360,7 @@ namespace CHANG
 
         private void Disappear()
         {
-            if (disappearVFX != null)
-            {
-                Instantiate(
-                    disappearVFX,
-                    transform.position,
-                    Quaternion.identity
-                );
-            }
+            
 
             Destroy(gameObject);
         }

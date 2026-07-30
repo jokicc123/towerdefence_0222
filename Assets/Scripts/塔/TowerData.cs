@@ -30,6 +30,8 @@ namespace CHANG
         public GameObject[] levelModelPrefabs; // 純模型 Prefab（換外觀用）
         [Header("圖示")]
         public Sprite icon; // 防禦塔圖示
+        [Header("音效")]
+        public AudioClip attackSFX;
     }
 
     [System.Serializable]

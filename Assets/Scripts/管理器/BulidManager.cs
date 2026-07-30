@@ -23,6 +23,8 @@ namespace CHANG
         private bool placingHero;
         private MeshRenderer previewRenderer;   // 預覽塔材質
         private RangeCircle previewRange;       // 攻擊範圍顯示
+        private Tower movingTower;// 目前正在移動的塔（如果有的話）
+        private bool isMovingTower;
 
         private RaycastHit currentHit;          // 記錄滑鼠射線打到的資訊（用來判斷道路）
 
@@ -116,29 +118,36 @@ namespace CHANG
 
             CancelSelection();
 
-            selectedHeroData = data;
-            placingHero = true;
-
-            if (data.prefab == null)
+            if (data == null || data.prefab == null)
             {
-                Debug.LogError("HeroData 缺少 Prefab");
+                Debug.LogError("HeroData 或英雄 Prefab 沒有設定");
                 return;
             }
 
+            selectedHeroData = data;
+            placingHero = true;
+
             previewInstance = Instantiate(data.prefab);
+
+            // 關閉預覽英雄邏輯，避免攻擊、光環和註冊英雄
+            Hero previewHero =
+                previewInstance.GetComponentInChildren<Hero>();
+
+            if (previewHero != null)
+            {
+                previewHero.enabled = false;
+            }
+            else
+            {
+                Debug.LogWarning("英雄預覽物件找不到 Hero 腳本");
+            }
 
             previewRenderer =
                 previewInstance.GetComponentInChildren<MeshRenderer>();
 
-            // ⭐ 英雄目前沒有RangeCircle可顯示，previewRange維持null，UpdatePreview內有null檢查不會出錯
-
-            // 關閉英雄邏輯
-            Hero h = previewInstance.GetComponentInChildren<Hero>();
-            if (h != null)
-                h.enabled = false;
-
-            // 關閉碰撞
-            foreach (Collider col in previewInstance.GetComponentsInChildren<Collider>())
+            // 關閉碰撞，避免預覽物件擋住射線與建造判斷
+            foreach (Collider col in
+                     previewInstance.GetComponentsInChildren<Collider>())
             {
                 col.enabled = false;
             }
@@ -175,8 +184,24 @@ namespace CHANG
 
                 previewInstance.transform.position = snapPos;
 
-                // ⭐ 修正1：預覽跟實際放置統一呼叫同一個CanBuild，用同一份footprint
-                Vector3 footprint = placingHero ? heroFootprint : selectedTowerData.buildFootprint;
+                Vector3 footprint;
+
+                if (placingHero)
+                {
+                    footprint = heroFootprint;
+                }
+                else if (isMovingTower && movingTower != null)
+                {
+                    footprint = movingTower.data.buildFootprint;
+                }
+                else
+                {
+                    if (selectedTowerData == null)
+                        return;
+
+                    footprint = selectedTowerData.buildFootprint;
+                }
+                
                 bool canBuild = CanBuild(snapPos, footprint);
 
                 // 決定顏色（綠 or 紅）
@@ -206,41 +231,85 @@ namespace CHANG
         // =========================================
         private void TryPlaceTower()
         {
-            if (!GameManager.Instance.CanBuildTower()) return;
-            if (previewInstance == null || selectedTowerData == null)
+            if (!GameManager.Instance.CanBuildTower())
                 return;
 
-            Vector3 pos = previewInstance.transform.position;
+            if (previewInstance == null)
+                return;
 
-            // 再次確認能不能建造
-            if (CanBuild(pos, selectedTowerData.buildFootprint))
+            Vector3 pos =
+                previewInstance.transform.position;
+
+            Vector3 footprint;
+
+            if (isMovingTower && movingTower != null)
             {
-                // 檢查金幣是否足夠
-                if (!GameManager.Instance.SpendGold(selectedTowerData.levels[0].cost))
-                {
-                    Debug.LogWarning("金幣不足！");
-                    return;
-                }
-
-                // 建立正式塔
-                GameObject newTower = Instantiate(
-                    selectedTowerData.levelPrefabs[0],
-                    pos,
-                    Quaternion.identity
-                );
-
-                // 初始化塔
-                if (newTower.TryGetComponent(out Tower towerScript))
-                {
-                    towerScript.Initialize(selectedTowerData);
-                }
-
-                Debug.Log($"成功建造: {selectedTowerData.towerName}");
-
-                // 清除預覽
-                CancelSelection();
+                footprint = movingTower.data.buildFootprint;
             }
+            else
+            {
+                if (selectedTowerData == null)
+                    return;
+
+                footprint = selectedTowerData.buildFootprint;
+            }
+
+            if (!CanBuild(pos, footprint))
+            {
+                Debug.Log("目前位置不能放置");
+                return;
+            }
+
+            // ==========================
+            // 正在重新放置舊塔
+            // ==========================
+            if (isMovingTower && movingTower != null)
+            {
+                movingTower.transform.position = pos;
+                movingTower.gameObject.SetActive(true);
+
+                Debug.Log($"塔已移動到：{pos}");
+
+                Destroy(previewInstance);
+
+                previewInstance = null;
+                previewRenderer = null;
+                previewRange = null;
+
+                movingTower = null;
+                isMovingTower = false;
+                selectedTowerData = null;
+
+                return;
+            }
+
+            // ==========================
+            // 原本的新建塔邏輯
+            // ==========================
+            if (!GameManager.Instance.SpendGold(
+                    selectedTowerData.levels[0].cost))
+            {
+                Debug.LogWarning("金幣不足！");
+                return;
+            }
+
+            GameObject newTower = Instantiate(
+                selectedTowerData.levelPrefabs[0],
+                pos,
+                Quaternion.identity
+            );
+
+            if (newTower.TryGetComponent(out Tower towerScript))
+            {
+                towerScript.Initialize(selectedTowerData);
+            }
+
+            Debug.Log($"成功建造：{selectedTowerData.towerName}");
+
+            CancelSelection();
         }
+
+        
 
         // =========================================
         // 嘗試放置英雄
@@ -332,12 +401,26 @@ namespace CHANG
         // =========================================
         private void CancelSelection()
         {
+            if (isMovingTower && movingTower != null)
+            {
+                movingTower.gameObject.SetActive(true);
+            }
+
+            if (previewInstance != null)
+            {
+                Destroy(previewInstance);
+            }
+
+            previewInstance = null;
+            previewRenderer = null;
+            previewRange = null;
+
             selectedTowerData = null;
             selectedHeroData = null;
             placingHero = false;
 
-            if (previewInstance != null)
-                Destroy(previewInstance);
+            movingTower = null;
+            isMovingTower = false;
         }
 
         void HandleTowerClick()
@@ -383,5 +466,71 @@ namespace CHANG
                 Debug.Log("❌ 打到物件但不是塔或英雄");
             }
         }
+
+        // =========================================
+        // 移動防禦塔
+        // =========================================
+        public void StartMoveTower(Tower tower)
+        {
+            if (tower == null)
+                return;
+
+            CancelSelection();
+
+            movingTower = tower;
+            isMovingTower = true;
+            placingHero = false;
+
+            // 記錄塔資料，讓 UpdatePreview 能取得 footprint
+            selectedTowerData = tower.data;
+
+            // 隱藏原本的塔
+            movingTower.gameObject.SetActive(false);
+
+            // 只建立模型作為預覽，不要建立完整塔 Prefab
+            GameObject modelPrefab =
+                tower.data.levelModelPrefabs[tower.currentLevel];
+
+            if (modelPrefab == null)
+            {
+                Debug.LogError("移動塔失敗：沒有設定 Level Model Prefab");
+
+                movingTower.gameObject.SetActive(true);
+                movingTower = null;
+                isMovingTower = false;
+                selectedTowerData = null;
+                return;
+            }
+
+            previewInstance = Instantiate(modelPrefab);
+
+            previewRenderer =
+                previewInstance.GetComponentInChildren<MeshRenderer>();
+
+            // 保險：關閉預覽內所有 Collider
+            foreach (Collider col in
+                     previewInstance.GetComponentsInChildren<Collider>(true))
+            {
+                col.enabled = false;
+            }
+
+            // 如果模型裡意外有 Tower 腳本，也一起停用
+            foreach (Tower towerScript in
+                     previewInstance.GetComponentsInChildren<Tower>(true))
+            {
+                towerScript.enabled = false;
+            }
+
+            previewRange =
+                previewInstance.GetComponentInChildren<RangeCircle>();
+
+            if (previewRange != null)
+            {
+                previewRange.DrawCircle(movingTower.attackRange);
+            }
+
+            Debug.Log($"開始移動塔：{movingTower.name}");
+        }
+
     }
 }

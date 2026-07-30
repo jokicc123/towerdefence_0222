@@ -640,6 +640,7 @@ MonoBehaviour:
   rotationSpeed: 10
   spawnAnimationDuration: 1.5
   attackAnimationDuration: 1.2
+  attackSFX: {fileID: 8300000, guid: 46a9c7228ad0d5e42a0dc11bda7328b3, type: 3}
   disappearVFX: {fileID: 0}
 --- !u!1 &3341076839245145198
 GameObject:

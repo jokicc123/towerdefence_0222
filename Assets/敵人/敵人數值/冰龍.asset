@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: "\u51B0\u9F8D"
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.EnemyData
   enemyName: "\u51B0\u9F8D"
-  maxHealth: 800
+  maxHealth: 2000
   moveSpeed: 1.8
   damage: 50
   goldReward: 200
   modelPrefab: {fileID: 7403445231042603841, guid: a510a891cea50f14bbe26430529d8e49, type: 3}
+  xpReward: 10
