@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b324fe66d9341d5479c5eb0d1f179728, type: 3}
+  m_Name: "\u85CD\u7DA0\u8718\u86DB"
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.EnemyData
+  enemyName: "\u85CD\u7DA0\u8718\u86DB"
+  maxHealth: 90
+  moveSpeed: 4
+  damage: 4
+  goldReward: 12
+  modelPrefab: {fileID: 7978624207812556279, guid: 7a1e02b4e3e3cde4da6a58f6c596f9b7, type: 3}
+  xpReward: 22
+  buffType: 0
+  buffMultiplier: 1.2
+  buffRadius: 6
+  buffUpdateInterval: 0.5
+  buffSelf: 0
+  buffVFX: {fileID: 0}

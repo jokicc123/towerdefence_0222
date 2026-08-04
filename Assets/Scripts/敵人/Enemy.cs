@@ -6,6 +6,7 @@ namespace CHANG
     public class Enemy : MonoBehaviour
     {
         [SerializeField] private EnemyData data;
+        public EnemyData Data => data;
         private float currentHealth;
         private bool isDead = false;
         private Renderer[] renderers;
@@ -18,10 +19,73 @@ namespace CHANG
         Rigidbody rb;
 
         // ⭐ 效果系統
+        // ⭐ 效果系統
         private List<StatusEffect> effects = new List<StatusEffect>();
-        private float slowMultiplier = 1f;
 
-        public float MoveSpeed => data != null ? data.moveSpeed * slowMultiplier : 3f;
+        // 減速倍率
+        private float slowMultiplier = 1f;
+        private float speedBuffMultiplier = 1f;
+        private float damageBuffMultiplier = 1f;
+        private float damageTakenMultiplier = 1f;
+        // ⭐ 暈眩計數（可支援多個暈眩）
+        private int stunCount;
+
+        // 是否處於暈眩
+        public bool IsStunned => stunCount > 0;
+
+        // 真正移動速度
+        public float MoveSpeed
+        {
+            get
+            {
+                // 暈眩時完全不能移動
+                if (IsStunned)
+                    return 0f;
+
+                return data != null
+                    ? data.moveSpeed * slowMultiplier
+                    : 3f;
+            }
+        }
+            public void ApplySpeedBuff(float multiplier)
+        {
+            speedBuffMultiplier *= Mathf.Max(multiplier, 0.01f);
+        }
+
+        public void RemoveSpeedBuff(float multiplier)
+        {
+            if (multiplier <= 0f)
+                return;
+
+            speedBuffMultiplier /= multiplier;
+        }
+
+        public void ApplyDamageBuff(float multiplier)
+        {
+            damageBuffMultiplier *= Mathf.Max(multiplier, 0.01f);
+        }
+
+        public void RemoveDamageBuff(float multiplier)
+        {
+            if (multiplier <= 0f)
+                return;
+
+            damageBuffMultiplier /= multiplier;
+        }
+
+        public void ApplyDefenseBuff(float multiplier)
+        {
+            damageTakenMultiplier *= Mathf.Max(multiplier, 0.01f);
+        }
+
+        public void RemoveDefenseBuff(float multiplier)
+        {
+            if (multiplier <= 0f)
+                return;
+
+            damageTakenMultiplier /= multiplier;
+        }
+        
 
         private void Awake()
         {
@@ -91,51 +155,83 @@ namespace CHANG
 
         private void Update()
         {
-            if (targetPoint == null) return;
+            if (isDead)
+                return;
+
+            // 狀態效果必須持續倒數
+            TickEffects();
+
+            if (targetPoint == null)
+                return;
+
             Move();
-            TickEffects(); // ⭐ 每幀更新效果
         }
 
         // ⭐ 新增效果
-        
+
         public void AddEffect(StatusEffect effect)
         {
-            var existing = effects.Find(e => e.GetType() == effect.GetType());
+            if (effect == null)
+                return;
+
+            // 同類型效果重新施放時，先移除舊效果
+            StatusEffect existing =
+                effects.Find(e =>
+                    e != null &&
+                    e.GetType() == effect.GetType()
+                );
+
             if (existing != null)
             {
                 existing.OnExpire();
                 effects.Remove(existing);
             }
+
             effect.OnApply();
             effects.Add(effect);
-           
         }
 
-        // ⭐ 每幀 Tick
         private void TickEffects()
         {
             for (int i = effects.Count - 1; i >= 0; i--)
             {
-                effects[i].Tick(Time.deltaTime);
-                if (effects[i].IsExpired)
+                StatusEffect effect = effects[i];
+
+                if (effect == null)
                 {
-                    effects[i].OnExpire();
                     effects.RemoveAt(i);
-                  
+                    continue;
+                }
+
+                effect.Tick(Time.deltaTime);
+
+                if (effect.IsExpired)
+                {
+                    effect.OnExpire();
+                    effects.RemoveAt(i);
                 }
             }
         }
-        
-
         // ⭐ 減速
-        public void ApplySlow(float percent)
-        {
-            slowMultiplier = 1f - percent;
-        }
-
+       public void ApplySlow(float percent)
+{
+    percent = Mathf.Clamp01(percent);
+    slowMultiplier = 1f - percent;
+}
         public void RemoveSlow()
         {
             slowMultiplier = 1f;
+        }
+
+        // ⭐ 暈眩
+        public void AddStun()
+        {
+            stunCount++;
+        }
+
+        public void RemoveStun()
+        {
+            stunCount = Mathf.Max(0, stunCount - 1);
         }
 
         private void Move()
@@ -168,7 +264,7 @@ namespace CHANG
                 GetNextWaypoint();
             }
         }
-
+        
         private void GetNextWaypoint()
         {
             // ✨ 修改：改用我自己的路徑 myPath 來做長度判定
@@ -188,9 +284,18 @@ namespace CHANG
 
         public void TakeDamage(float amount)
         {
-            if (isDead) return;
-            currentHealth -= amount;
-            if (currentHealth <= 0) KillByTower();
+            if (isDead)
+                return;
+
+            float finalDamage =
+                amount * damageTakenMultiplier;
+
+            currentHealth -= finalDamage;
+
+            if (currentHealth <= 0f)
+            {
+                KillByTower();
+            }
         }
 
         public void KillByTower()
@@ -203,7 +308,11 @@ namespace CHANG
 
         public void ReachGoal()
         {
-            GameManager.Instance.TakeDamege(data.damage);
+            int finalDamage = Mathf.RoundToInt(
+                data.damage * damageBuffMultiplier
+            );
+
+            GameManager.Instance.TakeDamege(finalDamage);
             Destroy(gameObject);
         }
     }

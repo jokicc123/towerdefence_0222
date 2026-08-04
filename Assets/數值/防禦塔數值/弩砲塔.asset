@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fae2c384834793c409e75e367a88eb31, type: 3}
+  m_Name: "\u5F29\u7832\u5854"
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerData
+  buildFootprint: {x: 1, y: 1, z: 1}
+  attackType: 0
+  effectType: 0
+  towerName: "\u5F29\u7832\u5854"
+  description: 
+  levels:
+  - attackRange: 4
+    damage: 10
+    attackSpeed: 1.8
+    cost: 40
+    bulletPrefab: {fileID: 1436082072587936, guid: 61ea1ee6d61cf414f89900746e4b6899, type: 3}
+    effectType: 0
+    effectDuration: 0
+    effectDamagePerSecond: 0
+    slowPercent: 0
+    blastRadius: 0
+    minDamageRatio: 0.4
+  - attackRange: 4.7
+    damage: 16
+    attackSpeed: 2
+    cost: 80
+    bulletPrefab: {fileID: 1751001828988230, guid: 84f0393b31eef6f448633f5ed4003405, type: 3}
+    effectType: 0
+    effectDuration: 0
+    effectDamagePerSecond: 0
+    slowPercent: 0
+    blastRadius: 0
+    minDamageRatio: 0.4
+  - attackRange: 5.5
+    damage: 30
+    attackSpeed: 2.5
+    cost: 120
+    bulletPrefab: {fileID: 1742592517029364, guid: ea4d9f0e26a38b0428a2800ab0e161bd, type: 3}
+    effectType: 0
+    effectDuration: 0
+    effectDamagePerSecond: 0
+    slowPercent: 0
+    blastRadius: 0
+    minDamageRatio: 0.4
+  levelPrefabs:
+  - {fileID: 1162075595987228, guid: a1beaea2123fae24798c8567dbe43d63, type: 3}
+  levelModelPrefabs:
+  - {fileID: 1162075595987228, guid: feb92283d5ff3a845b52ad5200a977d6, type: 3}
+  - {fileID: 1085163797507038, guid: 2ac3688c98e11ff4d94328a6fc244efb, type: 3}
+  - {fileID: 1625777184147098, guid: 20b66575fa81596498fb68ed0a6574cc, type: 3}
+  icon: {fileID: 21300000, guid: 7fc91d2574bc3204abd02bd98e624dc2, type: 3}
+  attackSFX: {fileID: 8300000, guid: ec46eb299a041384b83005833e3891df, type: 3}

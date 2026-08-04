@@ -16,12 +16,18 @@ namespace CHANG
         #region 技能冷卻計時
         private float skill1Timer;
         private float skill2Timer;
+        private Coroutine sunCoroutine;
+        private bool sunBurnBuffActive;
+        private GameObject currentSunVFX;
         #endregion
 
         [SerializeField] private Transform firePoint;
         [SerializeField] private Transform head;
         [SerializeField] private Animator animator; // ⭐ 攻擊動畫
-        public Coroutine attackCoroutine; // ⭐ 攻擊協程，給動畫事件呼叫
+        [Header("特效生成位置")]
+        [SerializeField] private Transform normalAttackVFXPoint;
+        [SerializeField] private Transform deathFlameVFXPoint;
+
 
         // ⭐ 給UiManager訂閱：經驗值/等級變動時通知面板刷新
         public event System.Action OnHeroDataChanged;
@@ -32,11 +38,24 @@ namespace CHANG
         [SerializeField] private float auraUpdateInterval = 0.5f;
         private Coroutine auraCoroutine;
 
+        public float FinalDamage => CurrentStats.damage * ShopBonus.HeroDamageMultiplier;
         // ⭐ 普通攻擊
         private List<Enemy> enemiesInRange = new List<Enemy>();
         private float attackTimer;
-        private float AttackInterval => 1f / CurrentStats.attackSpeed;
         private Enemy pendingFireTarget; // ⭐ 等動畫事件觸發時要打誰
+        private float AttackInterval
+        {
+            get
+            {
+                float attackSpeed =
+                    Mathf.Max(
+                        0.01f,
+                        CurrentStats.attackSpeed
+                    );
+
+                return 1f / attackSpeed;
+            }
+        }
 
         public HeroLevelStats CurrentStats
         {
@@ -58,18 +77,31 @@ namespace CHANG
                 return data.levelStats[safeIndex];
             }
         }
-        #region 生命週期
+        #region Unity 生命週期
 
         private void Awake()
         {
-            animator = GetComponentInChildren<Animator>();
+            if (animator == null)
+            {
+                animator =
+                    GetComponentInChildren<Animator>(true);
+            }
+
+            if (animator == null)
+            {
+                Debug.LogError(
+                    $"{name} 找不到 Animator",
+                    this
+                );
+            }
         }
+
         private void Start()
         {
             if (data == null)
             {
                 Debug.LogError(
-                    $"{name} 沒有設定 HeroData，請到 Inspector 拖入資料",
+                    $"{name} 沒有設定 HeroData",
                     this
                 );
 
@@ -87,29 +119,34 @@ namespace CHANG
                 UiManager.Instance.SetActiveHero(this);
             }
 
-            // 每隔一段時間更新光環
-            auraCoroutine = StartCoroutine(UpdatePassiveAuraRoutine());
+            auraCoroutine = StartCoroutine(
+                UpdatePassiveAuraRoutine()
+            );
 
             OnHeroDataChanged?.Invoke();
         }
 
         private void Update()
         {
-            if (skill1Timer > 0f) skill1Timer -= Time.deltaTime;
-            if (skill2Timer > 0f) skill2Timer -= Time.deltaTime;
+            skill1Timer =
+                Mathf.Max(
+                    0f,
+                    skill1Timer - Time.deltaTime
+                );
+
+            skill2Timer =
+                Mathf.Max(
+                    0f,
+                    skill2Timer - Time.deltaTime
+                );
 
             UpdateEnemiesInRange();
             HandleAttack();
         }
+
         private void OnDestroy()
         {
-            CancelInvoke();
-
-            if (attackCoroutine != null)
-            {
-                StopCoroutine(attackCoroutine);
-                attackCoroutine = null;
-            }
+            StopSunOfNoon();
 
             if (auraCoroutine != null)
             {
@@ -117,7 +154,6 @@ namespace CHANG
                 auraCoroutine = null;
             }
 
-            // 英雄消失時，移除所有塔的光環 Buff
             RemoveAllPassiveBuffs();
 
             if (UiManager.Instance != null)
@@ -125,73 +161,142 @@ namespace CHANG
                 UiManager.Instance.ClearActiveHero(this);
             }
         }
+
         #endregion
+
 
         #region 普通攻擊
         private void UpdateEnemiesInRange()
         {
             enemiesInRange.Clear();
 
-            Collider[] hits = Physics.OverlapSphere(transform.position, CurrentStats.range);
-            foreach (var hit in hits)
+            Collider[] hits = Physics.OverlapSphere(
+                transform.position,
+                CurrentStats.range
+            );
+
+            HashSet<Enemy> foundEnemies =
+                new HashSet<Enemy>();
+
+            foreach (Collider hit in hits)
             {
                 Enemy enemy =
-                hit.GetComponentInParent<Enemy>();
+                    hit.GetComponentInParent<Enemy>();
 
-                if (enemy != null)
+                if (enemy == null)
+                    continue;
+
+                if (foundEnemies.Add(enemy))
                 {
                     enemiesInRange.Add(enemy);
                 }
             }
+
+            // 優先打最近的敵人
+            enemiesInRange.Sort((a, b) =>
+            {
+                float distanceA =
+                    (a.transform.position -
+                     transform.position).sqrMagnitude;
+
+                float distanceB =
+                    (b.transform.position -
+                     transform.position).sqrMagnitude;
+
+                return distanceA.CompareTo(distanceB);
+            });
         }
+        #endregion
 
         private void HandleAttack()
         {
-            enemiesInRange.RemoveAll(e => e == null);
-            if (enemiesInRange.Count == 0) return;
-
-            RotateBodyToTarget(enemiesInRange[0]); // ⭐ 整個身體轉向敵人
-            RotateHeadToTarget(enemiesInRange[0]); // ⭐ Head再多轉一點做細部瞄準
-
             attackTimer -= Time.deltaTime;
-            if (attackTimer <= 0f)
+
+            enemiesInRange.RemoveAll(
+                enemy => enemy == null
+            );
+
+            if (enemiesInRange.Count == 0)
+                return;
+
+            Enemy target = enemiesInRange[0];
+
+            RotateBodyToTarget(target);
+            RotateHeadToTarget(target);
+
+            if (attackTimer > 0f)
+                return;
+
+            pendingFireTarget = target;
+
+            if (animator != null)
             {
-                Debug.Log("準備播放攻擊動畫");
-                pendingFireTarget = enemiesInRange[0];
-
-                if (animator != null)
-                {
-                    animator.SetTrigger("Attack"); // ⭐ 播動畫，真正發射交給動畫事件
-                }
-                else
-                {
-                    // 沒掛Animator就退回舊行為：立刻發射，避免完全打不出去
-                    Fire(pendingFireTarget);
-                }
-                
-
-                attackTimer = AttackInterval;
+               
+                animator.SetTrigger("Attack");
+                StartCoroutine(CheckAnimatorAfterAttack());
+            }
+            else
+            {
+                Fire(pendingFireTarget);
+                pendingFireTarget = null;
             }
 
+            attackTimer = AttackInterval;
         }
 
-        // ⭐ 給Animation Event呼叫：在丟石頭動畫「甩出去」那一幀觸發
-        // 在Animator的Attack動畫片段上，於甩手瞬間新增Animation Event，
+
+
         // Function選這個方法名稱：FireFromAnimationEvent
         public void FireFromAnimationEvent()
         {
-            if (pendingFireTarget == null || 
-                pendingFireTarget.Equals(null)) return; // 敵人可能已經死亡/被銷毀
+            if (data == null)
+                return;
+
+            Enemy target = pendingFireTarget;
+
+            // 清掉目標，避免同一個動畫內有兩個 Event 時重複傷害
+            pendingFireTarget = null;
+
+            if (target == null)
+                return;
 
             if (SoundManager.Instance != null &&
-                        data.attackSFX != null)
+                data.attackSFX != null)
             {
                 SoundManager.Instance.PlaySFX(
                     data.attackSFX
                 );
             }
 
-            Fire(pendingFireTarget);
+            PlayNormalAttackVFX();
+
+            Fire(target);
+        }
+        private void PlayNormalAttackVFX()
+        {
+            if (data == null ||
+                data.normalAttackVFX == null)
+            {
+                return;
+            }
+
+            if (firePoint == null)
+            {
+                Debug.LogWarning(
+                    $"{data.heroName} 沒有設定 FirePoint",
+                    this
+                );
+
+                return;
+            }
+            GameObject vfx = Instantiate(
+                data.normalAttackVFX,
+                firePoint.position,
+                firePoint.rotation,
+                firePoint
+            );
+
+            Destroy(vfx, 3f);
         }
 
         // ⭐ 讓整個英雄身體朝向敵人平滑轉動
@@ -224,41 +329,163 @@ namespace CHANG
 
         private void Fire(Enemy target)
         {
-            if (data.bulletPrefab == null || firePoint == null)
-            {
-                Debug.LogWarning($"{data.heroName} 無法攻擊，缺少 bulletPrefab 或 firePoint");
+            if (target == null || data == null)
                 return;
-            }
 
-            GameObject bulletObj = Instantiate(data.bulletPrefab, firePoint.position, firePoint.rotation);
-            if (bulletObj.TryGetComponent(out Bullet b))
+            switch (data.attackType)
             {
-                // ⚠️ TowerEffectType.None 是假設值，如果你的enum沒有這個選項，換成你實際的「無效果」值
-                b.SetTarget(target, CurrentStats.damage, TowerEffectType.None, 0f, 0f, 0f);
+                case HeroAttackType.Ranged:
+                    FireRanged(target);
+                    break;
+
+                case HeroAttackType.Melee:
+                    FireMelee(target);
+                    break;
             }
 
 
         }
-        #endregion
 
-        #region 特效播放共用方法
-        // ⭐ 生成特效並依ParticleSystem的實際時長自動銷毀，避免場上堆積殘留物件
-        private void PlayVFX(GameObject vfxPrefab, Vector3 position)
+        #region 攻擊方式
+        // ⭐ 遠程攻擊：直接對敵人造成傷害
+        private void FireRanged(Enemy target)
         {
-            if (vfxPrefab == null) return; // 沒指定特效就跳過，不報錯
-
-            GameObject vfxObj = Instantiate(vfxPrefab, position, Quaternion.identity);
-
-            if (vfxObj.TryGetComponent<ParticleSystem>(out var ps))
+            if (data.bulletPrefab == null ||
+                firePoint == null)
             {
-                float lifetime = ps.main.duration + ps.main.startLifetime.constantMax;
-                Destroy(vfxObj, lifetime);
+                Debug.LogWarning(
+                    $"{data.heroName} 缺少 Bullet Prefab 或 Fire Point",
+                    this
+                );
+
+                return;
+            }
+
+            Vector3 direction =
+                target.transform.position - firePoint.position;
+
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                firePoint.rotation =
+                    Quaternion.LookRotation(direction.normalized);
+            }
+
+            GameObject bulletObject = Instantiate(
+                data.bulletPrefab,
+                firePoint.position,
+                firePoint.rotation
+            );
+
+            if (bulletObject.TryGetComponent(out Bullet bullet))
+            {
+                bullet.SetTarget(
+                    target,
+                    FinalDamage,
+                    TowerEffectType.None,
+                    0f,
+                    0f,
+                    0f
+                );
             }
             else
             {
-                // 沒有ParticleSystem（例如是純動畫或Prefab本身有自帶銷毀腳本）就給個保底時間
-                Destroy(vfxObj, 3f);
+                Debug.LogWarning(
+                    $"{bulletObject.name} 沒有 Bullet 腳本",
+                    bulletObject
+                );
+
+                Destroy(bulletObject);
             }
+        }
+        // ⭐ 近戰攻擊：在英雄前方生成一個球形範圍，對範圍內的敵人造成傷害
+        private void FireMelee(Enemy target)
+        {
+            if (target == null)
+                return;
+
+            // 攻擊判定中心位於英雄前方
+            Vector3 hitCenter =
+                transform.position +
+                transform.forward * data.meleeHitOffset;
+
+            Collider[] hits = Physics.OverlapSphere(
+                hitCenter,
+                data.meleeHitRadius
+            );
+
+            HashSet<Enemy> damagedEnemies =
+                new HashSet<Enemy>();
+
+            foreach (Collider hit in hits)
+            {
+                Enemy enemy =
+                    hit.GetComponentInParent<Enemy>();
+
+                if (enemy == null)
+                    continue;
+
+                // 防止同一隻敵人的多個 Collider 重複受傷
+                if (!damagedEnemies.Add(enemy))
+                    continue;
+
+                enemy.TakeDamage(FinalDamage);
+
+                // 火焰劍士普通攻擊附加燃燒
+                if (data.normalAttackBurn)
+                {
+                    enemy.AddEffect(
+                        new BurnEffect(
+                            enemy,
+                            data.burnDuration,
+                            data.burnDamagePerSecond
+                        )
+                    );
+                }
+
+                Debug.Log(
+                    $"{data.heroName} 近戰命中 {enemy.name}，" +
+                    $"造成 {FinalDamage:0.0} 傷害",
+                    enemy
+                );
+            }
+        }
+        #endregion
+        #region 特效播放共用方法
+        // ⭐ 生成特效並依ParticleSystem的實際時長自動銷毀，避免場上堆積殘留物件
+        private void PlayVFX(
+            GameObject vfxPrefab,
+            Vector3 position)
+        {
+            if (vfxPrefab == null)
+                return;
+
+            GameObject vfxObject = Instantiate(
+                vfxPrefab,
+                position,
+                Quaternion.identity
+            );
+
+            ParticleSystem[] particleSystems =
+                vfxObject.GetComponentsInChildren<ParticleSystem>();
+
+            float lifetime = 3f;
+
+            foreach (ParticleSystem particle in particleSystems)
+            {
+                ParticleSystem.MainModule main =
+                    particle.main;
+
+                float particleLifetime =
+                    main.duration +
+                    main.startLifetime.constantMax;
+
+                lifetime = Mathf.Max(
+                    lifetime,
+                    particleLifetime
+                );
+            }
+
+            Destroy(vfxObject, lifetime);
         }
         #endregion
 
@@ -395,37 +622,171 @@ namespace CHANG
                 return data.skill2.levelStats[index];
             }
         }
-        // ⭐【自然系英雄】技能1：荊棘蔓延 —— 範圍暈眩（纏繞），CD短，用來控場拖延
-        #region 主動技能1：荊棘蔓延（暈眩控場）
+
+        #region 技能共用
+
+        private bool HasSkillStats(
+            ActiveSkillData skill)
+        {
+            return skill.levelStats != null &&
+                   skill.levelStats.Length > 0;
+        }
+
         public bool CanUseSkill1()
         {
-            return currentLevel >= data.skill1.unlockLevel &&
+            return data != null &&
+                   HasSkillStats(data.skill1) &&
+                   currentLevel >= data.skill1.unlockLevel &&
                    skill1Timer <= 0f;
         }
 
+        public bool CanUseSkill2()
+        {
+            return data != null &&
+                   HasSkillStats(data.skill2) &&
+                   currentLevel >= data.skill2.unlockLevel &&
+                   skill2Timer <= 0f;
+        }
 
         public void UseSkill1()
         {
-            if (currentLevel < data.skill1.unlockLevel)
-            {
-                Debug.Log(
-                    $"技能1需要 Lv.{data.skill1.unlockLevel} 才能使用"
-                );
-
-                return;
-            }
-
             if (!CanUseSkill1())
                 return;
 
-            SkillLevelStats skillStats =
+            SkillLevelStats stats =
                 CurrentSkill1Stats;
 
-            skill1Timer = skillStats.cooldown;
+            if (ExecuteSkill(
+                data.skill1,
+                stats))
+            {
+                skill1Timer =
+                    Mathf.Max(
+                        0f,
+                        stats.cooldown
+                    );
+            }
+        }
 
+        public void UseSkill2()
+        {
+            if (!CanUseSkill2())
+                return;
+
+            SkillLevelStats stats =
+                CurrentSkill2Stats;
+
+            if (ExecuteSkill(
+                data.skill2,
+                stats))
+            {
+                skill2Timer =
+                    Mathf.Max(
+                        0f,
+                        stats.cooldown
+                    );
+            }
+        }
+
+        private bool ExecuteSkill(
+            ActiveSkillData skill,
+            SkillLevelStats stats)
+        {
+            switch (skill.skillType)
+            {
+                case HeroSkillType.AreaStun:
+                    UseAreaStun(skill, stats);
+                    return true;
+
+                case HeroSkillType.SummonCreature:
+                    return UseSummonSkill(
+                        skill,
+                        stats
+                    );
+
+                case HeroSkillType.FireWall:
+                    UseFireWall(skill, stats);
+                    return true;
+
+                case HeroSkillType.SunOfNoon:
+                    StopSunOfNoon();
+
+                    sunCoroutine = StartCoroutine(
+                        UseSunOfNoonRoutine(
+                            skill,
+                            stats
+                        )
+                    );
+
+                    return true;
+
+                default:
+                    Debug.LogWarning(
+                        $"{data.heroName} 的技能類型尚未設定：" +
+                        $"{skill.skillType}",
+                        this
+                    );
+
+                    return false;
+            }
+        }
+
+        public float Skill1CooldownRatio
+        {
+            get
+            {
+                if (data == null ||
+                    !HasSkillStats(data.skill1))
+                {
+                    return 0f;
+                }
+
+                float cooldown =
+                    CurrentSkill1Stats.cooldown;
+
+                if (cooldown <= 0f)
+                    return 0f;
+
+                return Mathf.Clamp01(
+                    skill1Timer / cooldown
+                );
+            }
+        }
+
+        public float Skill2CooldownRatio
+        {
+            get
+            {
+                if (data == null ||
+                    !HasSkillStats(data.skill2))
+                {
+                    return 0f;
+                }
+
+                float cooldown =
+                    CurrentSkill2Stats.cooldown;
+
+                if (cooldown <= 0f)
+                    return 0f;
+
+                return Mathf.Clamp01(
+                    skill2Timer / cooldown
+                );
+            }
+        }
+
+        #endregion
+        // ⭐【自然系英雄】技能1：荊棘蔓延 —— 範圍暈眩（纏繞），CD短，用來控場拖延
+        #region 主動技能1：荊棘蔓延（暈眩控場）
+
+
+        private void UseAreaStun(
+             ActiveSkillData skill,
+             SkillLevelStats stats)
+        {
             Collider[] hits = Physics.OverlapSphere(
                 transform.position,
-                skillStats.radius
+                stats.radius
             );
 
             HashSet<Enemy> affectedEnemies =
@@ -445,74 +806,33 @@ namespace CHANG
                 enemy.AddEffect(
                     new StunEffect(
                         enemy,
-                        skillStats.value
+                        stats.value
                     )
                 );
 
                 PlayVFX(
-                    data.skill1.vfxPrefab,
+                    skill.vfxPrefab,
                     enemy.transform.position
                 );
             }
         }
-
-        public float Skill1CooldownRatio
-        {
-            get
-            {
-                float cooldown =
-                    CurrentSkill1Stats.cooldown;
-
-                if (cooldown <= 0f)
-                    return 0f;
-
-                return Mathf.Clamp01(
-                    skill1Timer / cooldown
-                );
-            }
-        }
         #endregion
-
+        // ⭐【自然系英雄】技能2：樹人降臨 —— 召喚樹人，CD長，用來清場
         #region 主動技能2：樹人降臨
 
-        public bool CanUseSkill2()
+      
+
+        private bool UseSummonSkill(
+            ActiveSkillData skill,
+            SkillLevelStats stats)
         {
-            return currentLevel >= data.skill2.unlockLevel &&
-                   skill2Timer <= 0f;
-        }
-
-        public void UseSkill2()
-        {
-            if (currentLevel < data.skill2.unlockLevel)
-            {
-                Debug.Log(
-                    $"樹人降臨需要英雄 Lv.{data.skill2.unlockLevel} 才能使用"
-                );
-
-                return;
-            }
-            if (!CanUseSkill2())
-            {
-                Debug.Log(
-                    $"樹人降臨冷卻中：{skill2Timer:0.0} 秒"
-                );
-
-                return;
-            }
-
-            if (data == null)
-            {
-                Debug.LogWarning("英雄沒有設定 HeroData");
-                return;
-            }
-
-            if (data.skill2.summonPrefab == null)
+            if (skill.summonPrefab == null)
             {
                 Debug.LogWarning(
-                    "樹人降臨沒有設定 Summon Prefab"
+                    $"{skill.skillName} 沒有設定 Summon Prefab"
                 );
 
-                return;
+                return false;
             }
 
             Vector3 spawnPosition =
@@ -520,88 +840,261 @@ namespace CHANG
                 transform.forward * 2.5f;
 
             GameObject summonedObject = Instantiate(
-                data.skill2.summonPrefab,
+                skill.summonPrefab,
                 spawnPosition,
                 transform.rotation
             );
 
             SummonedCreature creature =
-                summonedObject.GetComponent<SummonedCreature>();
-
-            if (creature == null)
-            {
-                creature =
-                    summonedObject.GetComponentInChildren<SummonedCreature>();
-            }
+                summonedObject.GetComponentInChildren<SummonedCreature>();
 
             if (creature == null)
             {
                 Debug.LogError(
-                    "樹人 Prefab 沒有 SummonedCreature 腳本"
+                    $"{skill.summonPrefab.name} 沒有 SummonedCreature",
+                    summonedObject
                 );
 
                 Destroy(summonedObject);
-                return;
+                return false;
             }
-
-            if (creature == null)
-            {
-                Debug.LogError(
-                    "樹人 Prefab 沒有 SummonedCreature 腳本"
-                );
-
-                Destroy(summonedObject);
-                return;
-            }
-
-            SkillLevelStats skillStats =
-                CurrentSkill2Stats;
 
             creature.Initialize(
-                skillStats.value,
-                skillStats.duration,
-                skillStats.attackSpeed,
-                skillStats.radius
+                stats.value,
+                stats.duration,
+                stats.attackSpeed,
+                stats.radius
             );
 
             PlayVFX(
-                data.skill2.vfxPrefab,
+                skill.vfxPrefab,
                 spawnPosition
             );
 
-            skill2Timer =
-                skillStats.cooldown;
-
-            Debug.Log(
-                $"樹人降臨施放成功：" +
-                $"傷害 {skillStats.value}，" +
-                $"持續 {skillStats.duration} 秒，" +
-                $"攻速 {skillStats.attackSpeed}，" +
-                $"搜尋範圍 {skillStats.radius}"
-            );
+            return true;
         }
 
         #endregion
-
-        public float Skill2CooldownRatio
+        //*火焰劍士技能1：火焰之牆 召喚火焰牆對經過的敵人造成傷害
+        #region  主動技能1 火焰之牆
+        private void UseFireWall(
+          ActiveSkillData skill,
+          SkillLevelStats stats)
         {
-            get
+            float length =
+                Mathf.Max(0.1f, stats.length);
+
+            float width =
+                Mathf.Max(0.1f, stats.width);
+
+            Vector3 center =
+                transform.position +
+                transform.forward *
+                (length * 0.5f);
+
+            Vector3 halfExtents =
+                new Vector3(
+                    width * 0.5f,
+                    1.5f,
+                    length * 0.5f
+                );
+
+            Collider[] hits =
+                Physics.OverlapBox(
+                    center,
+                    halfExtents,
+                    transform.rotation
+                );
+
+            HashSet<Enemy> damagedEnemies =
+                new HashSet<Enemy>();
+
+            float skillDamage =
+                stats.value *
+                ShopBonus.HeroDamageMultiplier;
+
+            float burnDps =
+                stats.damagePerSecond *
+                ShopBonus.HeroDamageMultiplier;
+
+            foreach (Collider hit in hits)
             {
-                float cooldown =
-                    CurrentSkill2Stats.cooldown;
+                Enemy enemy =
+                    hit.GetComponentInParent<Enemy>();
 
-                if (cooldown <= 0f)
-                    return 0f;
+                if (enemy == null)
+                    continue;
 
-                return Mathf.Clamp01(
-                    skill2Timer / cooldown
+                // 防止同一隻怪有多個 Collider 時重複傷害
+                if (!damagedEnemies.Add(enemy))
+                    continue;
+
+                enemy.TakeDamage(skillDamage);
+
+                if (stats.duration > 0f &&
+                    burnDps > 0f)
+                {
+                    enemy.AddEffect(
+                        new BurnEffect(
+                            enemy,
+                            stats.duration,
+                            burnDps
+                        )
+                    );
+                }
+
+                // 在被命中的怪物身上生成特效
+                if (skill.vfxPrefab != null)
+                {
+                    Vector3 vfxPosition =
+                        enemy.transform.position +
+                        Vector3.up * 1f;
+
+                    GameObject vfxObject =
+                        Instantiate(
+                            skill.vfxPrefab,
+                            vfxPosition,
+                            Quaternion.identity
+                        );
+
+                    Destroy(vfxObject, 3f);
+                }
+            }
+
+            Debug.Log(
+                $"死亡火焰：" +
+                $"命中 {damagedEnemies.Count} 隻敵人，" +
+                $"傷害 {skillDamage:0.0}，" +
+                $"長度 {length:0.0}，" +
+                $"寬度 {width:0.0}"
+            );
+        }
+        #endregion
+        //*火焰劍士技能2：正午的太陽 —— 召喚太陽，持續傷害，造成灼傷傷害加倍
+        #region 主動技能2:正午的太陽
+        private IEnumerator UseSunOfNoonRoutine(
+            ActiveSkillData skill,
+            SkillLevelStats stats)
+        {
+            float duration =
+                Mathf.Max(0.1f, stats.duration);
+
+            float radius =
+                Mathf.Max(0.1f, stats.radius);
+
+            float damagePerSecond =
+                Mathf.Max(
+                    0f,
+                    stats.damagePerSecond
+                ) *
+                ShopBonus.HeroDamageMultiplier;
+
+            float burnMultiplier =
+                Mathf.Max(1f, stats.multiplier);
+
+            Vector3 sunCenter =
+                transform.position +
+                transform.forward * 3f;
+
+            Vector3 vfxPosition =
+                sunCenter +
+                Vector3.up * 4f;
+
+            if (skill.vfxPrefab != null)
+            {
+                currentSunVFX = Instantiate(
+                    skill.vfxPrefab,
+                    vfxPosition,
+                    Quaternion.identity
                 );
             }
+
+            BurnDamageSystem.AddSun(
+                burnMultiplier
+            );
+
+            sunBurnBuffActive = true;
+
+            Debug.Log(
+                $"正午的太陽啟動：" +
+                $"持續 {duration:0.0} 秒，" +
+                $"每秒傷害 {damagePerSecond:0.0}，" +
+                $"燃燒倍率 ×{burnMultiplier:0.##}"
+            );
+
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+
+                Collider[] hits =
+                    Physics.OverlapSphere(
+                        sunCenter,
+                        radius
+                    );
+
+                HashSet<Enemy> damagedEnemies =
+                    new HashSet<Enemy>();
+
+                foreach (Collider hit in hits)
+                {
+                    Enemy enemy =
+                        hit.GetComponentInParent<Enemy>();
+
+                    if (enemy == null)
+                        continue;
+
+                    if (!damagedEnemies.Add(enemy))
+                        continue;
+
+                    enemy.TakeDamage(
+                        damagePerSecond *
+                        Time.deltaTime
+                    );
+                }
+
+                yield return null;
+            }
+
+            FinishSunOfNoon();
         }
 
 
-        // ⭐【自然系英雄】被動：森林共鳴 —— 只增強「毒塔」跟「火塔」的傷害
-        #region 被動技能：森林共鳴
+
+        private void StopSunOfNoon()
+        {
+            if (sunCoroutine != null)
+            {
+                StopCoroutine(sunCoroutine);
+                sunCoroutine = null;
+            }
+
+            FinishSunOfNoon();
+        }
+
+        private void FinishSunOfNoon()
+        {
+            if (sunBurnBuffActive)
+            {
+                BurnDamageSystem.RemoveSun();
+                sunBurnBuffActive = false;
+            }
+
+            if (currentSunVFX != null)
+            {
+                Destroy(currentSunVFX);
+                currentSunVFX = null;
+            }
+
+            sunCoroutine = null;
+        }
+        
+        #endregion
+
+
+        // ⭐【自然系英雄】被動：森林之子 —— 增加防禦塔
+        #region 被動技能：森林之子
 
         private IEnumerator UpdatePassiveAuraRoutine()
         {
@@ -695,7 +1188,7 @@ namespace CHANG
                 }
             }
         }
-
+        #endregion
 
         private bool IsBuffableTower(Tower tower)
         {
@@ -741,14 +1234,48 @@ namespace CHANG
             if (data == null)
                 return;
 
+            // 被動光環範圍
             Gizmos.color = Color.green;
 
             Gizmos.DrawWireSphere(
                 transform.position,
                 data.passive.auraRadius
             );
-        }
-        #endregion
-    }
 
+            // 近戰攻擊範圍
+            if (data.attackType == HeroAttackType.Melee)
+            {
+                Vector3 hitCenter =
+                    transform.position +
+                    transform.forward * data.meleeHitOffset;
+
+                Gizmos.color = Color.red;
+
+                Gizmos.DrawWireSphere(
+                    hitCenter,
+                    data.meleeHitRadius
+                );
+            }
+
+        }
+        private IEnumerator CheckAnimatorAfterAttack()
+        {
+            yield return null;
+
+            AnimatorStateInfo state =
+                animator.GetCurrentAnimatorStateInfo(0);
+
+            Debug.Log(
+                $"{data.heroName} 動畫狀態：" +
+                $"短名稱Hash={state.shortNameHash} | " +
+                $"完整名稱Hash={state.fullPathHash} | " +
+                $"轉場中={animator.IsInTransition(0)} | " +
+                $"Layer權重={animator.GetLayerWeight(0)}",
+                animator
+            );
+        }
+
+
+
+    }
 }

@@ -519,6 +519,7 @@ GameObject:
   - component: {fileID: 8633975208077388638}
   - component: {fileID: 4469096554825698028}
   - component: {fileID: 9197320906929571871}
+  - component: {fileID: -8229433707518158955}
   m_Layer: 7
   m_Name: "\u7070\u8718\u86DB"
   m_TagString: "\u6575\u4EBA"
@@ -625,6 +626,18 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.5
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-8229433707518158955
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8187015543198388644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9ece76104b597a47befa4e03417738b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.EnemyBuffAura
 --- !u!1 &8187015543198388646
 GameObject:
   m_ObjectHideFlags: 0

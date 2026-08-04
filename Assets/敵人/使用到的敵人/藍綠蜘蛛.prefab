@@ -1225,6 +1225,7 @@ GameObject:
   - component: {fileID: -7979495105033778286}
   - component: {fileID: -7088038236494024374}
   - component: {fileID: 6321515047444937703}
+  - component: {fileID: 867792125692484532}
   m_Layer: 7
   m_Name: "\u85CD\u7DA0\u8718\u86DB"
   m_TagString: "\u6575\u4EBA"
@@ -1331,3 +1332,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.Enemy
   data: {fileID: 11400000, guid: 0722bac6489804d498142bb0668fa8ba, type: 2}
+--- !u!114 &867792125692484532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7978624207812556279}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9ece76104b597a47befa4e03417738b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.EnemyBuffAura

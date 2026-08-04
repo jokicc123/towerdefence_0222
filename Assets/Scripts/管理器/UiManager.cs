@@ -21,6 +21,7 @@ namespace CHANG
         // activeHero：場上真正負責施放技能的英雄
         private Hero activeHero;
 
+      
         #region 一般 UI
 
         [Header("一般 UI")]
@@ -29,6 +30,8 @@ namespace CHANG
         [SerializeField] private TMP_Text waveText;
         [SerializeField] private CanvasGroup gameOverUI;
         [SerializeField] private CanvasGroup winUI;
+        [SerializeField] private TMP_Text winCrystalText;
+        [SerializeField] private TMP_Text loseCrystalText;
 
         #endregion
 
@@ -133,6 +136,14 @@ namespace CHANG
 
             if (skill2CooldownImage != null)
                 skill2CooldownImage.fillAmount = 0f;
+
+            if (HeroSelectionManager.Instance != null)
+            {
+                HeroSelectionManager.Instance.OnSelectedHeroChanged +=
+                    RefreshSelectedHeroSkillIcons;
+
+                RefreshSelectedHeroSkillIcons();
+            }
         }
 
         private void Update()
@@ -162,6 +173,11 @@ namespace CHANG
             if (Instance == this)
             {
                 Instance = null;
+            }
+            if (HeroSelectionManager.Instance != null)
+            {
+                HeroSelectionManager.Instance.OnSelectedHeroChanged -=
+                    RefreshSelectedHeroSkillIcons;
             }
         }
 
@@ -200,6 +216,16 @@ namespace CHANG
                     FadeSystem.Fade(gameOverUI, true)
                 );
             }
+            if (loseCrystalText != null)
+            {
+                loseCrystalText.text =
+                    $"獲得 {GameManager.Instance.LoseCrystalReward} 水晶";
+            }
+
+            StopAllCoroutines();
+            StartCoroutine(
+                FadeSystem.Fade(gameOverUI, true)
+            );
         }
 
         private void ShowWin()
@@ -214,6 +240,16 @@ namespace CHANG
                     FadeSystem.Fade(winUI, true)
                 );
             }
+            if (winCrystalText != null)
+            {
+                winCrystalText.text =
+                    $"獲得 {GameManager.Instance.WinCrystalReward} 水晶";
+            }
+
+            StopAllCoroutines();
+            StartCoroutine(
+                FadeSystem.Fade(winUI, true)
+            );
         }
 
         #endregion
@@ -676,6 +712,39 @@ namespace CHANG
 
             if (skill2CooldownImage != null)
                 skill2CooldownImage.fillAmount = 0f;
+        }
+        private void RefreshSelectedHeroSkillIcons()
+        {
+            if (HeroSelectionManager.Instance == null)
+                return;
+
+            HeroData selectedData =
+                HeroSelectionManager.Instance.CurrentHeroData;
+
+            if (selectedData == null)
+                return;
+
+            if (skill1Icon != null)
+            {
+                skill1Icon.sprite = selectedData.skill1.icon;
+                skill1Icon.enabled = selectedData.skill1.icon != null;
+                skill1Icon.color = Color.white;
+            }
+
+            if (skill2Icon != null)
+            {
+                skill2Icon.sprite = selectedData.skill2.icon;
+                skill2Icon.enabled = selectedData.skill2.icon != null;
+                skill2Icon.color = Color.white;
+            }
+
+            Debug.Log(
+                $"技能圖片已切換：" +
+                $"{selectedData.heroName} | " +
+                $"技能1={selectedData.skill1.icon?.name} | " +
+                $"技能2={selectedData.skill2.icon?.name}",
+                this
+            );
         }
 
         #endregion

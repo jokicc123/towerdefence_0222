@@ -30,10 +30,13 @@ namespace CHANG
 
         #region 屬性（全部改成吃等級 + 被動光環倍率）
         public float attackRange => CurrenData.attackRange * rangeMultiplier;
-        public float damage => CurrenData.damage * damageMultiplier;
         public float attackSpeed => CurrenData.attackSpeed * attackSpeedMultiplier;
         public float cost => CurrenData.cost;
         public TowerEffectType EffectType => CurrenData.effectType; // ⭐給英雄被動光環判斷屬性用
+        public float damage =>
+            CurrenData.damage *
+            damageMultiplier *
+            ShopBonus.TowerDamageMultiplier;
         #endregion
 
         private GameObject bulletPrefab => CurrenData.bulletPrefab;
@@ -524,6 +527,16 @@ namespace CHANG
 
             // 回收 70%
             return Mathf.RoundToInt(totalCost * 0.7f);
+        }
+        [ContextMenu("測試塔傷害加成")]
+        private void TestTowerDamageBonus()
+        {
+            Debug.Log(
+                $"塔基礎傷害：{CurrenData.damage}\n" +
+                $"英雄光環倍率：{damageMultiplier}\n" +
+                $"商店倍率：{ShopBonus.TowerDamageMultiplier}\n" +
+                $"最終傷害：{damage}"
+            );
         }
     }
 }

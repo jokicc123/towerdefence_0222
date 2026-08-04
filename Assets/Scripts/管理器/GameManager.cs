@@ -25,7 +25,7 @@ namespace CHANG
         public GameState currentState = GameState.Build;
         [Header("數值")]
         #region  數值
-        public int castleHp = 100;
+        public int castleHp;
         public int gold = 100;
         public int currentWave = 0;
         public int totalWaves = 0;
@@ -41,6 +41,18 @@ namespace CHANG
         [SerializeField] private Button btnBackToMenuWin;
         [SerializeField] private Button btnBackToMenuGameOver;
 
+        [Header("水晶")]
+        // 這裡的水晶數量是遊戲內的初始值，實際的水晶數量應該從 PlayerData 或其他持久化系統中讀取
+        [SerializeField] private int crystal = 100;
+
+        public int Crystal => crystal;
+
+        public event System.Action<int> OnCrystalChanged;
+        [SerializeField] private int winCrystalReward = 100;
+        [SerializeField] private int loseCrystalReward = 25;
+        public int WinCrystalReward => winCrystalReward;
+        public int LoseCrystalReward => loseCrystalReward;
+        private bool crystalRewardGiven;
 
         public bool CanBuildTower()
         {
@@ -49,6 +61,18 @@ namespace CHANG
 
         public void StartGame()
         {
+            crystalRewardGiven = false;
+
+            castleHp =
+               ShopBonus.CastleMaxHP;
+
+            OnHpChanged?.Invoke(castleHp);
+
+            Debug.Log(
+                $"商店城堡等級：" +
+                $"{PlayerPrefs.GetInt(ShopUpgradeType.CastleHP.ToString(), 0)}，" +
+                $"本場城堡生命：{castleHp}"
+            );
             if (currentState != GameState.Build) return;
 
             currentState = GameState.Playing;
@@ -74,7 +98,6 @@ namespace CHANG
         }
         private void Awake()
         {
-            // 單例模式
             if (Instance == null)
             {
                 Instance = this;
@@ -83,7 +106,13 @@ namespace CHANG
             else
             {
                 Destroy(gameObject);
+                return;
             }
+
+            castleHp = ShopBonus.CastleMaxHP;
+            crystalRewardGiven = false;
+
+            Debug.Log($"城堡初始生命：{castleHp}");
         }
         private void Start()
         {
@@ -165,18 +194,32 @@ namespace CHANG
         {
             if (currentState != GameState.Playing) return;
             currentState = GameState.Win;
+            GiveCrystalReward(winCrystalReward);
             Time.timeScale = 0f;   // ⭐ 補上
-            Debug.Log("你贏了!");
+            Debug.Log(
+                $"你贏了，獲得 {winCrystalReward} 水晶，" +
+                $"目前共有 {PlayerData.Crystal} 水晶"
+            );
             Onwin?.Invoke();
         }
 
         public void GameOver()
         {
-            if (currentState != GameState.Playing) return;
+            if (currentState == GameState.GameOver)
+                return;
+
             currentState = GameState.GameOver;
-            Time.timeScale = 0f;   // ⭐ 補上
-            Debug.Log("遊戲結束!");
+
+            GiveCrystalReward(loseCrystalReward);
+
+            Time.timeScale = 0f;
+
             OnGameOver?.Invoke();
+
+            Debug.Log(
+                $"遊戲失敗，獲得 {loseCrystalReward} 水晶，" +
+                $"目前共有 {PlayerData.Crystal} 水晶"
+            );
         }
         public bool IsGameRunning()
         {
@@ -199,7 +242,7 @@ namespace CHANG
         }
         public void ResetGameState()
         {
-            castleHp = 100;
+            castleHp = ShopBonus.CastleMaxHP;
             gold = 100;
             currentWave = 0;
             currentState = GameState.Build;
@@ -209,6 +252,36 @@ namespace CHANG
             OnGoldChanged?.Invoke(gold);
             OnWaveChanged?.Invoke(currentWave);
 
+        }
+        private void GiveCrystalReward(int amount)
+        {
+            PlayerData.Crystal += amount;
+        }
+        public bool SpendCrystal(int amount)
+        {
+            if (amount <= 0)
+                return false;
+
+            if (crystal < amount)
+            {
+                Debug.Log($"水晶不足，目前水晶：{crystal}，需要：{amount}");
+                return false;
+            }
+
+            crystal -= amount;
+            OnCrystalChanged?.Invoke(crystal);
+
+            Debug.Log($"消耗 {amount} 水晶，剩餘 {crystal}");
+            return true;
+        }
+
+        public void AddCrystal(int amount)
+        {
+            if (amount <= 0)
+                return;
+
+            crystal += amount;
+            OnCrystalChanged?.Invoke(crystal);
         }
     }
 }

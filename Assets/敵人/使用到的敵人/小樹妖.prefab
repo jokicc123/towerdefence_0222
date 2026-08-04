@@ -755,6 +755,7 @@ GameObject:
   - component: {fileID: -4303817518208117990}
   - component: {fileID: 3159205361995680133}
   - component: {fileID: 8398109684679131816}
+  - component: {fileID: -3913266253886959029}
   m_Layer: 7
   m_Name: "\u5C0F\u6A39\u5996"
   m_TagString: Untagged
@@ -867,6 +868,18 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0.5, z: 0}
+--- !u!114 &-3913266253886959029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3204263856825333624}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9ece76104b597a47befa4e03417738b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CHANG.EnemyBuffAura
 --- !u!1 &3438633942543393487
 GameObject:
   m_ObjectHideFlags: 0

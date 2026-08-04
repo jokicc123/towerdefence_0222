@@ -141,7 +141,15 @@ namespace CHANG
             {
                 Debug.LogWarning("英雄預覽物件找不到 Hero 腳本");
             }
-
+            foreach (Animator previewAnimator in
+             previewInstance.GetComponentsInChildren<Animator>(true))
+            {
+                previewAnimator.SetBool("Jump", false);
+                previewAnimator.ResetTrigger("Attack");
+                previewAnimator.Play("Idle", 0, 0f);
+                previewAnimator.Update(0f);
+                previewAnimator.speed = 0f;
+            }
             previewRenderer =
                 previewInstance.GetComponentInChildren<MeshRenderer>();
 
@@ -309,38 +317,80 @@ namespace CHANG
             CancelSelection();
         }
 
-        
+
 
         // =========================================
         // 嘗試放置英雄
         // =========================================
         private void TryPlaceHero()
         {
-            // ⭐ 修正3：補上跟TryPlaceTower()一致的閘門檢查
-            if (!GameManager.Instance.CanBuildTower()) return;
-            if (previewInstance == null || selectedHeroData == null)
+            if (!placingHero)
                 return;
 
-            Vector3 pos = previewInstance.transform.position;
+            if (selectedHeroData == null)
+                return;
 
-            // ⭐ 修正1：跟預覽用同一個CanBuild + heroFootprint，不再用獨立的CanBuildHero
-            if (!CanBuild(pos, heroFootprint))
+            if (previewInstance == null)
+                return;
+
+            Vector3 placePosition =
+                previewInstance.transform.position;
+
+            if (!CanBuildHero(placePosition))
             {
-                Debug.Log("英雄不能放這裡");
+                Debug.Log("這裡不能放置英雄");
                 return;
             }
 
-            bool success =
+            bool purchased =
                 HeroManager.Instance.TryPurchaseHero(
                     selectedHeroData,
-                    pos
+                    placePosition
                 );
 
-            if (success)
+            if (!purchased)
             {
-                Debug.Log($"成功放置英雄 {selectedHeroData.heroName}");
-                CancelSelection();
+                Debug.Log("英雄購買或生成失敗");
+                return;
             }
+
+            // 正式英雄由 HeroManager 重新 Instantiate
+            // 預覽物件直接刪除
+            CancelSelection();
+        }
+        private bool CanBuildHero(Vector3 position)
+        {
+            Vector3 halfExtents =
+                new Vector3(0.5f, 1f, 0.5f);
+
+            Collider[] hits = Physics.OverlapBox(
+                position,
+                halfExtents,
+                Quaternion.identity,
+                buildCheckLayers,
+                QueryTriggerInteraction.Collide
+            );
+
+            foreach (Collider hit in hits)
+            {
+                if (hit == null)
+                    continue;
+
+                // 地面不算阻擋物
+                if (((1 << hit.gameObject.layer) & groundLayer.value) != 0)
+                    continue;
+
+                // 道路、環境、其他塔或英雄禁止放置
+                if (hit.CompareTag("道路") ||
+                    hit.CompareTag("環境裝飾") ||
+                    hit.GetComponentInParent<Tower>() != null ||
+                    hit.GetComponentInParent<Hero>() != null)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         // =========================================
