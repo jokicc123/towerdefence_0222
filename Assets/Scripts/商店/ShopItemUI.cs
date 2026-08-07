@@ -4,19 +4,52 @@ using UnityEngine.UI;
 
 namespace CHANG
 {
+    /// <summary>
+    /// 商店升級項目 UI。
+    /// 顯示目前等級、升級花費與升級效果，
+    /// 並負責處理升級按鈕。
+    /// </summary>
     public class ShopItemUI : MonoBehaviour
     {
+        #region Inspector 設定
+
         [Header("商品資料")]
-        [SerializeField] private ShopUpgradeData data;
+        [SerializeField]
+        private ShopUpgradeData data;
 
         [Header("UI")]
-        [SerializeField] private TMP_Text levelText;
-        [SerializeField] private TMP_Text crystalCostsText;
-        [SerializeField] private TMP_Text valueText;
-        [SerializeField] private Button upgradeButton;
-        
+        [SerializeField]
+        private TMP_Text levelText;
+
+        [SerializeField]
+        private TMP_Text crystalCostsText;
+
+        [SerializeField]
+        private TMP_Text valueText;
+
+        [SerializeField]
+        private Button upgradeButton;
+
+        #endregion
+
+        #region Unity 生命週期
 
         private void Start()
+        {
+            RegisterEvents();
+            Refresh();
+        }
+
+        private void OnDestroy()
+        {
+            UnregisterEvents();
+        }
+
+        #endregion
+
+        #region 事件註冊
+
+        private void RegisterEvents()
         {
             if (upgradeButton != null)
             {
@@ -24,14 +57,9 @@ namespace CHANG
                     OnClickUpgrade
                 );
             }
-            
-           
-
-            Refresh();
         }
 
-     
-        private void OnDestroy()
+        private void UnregisterEvents()
         {
             if (upgradeButton != null)
             {
@@ -41,6 +69,10 @@ namespace CHANG
             }
         }
 
+        #endregion
+
+        #region 按鈕事件
+
         private void OnClickUpgrade()
         {
             if (data == null)
@@ -48,7 +80,6 @@ namespace CHANG
                 Debug.LogWarning(
                     $"{name} 沒有設定 ShopUpgradeData"
                 );
-
                 return;
             }
 
@@ -57,7 +88,6 @@ namespace CHANG
                 Debug.LogError(
                     "場景中找不到 ShopManager"
                 );
-
                 return;
             }
 
@@ -66,6 +96,10 @@ namespace CHANG
                 Refresh();
             }
         }
+
+        #endregion
+
+        #region UI 更新
 
         public void Refresh()
         {
@@ -76,91 +110,127 @@ namespace CHANG
             }
 
             int level =
-                ShopManager.Instance.GetLevel(data.type);
+                ShopManager.Instance.GetLevel(
+                    data.type
+                );
 
-            if (levelText != null)
-            {
-                levelText.text = $"Lv.{level}";
-            }
+            UpdateLevel(level);
 
-            // 已滿級
             if (level >= data.maxLevel)
             {
-                if (crystalCostsText != null)
-                {
-                    crystalCostsText.text = "MAX";
-                }
-
-                if (valueText != null &&
-                    data.values != null &&
-                    data.values.Length > 0)
-                {
-                    int maxIndex = Mathf.Clamp(
-                        level,
-                        0,
-                        data.values.Length - 1
-                    );
-
-                    valueText.text =
-                        FormatValue(data.values[maxIndex]);
-                }
-
-                if (upgradeButton != null)
-                {
-                    upgradeButton.interactable = false;
-                }
-
+                UpdateMaxLevel(level);
                 return;
             }
 
-            // 顯示升級價格
+            UpdateCost(level);
+            UpdateValue(level);
+            UpdateButton(level);
+        }
+
+        private void UpdateLevel(int level)
+        {
+            if (levelText != null)
+            {
+                levelText.text =
+                    $"Lv.{level}";
+            }
+        }
+
+        private void UpdateMaxLevel(int level)
+        {
             if (crystalCostsText != null)
             {
-                if (data.crystalCosts != null &&
-                    level < data.crystalCosts.Length)
-                {
-                    crystalCostsText.text =
-                        $"{data.crystalCosts[level]} 水晶";
-                }
-                else
-                {
-                    crystalCostsText.text = "價格未設定";
-                }
+                crystalCostsText.text = "MAX";
             }
 
-            // 顯示目前效果 → 下一級效果
             if (valueText != null &&
                 data.values != null &&
                 data.values.Length > 0)
             {
-                int currentIndex = Mathf.Clamp(
+                int index = Mathf.Clamp(
                     level,
                     0,
                     data.values.Length - 1
                 );
 
-                int nextIndex = Mathf.Clamp(
+                valueText.text =
+                    FormatValue(
+                        data.values[index]
+                    );
+            }
+
+            if (upgradeButton != null)
+            {
+                upgradeButton.interactable = false;
+            }
+        }
+
+        private void UpdateCost(int level)
+        {
+            if (crystalCostsText == null)
+                return;
+
+            if (data.crystalCosts != null &&
+                level < data.crystalCosts.Length)
+            {
+                crystalCostsText.text =
+                    $"{data.crystalCosts[level]} 水晶";
+            }
+            else
+            {
+                crystalCostsText.text =
+                    "價格未設定";
+            }
+        }
+
+        private void UpdateValue(int level)
+        {
+            if (valueText == null ||
+                data.values == null ||
+                data.values.Length == 0)
+            {
+                return;
+            }
+
+            int current =
+                Mathf.Clamp(
+                    level,
+                    0,
+                    data.values.Length - 1
+                );
+
+            int next =
+                Mathf.Clamp(
                     level + 1,
                     0,
                     data.values.Length - 1
                 );
 
-                valueText.text =
-                    $"{FormatValue(data.values[currentIndex])}" +
-                    $" → {FormatValue(data.values[nextIndex])}";
-            }
-
-            if (upgradeButton != null)
-            {
-                bool hasCost =
-                    data.crystalCosts != null &&
-                    level < data.crystalCosts.Length;
-
-                upgradeButton.interactable = hasCost;
-            }
+            valueText.text =
+                $"{FormatValue(data.values[current])}" +
+                $" → " +
+                $"{FormatValue(data.values[next])}";
         }
 
-        private string FormatValue(float value)
+        private void UpdateButton(int level)
+        {
+            if (upgradeButton == null)
+                return;
+
+            bool hasCost =
+                data.crystalCosts != null &&
+                level < data.crystalCosts.Length;
+
+            upgradeButton.interactable =
+                hasCost;
+        }
+
+        #endregion
+
+        #region 顯示格式
+
+        private string FormatValue(
+            float value)
         {
             switch (data.type)
             {
@@ -169,11 +239,14 @@ namespace CHANG
 
                 case ShopUpgradeType.TowerDamage:
                 case ShopUpgradeType.HeroDamage:
-                    return $"+{(value - 1f) * 100f:0}%";
+                    return
+                        $"+{(value - 1f) * 100f:0}%";
 
                 default:
                     return value.ToString("0.##");
             }
         }
+
+        #endregion
     }
 }

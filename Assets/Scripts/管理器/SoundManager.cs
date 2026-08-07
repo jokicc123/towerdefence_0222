@@ -4,10 +4,13 @@ using UnityEngine.Audio;
 namespace CHANG
 {
     /// <summary>
-    /// 音效管理器
+    /// 音效管理器。
+    /// 負責 AudioMixer 音量設定與音效播放。
     /// </summary>
     public class SoundManager : MonoBehaviour
     {
+        #region Singleton
+
         private static SoundManager instance;
 
         public static SoundManager Instance
@@ -24,11 +27,21 @@ namespace CHANG
             }
         }
 
+        #endregion
+
+        #region Inspector 設定
+
         [Header("Audio Mixer")]
-        [SerializeField] private AudioMixer audioMixer;
+        [SerializeField]
+        private AudioMixer audioMixer;
 
         [Header("音效播放來源")]
-        [SerializeField] private AudioSource sfxSource;
+        [SerializeField]
+        private AudioSource sfxSource;
+
+        #endregion
+
+        #region 常數
 
         private const string VolumeMasterParameter =
             "VolumeMaster";
@@ -38,6 +51,10 @@ namespace CHANG
 
         private const string VolumeSFXParameter =
             "VolumeSFX";
+
+        #endregion
+
+        #region 公開屬性
 
         public float VolumeMaster =>
             PlayerPrefs.GetFloat(
@@ -57,9 +74,14 @@ namespace CHANG
                 0f
             );
 
+        #endregion
+
+        #region Unity 生命週期
+
         private void Awake()
         {
-            if (instance != null && instance != this)
+            if (instance != null &&
+                instance != this)
             {
                 Destroy(gameObject);
                 return;
@@ -67,6 +89,23 @@ namespace CHANG
 
             instance = this;
 
+            CacheAudioSource();
+        }
+
+        private void OnDestroy()
+        {
+            if (instance == this)
+            {
+                instance = null;
+            }
+        }
+
+        #endregion
+
+        #region 初始化
+
+        private void CacheAudioSource()
+        {
             if (sfxSource == null)
             {
                 sfxSource =
@@ -82,68 +121,84 @@ namespace CHANG
             }
         }
 
-        public void UpdateMasterVolume(float volume)
-        {
-            if (audioMixer == null)
-                return;
+        #endregion
 
-            audioMixer.SetFloat(
+        #region 音量設定
+
+        public void UpdateMasterVolume(
+            float volume)
+        {
+            SetMixerVolume(
                 VolumeMasterParameter,
                 volume
             );
-
-            PlayerPrefs.SetFloat(
-                VolumeMasterParameter,
-                volume
-            );
-
-            PlayerPrefs.Save();
         }
 
-        public void UpdateBGMVolume(float volume)
+        public void UpdateBGMVolume(
+            float volume)
         {
-            if (audioMixer == null)
-                return;
-
-            audioMixer.SetFloat(
+            SetMixerVolume(
                 VolumeBGMParameter,
                 volume
             );
-
-            PlayerPrefs.SetFloat(
-                VolumeBGMParameter,
-                volume
-            );
-
-            PlayerPrefs.Save();
         }
 
-        public void UpdateSFXVolume(float volume)
+        public void UpdateSFXVolume(
+            float volume)
         {
-            if (audioMixer == null)
-                return;
-
-            bool success = audioMixer.SetFloat(
+            SetMixerVolume(
                 VolumeSFXParameter,
                 volume
             );
+        }
+
+        private void SetMixerVolume(
+            string parameterName,
+            float volume)
+        {
+            if (audioMixer == null)
+                return;
+
+            bool success =
+                audioMixer.SetFloat(
+                    parameterName,
+                    volume
+                );
 
             if (!success)
             {
                 Debug.LogError(
-                    $"AudioMixer 找不到參數：{VolumeSFXParameter}"
+                    $"AudioMixer 找不到參數：{parameterName}",
+                    this
                 );
+
+                return;
             }
 
             PlayerPrefs.SetFloat(
-                VolumeSFXParameter,
+                parameterName,
                 volume
             );
 
             PlayerPrefs.Save();
         }
 
-        public void PlaySFX(AudioClip clip)
+        #endregion
+
+        #region 音效播放
+
+        public void PlaySFX(
+            AudioClip clip)
+        {
+            PlaySFX(
+                clip,
+                1f
+            );
+        }
+
+        public void PlaySFX(
+            AudioClip clip,
+            float volumeScale)
         {
             if (clip == null)
                 return;
@@ -151,26 +206,19 @@ namespace CHANG
             if (sfxSource == null)
             {
                 Debug.LogWarning(
-                    "SoundManager 沒有 AudioSource"
+                    "SoundManager 沒有 AudioSource",
+                    this
                 );
 
                 return;
             }
-
-            sfxSource.PlayOneShot(clip);
-        }
-
-        public void PlaySFX(
-            AudioClip clip,
-            float volumeScale)
-        {
-            if (clip == null || sfxSource == null)
-                return;
 
             sfxSource.PlayOneShot(
                 clip,
                 Mathf.Clamp01(volumeScale)
             );
         }
+
+        #endregion
     }
 }

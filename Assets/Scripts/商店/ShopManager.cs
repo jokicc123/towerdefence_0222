@@ -1,106 +1,89 @@
 ﻿using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
 namespace CHANG
 {
+    /// <summary>
+    /// 商店管理器。
+    /// 負責永久升級、水晶顯示與商店場景操作。
+    /// </summary>
     public class ShopManager : MonoBehaviour
     {
-        public static ShopManager Instance;
+        #region Singleton
 
-        [SerializeField] private Button shopExitButton;
-        [SerializeField] private TMP_Text crystalText;
-        [SerializeField] private Image crystalIcon;   // 可選，如果需要控制圖示
+        public static ShopManager Instance
+        {
+            get;
+            private set;
+        }
+
+        #endregion
+
+        #region Inspector 設定
+
+        [Header("商店 UI")]
+        [SerializeField]
+        private Button shopExitButton;
+
+        [SerializeField]
+        private TMP_Text crystalText;
+
+        [SerializeField]
+        private Image crystalIcon;
+
+        #endregion
+
+        #region Unity 生命週期
 
         private void Awake()
         {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-            else
+            if (Instance != null &&
+                Instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
 
-            // 測試用：直接設定 1000 水晶
-            PlayerData.Crystal = 1000;
+            Instance = this;
 
+            RegisterEvents();
+            RefreshCrystalUI();
+
+#if UNITY_EDITOR
             Debug.Log(
-                $"目前水晶：{PlayerData.Crystal}"
+                $"目前水晶：{PlayerData.Crystal}",
+                this
             );
+#endif
+        }
 
+        private void OnDestroy()
+        {
+            UnregisterEvents();
+
+            if (Instance == this)
+            {
+                Instance = null;
+            }
+        }
+
+        #endregion
+
+        #region 事件註冊
+
+        private void RegisterEvents()
+        {
             if (shopExitButton != null)
             {
                 shopExitButton.onClick.AddListener(
                     OnClickShopExit
                 );
             }
-            RefreshCrystalUI();
         }
 
-        // 取得目前升級等級
-        public int GetLevel(ShopUpgradeType type)
-        {
-            return PlayerPrefs.GetInt(type.ToString(), 0);
-        }
-
-        // 升級
-        public bool Upgrade(ShopUpgradeData data)
-        {
-            if (data == null)
-            {
-                Debug.LogError("ShopUpgradeData 沒有設定");
-                return false;
-            }
-
-            int level = GetLevel(data.type);
-
-            if (level >= data.maxLevel)
-            {
-                Debug.Log("已達最高等級");
-                return false;
-            }
-
-            if (data.crystalCosts == null ||
-                level >= data.crystalCosts.Length)
-            {
-                Debug.LogError(
-                    $"{data.upgradeName} 的 Crystal Costs 數量不足"
-                );
-
-                return false;
-            }
-
-            int cost = data.crystalCosts[level];
-
-            if (!PlayerData.SpendCrystal(cost))
-            {
-                Debug.Log("水晶不足");
-                return false;
-            }
-
-            PlayerPrefs.SetInt(
-                data.type.ToString(),
-                level + 1
-            );
-
-            PlayerPrefs.Save();
-            Debug.Log(
-            $"{data.type} = {PlayerPrefs.GetInt(data.type.ToString())}"
-             );
-            RefreshCrystalUI();
-
-            Debug.Log(
-                $"{data.upgradeName} 升到 Lv.{level + 1}"
-            );
-
-            return true;
-        }
-
-       
-        private void OnDestroy()
+        private void UnregisterEvents()
         {
             if (shopExitButton != null)
             {
@@ -109,27 +92,100 @@ namespace CHANG
                 );
             }
         }
-        public void RefreshCrystalUI()
+
+        #endregion
+
+        #region 商店升級
+
+        public bool Upgrade(
+            ShopUpgradeData data)
         {
-            if (crystalText != null)
+            if (data == null)
             {
-                crystalText.text = $" {PlayerData.Crystal}";
+                Debug.LogError(
+                    "ShopUpgradeData 沒有設定",
+                    this
+                );
+
+                return false;
             }
-        }
-        public void OnClickShopExit()
-        {
-            SceneManager.LoadScene("主選單");
-        }
-        [ContextMenu("重置所有商店資料")]
-        public void ResetShopData()
-        {
-            PlayerPrefs.DeleteAll();
+
+            int level =
+                GetLevel(data.type);
+
+            if (level >= data.maxLevel)
+            {
+#if UNITY_EDITOR
+                Debug.Log(
+                    $"{data.upgradeName} 已達最高等級",
+                    this
+                );
+#endif
+                return false;
+            }
+
+            if (data.crystalCosts == null ||
+                level >= data.crystalCosts.Length)
+            {
+                Debug.LogError(
+                    $"{data.upgradeName} 的 Crystal Costs 數量不足",
+                    this
+                );
+
+                return false;
+            }
+
+            int cost =
+                data.crystalCosts[level];
+
+            if (!PlayerData.SpendCrystal(cost))
+            {
+#if UNITY_EDITOR
+                Debug.Log(
+                    "水晶不足",
+                    this
+                );
+#endif
+                return false;
+            }
+
+            int newLevel =
+                level + 1;
+
+            PlayerPrefs.SetInt(
+                data.type.ToString(),
+                newLevel
+            );
+
             PlayerPrefs.Save();
 
-            Debug.Log("已重置所有 PlayerPrefs");
-        }
-        public float GetCurrentValue(ShopUpgradeData data)
+            RefreshCrystalUI();
 
+#if UNITY_EDITOR
+            Debug.Log(
+                $"{data.upgradeName} 升到 Lv.{newLevel}",
+                this
+            );
+#endif
+
+            return true;
+        }
+
+        #endregion
+
+        #region 商店資料查詢
+
+        public int GetLevel(
+            ShopUpgradeType type)
+        {
+            return PlayerPrefs.GetInt(
+                type.ToString(),
+                0
+            );
+        }
+
+        public float GetCurrentValue(
+            ShopUpgradeData data)
         {
             if (data == null ||
                 data.values == null ||
@@ -138,18 +194,80 @@ namespace CHANG
                 return 1f;
             }
 
-            int level = GetLevel(data.type);
+            int level =
+                GetLevel(data.type);
 
-            int index = Mathf.Clamp(
-                level,
-                0,
-                data.values.Length - 1
-            );
+            int index =
+                Mathf.Clamp(
+                    level,
+                    0,
+                    data.values.Length - 1
+                );
 
             return data.values[index];
         }
-      
-        
 
+        #endregion
+
+        #region 水晶 UI
+
+        public void RefreshCrystalUI()
+        {
+            if (crystalText != null)
+            {
+                crystalText.text =
+                    $"{PlayerData.Crystal}";
+            }
+        }
+
+        #endregion
+
+        #region 場景切換
+
+        private void OnClickShopExit()
+        {
+            if (LoadingManager.Instance != null)
+            {
+                LoadingManager.Instance.StartLoad(
+                    "主選單"
+                );
+
+                return;
+            }
+
+            SceneManager.LoadScene(
+                "主選單"
+            );
+        }
+
+        #endregion
+
+        #region 測試工具
+
+        [ContextMenu("重置商店升級資料")]
+        private void ResetShopData()
+        {
+            foreach (ShopUpgradeType type in
+                     System.Enum.GetValues(
+                         typeof(ShopUpgradeType)))
+            {
+                PlayerPrefs.DeleteKey(
+                    type.ToString()
+                );
+            }
+
+            PlayerPrefs.Save();
+
+            RefreshCrystalUI();
+
+#if UNITY_EDITOR
+            Debug.Log(
+                "已重置所有商店升級資料",
+                this
+            );
+#endif
+        }
+
+        #endregion
     }
 }

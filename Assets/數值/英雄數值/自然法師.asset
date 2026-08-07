@@ -80,7 +80,7 @@ MonoBehaviour:
   skill1:
     skillName: "\u834A\u68D8\u8513\u5EF6"
     description: "\u904B\u7528\u81EA\u7136\u7684\u529B\u91CF\u7981\u932E\u6575\u4EBA"
-    skillType: 0
+    skillType: 1
     unlockLevel: 2
     icon: {fileID: 21300000, guid: e0ae04ccff276f247921ae861020ee13, type: 3}
     vfxPrefab: {fileID: 4772634663576830964, guid: e1385af346f4e624eb313ec1ea4fcd7e, type: 3}
@@ -161,7 +161,7 @@ MonoBehaviour:
   skill2:
     skillName: "\u6A39\u4EBA\u964D\u81E8"
     description: "\u53EC\u559A\u5B88\u885B\u68EE\u6797\u7684\u6A39\u4EBA\u4F86\u653B\u64CA\u6575\u4EBA"
-    skillType: 0
+    skillType: 2
     unlockLevel: 5
     icon: {fileID: 21300000, guid: ce1d63bb66b9aff4988c19784b29a290, type: 3}
     vfxPrefab: {fileID: 5861408975432239828, guid: f0ed1f339b24aa2468354fcd9c37b9a0, type: 3}

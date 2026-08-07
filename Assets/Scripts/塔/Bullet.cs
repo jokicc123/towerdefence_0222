@@ -3,85 +3,152 @@ using static CHANG.TowerData;
 
 namespace CHANG
 {
+    /// <summary>
+    /// 防禦塔子彈。
+    /// 負責追蹤目標、造成單體或範圍傷害，
+    /// 並套用燃燒或中毒等狀態效果。
+    /// </summary>
     public class Bullet : MonoBehaviour
     {
+        #region Inspector 設定
+
         [Header("子彈設定")]
         [SerializeField] private float speed = 15f;
         [SerializeField] private float reachDistance = 0.2f;
-        [SerializeField] private GameObject hitEffectPrefab; // 撞擊/爆炸特效
+        [SerializeField] private GameObject hitEffectPrefab;
         [SerializeField] private float slowPercent = 0.5f;
 
-        [Header(" 物理優化")]
-        [SerializeField] private LayerMask enemyLayer;      // 只偵測怪物的圖層
+        [Header("物理優化")]
+        [SerializeField] private LayerMask enemyLayer;
+
+        #endregion
+
+        #region 執行期間資料
 
         private Enemy target;
+
         private float damage;
         private TowerEffectType effectType;
         private float effectDuration;
         private float effectDps;
+
         private float blastRadius;
         private bool isAoE;
 
-        private float sqrReachDistance; // 快取判定距離的平方
+        private float sqrReachDistance;
 
-        public void SetTarget(Enemy newTarget, float dmg, TowerEffectType type, float duration, float dps, float blastRadius)
-        {
-            target = newTarget;
-            damage = dmg;
-            effectType = type;
-            effectDuration = duration;
-            effectDps = dps;
-            this.blastRadius = blastRadius;
-            isAoE = blastRadius > 0f;
+        #endregion
 
-            //  在初始化時先算好平方，避免 Update 裡一直做開根號運算
-            sqrReachDistance = reachDistance * reachDistance;
-        }
+        #region Unity 生命週期
 
         private void Update()
         {
-            if (target == null)
+            if (target == null ||
+                target.IsDead)
             {
                 Destroy(gameObject);
                 return;
             }
 
-            // 用 sqrMagnitude 代替 Vector3.Distance
-            Vector3 offset = target.transform.position - transform.position;
-            if (offset.sqrMagnitude <= sqrReachDistance)
+            MoveToTarget();
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            if (blastRadius <= 0f)
+                return;
+
+            Gizmos.color =
+                Color.red;
+
+            Gizmos.DrawWireSphere(
+                transform.position,
+                blastRadius
+            );
+        }
+
+        #endregion
+
+        #region 目標設定
+
+        public void SetTarget(
+            Enemy newTarget,
+            float damage,
+            TowerEffectType effectType,
+            float effectDuration,
+            float effectDps,
+            float blastRadius)
+        {
+            target = newTarget;
+
+            this.damage =
+                Mathf.Max(0f, damage);
+
+            this.effectType =
+                effectType;
+
+            this.effectDuration =
+                Mathf.Max(0f, effectDuration);
+
+            this.effectDps =
+                Mathf.Max(0f, effectDps);
+
+            this.blastRadius =
+                Mathf.Max(0f, blastRadius);
+
+            isAoE =
+                this.blastRadius > 0f;
+
+            sqrReachDistance =
+                reachDistance *
+                reachDistance;
+        }
+
+        #endregion
+
+        #region 移動系統
+
+        private void MoveToTarget()
+        {
+            Vector3 offset =
+                target.transform.position -
+                transform.position;
+
+            if (offset.sqrMagnitude <=
+                sqrReachDistance)
             {
                 HitTarget();
                 return;
             }
 
-            Vector3 dir = offset.normalized;
-            transform.position += dir * speed * Time.deltaTime;
-            transform.LookAt(target.transform);
+            Vector3 direction =
+                offset.normalized;
+
+            transform.position +=
+                direction *
+                speed *
+                Time.deltaTime;
+
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                transform.rotation =
+                    Quaternion.LookRotation(
+                        direction
+                    );
+            }
         }
+
+        #endregion
+
+        #region 命中處理
 
         private void HitTarget()
         {
-            // 1.生成擊中/爆炸特效
-            if (hitEffectPrefab != null)
-            {
-                GameObject effect = Instantiate(hitEffectPrefab, transform.position, Quaternion.identity);
-                Destroy(effect, 2f); // 2秒後自動銷毀特效，防止 Hierarchy 爆炸
-            }
+            SpawnHitEffect();
 
-            // 2. 處理傷害邏輯
             if (isAoE)
             {
-                // 加入 enemyLayer，物理引擎直接過濾掉地面、雜物，只抓小怪
-                Collider[] hits = Physics.OverlapSphere(transform.position, blastRadius, enemyLayer);
-
-                foreach (Collider hit in hits)
-                {
-                    Enemy enemy = hit.GetComponent<Enemy>();
-                    if (enemy != null)
-                    {
-                        DamageEnemy(enemy);
-                    }
-                }
+                DamageArea();
             }
             else
             {
@@ -91,31 +158,106 @@ namespace CHANG
             Destroy(gameObject);
         }
 
-        private void DamageEnemy(Enemy enemy)
+        private void SpawnHitEffect()
         {
-            enemy.TakeDamage(damage);
-            Debug.Log($"💥 打到敵人：{enemy.name}");
+            if (hitEffectPrefab == null)
+                return;
 
+            GameObject effect =
+                Instantiate(
+                    hitEffectPrefab,
+                    transform.position,
+                    Quaternion.identity
+                );
+
+            Destroy(
+                effect,
+                2f
+            );
+        }
+
+        private void DamageArea()
+        {
+            Collider[] hits =
+                Physics.OverlapSphere(
+                    transform.position,
+                    blastRadius,
+                    enemyLayer,
+                    QueryTriggerInteraction.Collide
+                );
+
+            foreach (Collider hit in hits)
+            {
+                Enemy enemy =
+                    hit.GetComponentInParent<Enemy>();
+
+                if (enemy == null ||
+                    enemy.IsDead)
+                {
+                    continue;
+                }
+
+                DamageEnemy(enemy);
+            }
+        }
+
+        #endregion
+
+        #region 傷害與狀態效果
+
+        private void DamageEnemy(
+            Enemy enemy)
+        {
+            if (enemy == null ||
+                enemy.IsDead)
+            {
+                return;
+            }
+
+            enemy.TakeDamage(
+                damage
+            );
+
+            ApplyStatusEffect(
+                enemy
+            );
+
+#if UNITY_EDITOR
+            Debug.Log(
+                $"子彈命中：{enemy.name}，傷害：{damage}",
+                enemy
+            );
+#endif
+        }
+
+        private void ApplyStatusEffect(
+            Enemy enemy)
+        {
             switch (effectType)
             {
                 case TowerEffectType.Burn:
-                    enemy.AddEffect(new BurnEffect(enemy, effectDuration, effectDps));
+                    enemy.AddEffect(
+                        new BurnEffect(
+                            enemy,
+                            effectDuration,
+                            effectDps
+                        )
+                    );
                     break;
 
                 case TowerEffectType.Poison:
-                    enemy.AddEffect(new PoisonEffect(enemy, effectDuration, effectDps, slowPercent));
+                    enemy.AddEffect(
+                        new PoisonEffect(
+                            enemy,
+                            effectDuration,
+                            effectDps,
+                            slowPercent
+                        )
+                    );
                     break;
             }
         }
 
-        //在 Scene 視窗畫出爆炸範圍，方便你調數值
-        private void OnDrawGizmosSelected()
-        {
-            if (blastRadius > 0)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.DrawWireSphere(transform.position, blastRadius);
-            }
-        }
+        #endregion
     }
 }

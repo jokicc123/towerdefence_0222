@@ -4,17 +4,40 @@ using static CHANG.EnemyData;
 
 namespace CHANG
 {
+    /// <summary>
+    /// 敵人光環系統。
+    /// 定期搜尋範圍內的敵人，套用或移除移動速度、傷害或防禦 Buff。
+    /// </summary>
     [RequireComponent(typeof(Enemy))]
     public class EnemyBuffAura : MonoBehaviour
     {
+        #region 執行期間資料
+
         private Enemy owner;
-        private EnemyData Data =>
-            owner != null ? owner.Data : null;
 
         private readonly HashSet<Enemy> buffedEnemies =
-            new HashSet<Enemy>();
+            new();
+
+        private readonly HashSet<Enemy> enemiesCurrentlyInAura =
+            new();
+
+        private readonly List<Enemy> removeList =
+            new();
 
         private float updateTimer;
+
+        #endregion
+
+        #region 屬性
+
+        private EnemyData Data =>
+            owner != null
+                ? owner.Data
+                : null;
+
+        #endregion
+
+        #region Unity 生命週期
 
         private void Awake()
         {
@@ -44,14 +67,12 @@ namespace CHANG
                 return;
             }
 
-            // 沒有光環能力就關閉腳本
             if (Data.buffType == EnemyBuffType.None)
             {
                 enabled = false;
                 return;
             }
 
-            // 出生後立即檢查一次
             RefreshAura();
         }
 
@@ -73,29 +94,73 @@ namespace CHANG
             RefreshAura();
         }
 
+        private void OnDisable()
+        {
+            RemoveAllBuffs();
+        }
+
+        private void OnDestroy()
+        {
+            RemoveAllBuffs();
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            Enemy enemy =
+                GetComponent<Enemy>();
+
+            if (enemy == null ||
+                enemy.Data == null ||
+                enemy.Data.buffType ==
+                EnemyBuffType.None)
+            {
+                return;
+            }
+
+            Gizmos.color =
+                Color.yellow;
+
+            Gizmos.DrawWireSphere(
+                transform.position,
+                enemy.Data.buffRadius
+            );
+        }
+
+        #endregion
+
+        #region 光環更新
+
         private void RefreshAura()
         {
-            Collider[] hits = Physics.OverlapSphere(
-                transform.position,
-                Data.buffRadius
-            );
+            enemiesCurrentlyInAura.Clear();
+            removeList.Clear();
 
-            HashSet<Enemy> enemiesCurrentlyInAura =
-                new HashSet<Enemy>();
+            Collider[] hits =
+                Physics.OverlapSphere(
+                    transform.position,
+                    Data.buffRadius
+                );
 
             foreach (Collider hit in hits)
             {
                 Enemy enemy =
                     hit.GetComponentInParent<Enemy>();
 
-                if (enemy == null)
+                if (enemy == null ||
+                    enemy.IsDead)
+                {
                     continue;
+                }
 
-                // 預設不強化自己
-                if (!Data.buffSelf && enemy == owner)
+                if (!Data.buffSelf &&
+                    enemy == owner)
+                {
                     continue;
+                }
 
-                enemiesCurrentlyInAura.Add(enemy);
+                enemiesCurrentlyInAura.Add(
+                    enemy
+                );
 
                 if (buffedEnemies.Contains(enemy))
                     continue;
@@ -103,9 +168,6 @@ namespace CHANG
                 ApplyBuff(enemy);
                 buffedEnemies.Add(enemy);
             }
-
-            List<Enemy> removeList =
-                new List<Enemy>();
 
             foreach (Enemy enemy in buffedEnemies)
             {
@@ -115,11 +177,11 @@ namespace CHANG
                     continue;
                 }
 
-                if (!enemiesCurrentlyInAura.Contains(enemy))
-                {
-                    RemoveBuff(enemy);
-                    removeList.Add(enemy);
-                }
+                if (enemiesCurrentlyInAura.Contains(enemy))
+                    continue;
+
+                RemoveBuff(enemy);
+                removeList.Add(enemy);
             }
 
             foreach (Enemy enemy in removeList)
@@ -128,10 +190,18 @@ namespace CHANG
             }
         }
 
-        private void ApplyBuff(Enemy enemy)
+        #endregion
+
+        #region Buff 套用與移除
+
+        private void ApplyBuff(
+            Enemy enemy)
         {
-            if (enemy == null || Data == null)
+            if (enemy == null ||
+                Data == null)
+            {
                 return;
+            }
 
             switch (Data.buffType)
             {
@@ -154,26 +224,25 @@ namespace CHANG
                     break;
             }
 
-            if (Data.buffVFX != null)
-            {
-                Instantiate(
-                    Data.buffVFX,
-                    enemy.transform.position,
-                    Quaternion.identity,
-                    enemy.transform
-                );
-            }
+            SpawnBuffVFX(enemy);
 
+#if UNITY_EDITOR
             Debug.Log(
                 $"{owner.name} 對 {enemy.name} 套用 " +
-                $"{Data.buffType} × {Data.buffMultiplier}"
+                $"{Data.buffType} × {Data.buffMultiplier}",
+                this
             );
+#endif
         }
 
-        private void RemoveBuff(Enemy enemy)
+        private void RemoveBuff(
+            Enemy enemy)
         {
-            if (enemy == null || Data == null)
+            if (enemy == null ||
+                Data == null)
+            {
                 return;
+            }
 
             switch (Data.buffType)
             {
@@ -211,36 +280,32 @@ namespace CHANG
             }
 
             buffedEnemies.Clear();
+            enemiesCurrentlyInAura.Clear();
+            removeList.Clear();
         }
 
-        private void OnDisable()
-        {
-            RemoveAllBuffs();
-        }
+        #endregion
 
-        private void OnDestroy()
-        {
-            RemoveAllBuffs();
-        }
+        #region 特效
 
-        private void OnDrawGizmosSelected()
+        private void SpawnBuffVFX(
+            Enemy enemy)
         {
-            Enemy enemy = GetComponent<Enemy>();
-
-            if (enemy == null ||
-                enemy.Data == null ||
-                enemy.Data.buffType ==
-                EnemyBuffType.None)
+            if (Data == null ||
+                Data.buffVFX == null ||
+                enemy == null)
             {
                 return;
             }
 
-            Gizmos.color = Color.yellow;
-
-            Gizmos.DrawWireSphere(
-                transform.position,
-                enemy.Data.buffRadius
+            Instantiate(
+                Data.buffVFX,
+                enemy.transform.position,
+                Quaternion.identity,
+                enemy.transform
             );
         }
+
+        #endregion
     }
 }

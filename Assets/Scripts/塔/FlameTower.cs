@@ -1,44 +1,110 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace CHANG
 {
+    /// <summary>
+    /// 火焰塔。
+    /// 攻擊時對範圍內所有敵人造成傷害，
+    /// 並在主要目標位置生成火焰特效。
+    /// </summary>
     public class FlameTower : Tower
     {
-        // 覆寫 Fire()
-        public override void Fire(Enemy target)
+        #region 執行期間資料
+
+        private readonly HashSet<Enemy> damagedEnemies =
+            new();
+
+        #endregion
+
+        #region 攻擊系統
+
+        public override void Fire(
+            Enemy target)
         {
-            Debug.Log("Fire() 被呼叫"); // ✅ 確認是否執行
-
-            if (target == null) return;
-
-            Collider[] hits = Physics.OverlapSphere(transform.position, attackRange);
-            Debug.Log("OverlapSphere 偵測到敵人數量: " + hits.Length); // ✅ 確認範圍內敵人
-
-            foreach (var hit in hits)
+            if (target == null ||
+                target.IsDead)
             {
-                if (hit.TryGetComponent(out Enemy enemy))
-                {
-                    Debug.Log("對敵人造成傷害: " + enemy.name); // ✅ 確認有找到 Enemy
-                    enemy.TakeDamage(damage);
-                }
+                return;
             }
-            if (data.levels[currentLevel].bulletPrefab != null)
+
+            damagedEnemies.Clear();
+
+            Collider[] hits =
+                Physics.OverlapSphere(
+                    transform.position,
+                    AttackRange
+                );
+
+            foreach (Collider hit in hits)
             {
-                GameObject effect = Instantiate(
-                data.levels[currentLevel].bulletPrefab,
-                target.transform.position + Vector3.up * 1f,
-                Quaternion.identity,
-                target.transform
+                Enemy enemy =
+                    hit.GetComponentInParent<Enemy>();
+
+                if (enemy == null ||
+                    enemy.IsDead ||
+                    !damagedEnemies.Add(enemy))
+                {
+                    continue;
+                }
+
+                enemy.TakeDamage(
+                    Damage
+                );
+            }
+
+            SpawnAttackEffect(
+                target
             );
-
-                ParticleSystem ps = effect.GetComponentInChildren<ParticleSystem>();
-
-                if (ps != null)
-                {
-                    ps.Play();
-                    Destroy(effect, 2f); // 不要太長，避免堆積
-                }
-            }
         }
+
+        #endregion
+
+        #region 攻擊特效
+
+        private void SpawnAttackEffect(
+            Enemy target)
+        {
+            if (target == null ||
+                Data == null)
+            {
+                return;
+            }
+
+            GameObject effectPrefab =
+                Data.levels[CurrentLevel]
+                    .bulletPrefab;
+
+            if (effectPrefab == null)
+                return;
+
+            Vector3 spawnPosition =
+                target.transform.position +
+                Vector3.up;
+
+            GameObject effect =
+                Instantiate(
+                    effectPrefab,
+                    spawnPosition,
+                    Quaternion.identity,
+                    target.transform
+                );
+
+            ParticleSystem particleSystem =
+                effect.GetComponentInChildren<
+                    ParticleSystem>();
+
+            if (particleSystem != null)
+            {
+                particleSystem.Play();
+            }
+
+            Destroy(
+                effect,
+                2f
+            );
+        }
+
+        #endregion
     }
 }

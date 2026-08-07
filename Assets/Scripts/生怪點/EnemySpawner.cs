@@ -4,98 +4,221 @@ using UnityEngine;
 
 namespace CHANG
 {
-    // ✨ 新增：用來在 Inspector 綁定「傳送門」與「專屬路徑點」的資料結構
+    #region 路線資料結構
+
+    /// <summary>
+    /// 敵人生成路線資料。
+    /// 綁定生成傳送門與專屬 Waypoints。
+    /// </summary>
     [System.Serializable]
     public class PortalRoute
     {
-        public string routeName;       // 路線標籤（例如：陸路、水路）
-        public Transform spawnPortal;  // 該路線的傳送門起點
-        public Transform[] waypoints;  // 該路線所有的 Waypoints 路點
-     
+        public string routeName;
+
+        public Transform spawnPortal;
+
+        public Transform[] waypoints;
     }
 
+    #endregion
+
+
+    /// <summary>
+    /// 管理關卡敵人波數、生成與多路線設定。
+    /// </summary>
     public class EnemySpawner : MonoBehaviour
     {
-        public List<Wave> waves;
+        #region Inspector 設定
+
+        [Header("波數設定")]
+        [SerializeField]
+        private List<Wave> waves = new();
 
         [Header("多路線設定")]
-        [Tooltip("Element 0 放原本的陸路設定，Element 1 放水路設定。這裡的順序要對應 enemyData.portalIndex 喔！")]
-        public PortalRoute[] routes;
+        [Tooltip(
+            "Element 0、1... 對應 EnemySpawnData 的 portalIndex。"
+        )]
+        [SerializeField]
+        private PortalRoute[] routes;
 
-        private int currentWaveIndex = 0;
+        [Header("波次設定")]
+        [SerializeField, Min(0f)]
+        private float waveInterval = 10f;
 
-   
-        IEnumerator Start()
+        #endregion
+
+        #region 執行期間資料
+
+        private int currentWaveIndex;
+
+        #endregion
+
+        #region Unity 生命週期
+
+        private IEnumerator Start()
         {
-            yield return new WaitUntil(() =>
-                GameManager.Instance.currentState == GameManager.GameState.Playing);
-                GameManager.Instance.totalWaves = waves.Count;
-            StartCoroutine(SpawnWaves());
+            yield return new WaitUntil(
+                () =>
+                    GameManager.Instance != null &&
+                    GameManager.Instance.CurrentState ==
+                    GameManager.GameState.Playing
+            );
+
+            GameManager.Instance.SetTotalWaves(
+                waves.Count
+            );
+
+            yield return StartCoroutine(
+                SpawnWaves()
+            );
         }
+
+        #endregion
+
+        #region 波數流程
+
         private IEnumerator SpawnWaves()
         {
             while (currentWaveIndex < waves.Count)
             {
                 GameManager.Instance.StartNextWave();
-                yield return StartCoroutine(SpawnWave());
 
-                // 每波間隔
-                yield return new WaitForSeconds(10f);
-                yield return new WaitUntil(() =>
-                FindObjectsByType<Enemy>(FindObjectsSortMode.None).Length == 0);
-                Debug.Log("所有波數生成完成");
-              currentWaveIndex++;
+                yield return StartCoroutine(
+                    SpawnWave()
+                );
+
+                yield return new WaitForSeconds(
+                    waveInterval
+                );
+
+                yield return new WaitUntil(
+                    () =>
+                        FindObjectsByType<Enemy>(
+                            FindObjectsSortMode.None
+                        ).Length == 0
+                );
+
+                currentWaveIndex++;
             }
+
+#if UNITY_EDITOR
+            Debug.Log(
+                "所有波數生成完成",
+                this
+            );
+#endif
+
             GameManager.Instance.CheckWin();
         }
 
+        #endregion
+
+        #region 單波生成
+
         private IEnumerator SpawnWave()
         {
-            // 🔥 更新波數 UI
-           
-
-            Wave wave = waves[currentWaveIndex];
+            Wave wave =
+                waves[currentWaveIndex];
 
             foreach (var enemyData in wave.enemies)
             {
-                for (int i = 0; i < enemyData.count; i++)
+                for (int i = 0;
+                     i < enemyData.count;
+                     i++)
                 {
-                    // 💡 檢查是否有設定路線，且資料裡的 portalIndex 有在範圍內
-                    // 備註：請確保你定義 enemyData 的類別（例如 EnemySpawnData）裡面有 public int portalIndex; 這個變數
-                    int pIndex = enemyData.portalIndex;
+                    SpawnEnemy(enemyData);
 
-                    // 這裡利用反射或直接讀取來安全取得 portalIndex（假設你已經在你的 Wave/EnemyData 結構裡加了這個欄位）
-                    // 如果你還沒加，可以去定義 wave.enemies 的那個 class 補上 public int portalIndex = 0;
-                    // pIndex = enemyData.portalIndex; 
-
-                    if (routes != null && pIndex < routes.Length)
-                    {
-                        PortalRoute selectedRoute = routes[pIndex];
-
-                        //  修改：不在 spawner 本身位置生成，改在「指定傳送門」的位置生成
-                        GameObject enemyObj = Instantiate(
-                            enemyData.enemyPrefab,
-                            selectedRoute.spawnPortal.position,
-                            Quaternion.identity
-                        );
-
-                        // ✨ 修改：生成後，立刻把這條路徑的 waypoints 陣列塞給怪物
-                        if (enemyObj.TryGetComponent(out Enemy enemyScript))
-                        {
-                            enemyScript.InitializePath(selectedRoute.waypoints);
-                        }
-                    }
-                    else
-                    {
-                        // ：如果 Index 超出範圍，就用原本 Spawner 的位置防呆
-                        Instantiate(enemyData.enemyPrefab, transform.position, Quaternion.identity);
-                        Debug.LogWarning($"Portal Index 找不到對應路線，已使用預設位置生成！");
-                    }
-
-                    yield return new WaitForSeconds(enemyData.spawnDelay);
+                    yield return new WaitForSeconds(
+                        enemyData.spawnDelay
+                    );
                 }
             }
-
         }
+
+        #endregion
+
+        #region 敵人生成
+
+        private void SpawnEnemy(
+            EnemyWaveData enemyData)
+        {
+            if (enemyData.enemyPrefab == null)
+            {
+                Debug.LogError(
+                    "EnemyWaveData 沒有設定 Enemy Prefab",
+                    this
+                );
+
+                return;
+            }
+
+            int portalIndex =
+                enemyData.portalIndex;
+
+            if (TryGetRoute(
+                    portalIndex,
+                    out PortalRoute route))
+            {
+                GameObject enemyObject =
+                    Instantiate(
+                        enemyData.enemyPrefab,
+                        route.spawnPortal.position,
+                        Quaternion.identity
+                    );
+
+                if (enemyObject.TryGetComponent(
+                        out Enemy enemy))
+                {
+                    enemy.InitializePath(
+                        route.waypoints
+                    );
+                }
+
+                return;
+            }
+
+            // 找不到路線時使用 Spawner 位置作為備援。
+            Instantiate(
+                enemyData.enemyPrefab,
+                transform.position,
+                Quaternion.identity
+            );
+
+#if UNITY_EDITOR
+            Debug.LogWarning(
+                $"找不到 Portal Index {portalIndex}，" +
+                $"已改用 {name} 的位置生成。",
+                this
+            );
+#endif
+        }
+
+        private bool TryGetRoute(
+            int index,
+            out PortalRoute route)
+        {
+            route = null;
+
+            if (routes == null ||
+                index < 0 ||
+                index >= routes.Length)
+            {
+                return false;
+            }
+
+            PortalRoute selectedRoute =
+                routes[index];
+
+            if (selectedRoute == null ||
+                selectedRoute.spawnPortal == null)
+            {
+                return false;
+            }
+
+            route = selectedRoute;
+            return true;
+        }
+
+        #endregion
     }
 }

@@ -1,29 +1,35 @@
-﻿using UnityEngine;
-
-namespace CHANG 
+﻿namespace CHANG
 {
     public class TowerIdle : StateTower
     {
+        #region 建構式
 
-        public TowerIdle(string name, StateMachine stateMachine, Tower tower) : base(name, stateMachine, tower)
+        public TowerIdle(
+            string name,
+            StateMachine stateMachine,
+            Tower tower)
+            : base(
+                name,
+                stateMachine,
+                tower
+            )
         {
-
         }
 
-        public override void Enter()
-        {
-            base.Enter();
-        }
+        #endregion
 
-        public override void Exit()
-        {
-            base.Exit();
-        }
+        #region 狀態更新
 
         public override void Update()
         {
-            base.Update();
-           if (tower.HasTarget())stateMachine.ChangeState(tower.Attack);
+            if (!tower.HasTarget())
+                return;
+
+            stateMachine.ChangeState(
+                tower.Attack
+            );
         }
+
+        #endregion
     }
 }

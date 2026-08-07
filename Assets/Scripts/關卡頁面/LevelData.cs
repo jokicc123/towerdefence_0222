@@ -2,16 +2,36 @@
 
 namespace CHANG
 {
-    [CreateAssetMenu(fileName = "LevelData", menuName = "TowerDefense/LevelData")]
+    /// <summary>
+    /// 關卡資料，用於選關與載入關卡。
+    /// </summary>
+    [CreateAssetMenu(
+        fileName = "LevelData",
+        menuName = "TowerDefense/LevelData"
+    )]
     public class LevelData : ScriptableObject
     {
+        #region Inspector 設定
+
         [Header("基本資訊")]
-        public string levelName;        // 關卡顯示名稱，例如 "第一關"
+        [SerializeField] private string levelName;
 
         [Header("場景設定")]
-        public string sceneName;        // 要載入的實際 Scene 名稱
+        [SerializeField] private string sceneName;
 
         [Header("關卡數值")]
-        public int totalWaves;          // 這關總波數，對應 GameManager.totalWaves
+        [SerializeField] private int totalWaves;
+
+        #endregion
+
+        #region 屬性
+
+        public string LevelName => levelName;
+
+        public string SceneName => sceneName;
+
+        public int TotalWaves => totalWaves;
+
+        #endregion
     }
 }

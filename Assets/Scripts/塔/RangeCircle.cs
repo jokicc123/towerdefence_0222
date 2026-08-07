@@ -1,44 +1,94 @@
 ﻿using UnityEngine;
+
 namespace CHANG
 {
-    //強制這個腳本所在的物件一定要有某個元件
+    /// <summary>
+    /// 使用 LineRenderer 繪製塔的攻擊範圍。
+    /// </summary>
     [RequireComponent(typeof(LineRenderer))]
     public class RangeCircle : MonoBehaviour
     {
+        #region Inspector 設定
+
         [Header("圓形細緻度")]
-        [SerializeField]
+        [SerializeField, Min(3)]
         private int segments = 50;
+
+        [Header("線條寬度")]
+        [SerializeField]
+        private float lineWidth = 0.1f;
+
+        [Header("高度偏移")]
+        [SerializeField]
+        private float yOffset = 0.05f;
+
+        #endregion
+
+        #region 執行期間資料
+
         private LineRenderer line;
+
+        #endregion
+
+        #region Unity 生命週期
 
         private void Awake()
         {
             line = GetComponent<LineRenderer>();
 
-            line.loop = true; // 讓線條形成閉合的圓
-            line.useWorldSpace = false; // 使用物件的本地座標系統
-            line.widthMultiplier = 0.1f; // 線條寬度
+            line.loop = true;
+            line.useWorldSpace = false;
+            line.widthMultiplier = lineWidth;
         }
+
+        #endregion
+
+        #region 繪製範圍
+
         public void DrawCircle(float radius)
         {
-            line.positionCount = segments; // 設定線條的點數
-            float anglestep = 360f / segments; // 每段的角度
+            if (line == null)
+                return;
+
+            radius = Mathf.Max(0f, radius);
+
+            line.positionCount = segments;
+
+            float angleStep =
+                360f / segments;
 
             for (int i = 0; i < segments; i++)
             {
-                float angle = anglestep * i;
+                float angle =
+                    angleStep * i * Mathf.Deg2Rad;
 
-                float x = Mathf.Cos(angle * Mathf.Deg2Rad) * radius; // 計算x座標
-                float z = Mathf.Sin(angle * Mathf.Deg2Rad) * radius; // 計算z座標
+                Vector3 point =
+                    new Vector3(
+                        Mathf.Cos(angle) * radius,
+                        yOffset,
+                        Mathf.Sin(angle) * radius
+                    );
 
-                line.SetPosition(i, new Vector3(x, 0.05f, z)); // 設定線條的點位置
+                line.SetPosition(
+                    i,
+                    point
+                );
             }
-
         }
+
+        #endregion
+
+        #region 外觀設定
+
         public void SetColor(Color color)
         {
-            
+            if (line == null)
+                return;
+
             line.startColor = color;
             line.endColor = color;
         }
+
+        #endregion
     }
 }

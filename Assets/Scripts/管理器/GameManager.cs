@@ -2,15 +2,33 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+
 namespace CHANG
 {
+    /// <summary>
+    /// 管理單一關卡的遊戲狀態、城堡生命、金幣、波數與勝敗流程。
+    /// 永久水晶資料由 PlayerData 負責保存。
+    /// </summary>
     public class GameManager : MonoBehaviour
     {
-        public static GameManager Instance;
+        #region  Singleton
+        private static GameManager instance;
 
-        /// <summary>
-        /// 遊戲狀態
-        /// </summary>
+        public static GameManager Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = FindFirstObjectByType<GameManager>();
+                }
+
+                return instance;
+            }
+        }
+        #endregion
+
+        #region   列舉
         public enum GameState
         {
             Build,
@@ -18,160 +36,276 @@ namespace CHANG
             Paused,
             GameOver,
             Win
-        }
-        /// <summary>
-        /// 遊戲狀態初始化
-        /// </summary>
-        public GameState currentState = GameState.Build;
-        [Header("數值")]
-        #region  數值
-        public int castleHp;
-        public int gold = 100;
-        public int currentWave = 0;
-        public int totalWaves = 0;
+        } 
         #endregion
-        #region 事件
-        public event Action<int> OnHpChanged;
-        public event Action<int> OnGoldChanged;
-        public event Action<int> OnWaveChanged;
-        public event Action Onwin;
-        public event Action OnGameOver;
-        #endregion
+
+        #region 設定
+
+        [SerializeField]
+        private GameState currentState = GameState.Build;
+
+        [SerializeField]
+        private int castleHp;
+
+        [SerializeField]
+        private int gold = 100;
+
+        [SerializeField]
+        private int currentWave;
+
+        [SerializeField]
+        private int totalWaves;
+
+       
+
+        [Header("水晶獎勵")]
+        [SerializeField, Min(0)] private int winCrystalReward = 100;
+        [SerializeField, Min(0)] private int loseCrystalReward = 25;
+
         [Header("返回主選單")]
         [SerializeField] private Button btnBackToMenuWin;
         [SerializeField] private Button btnBackToMenuGameOver;
 
-        [Header("水晶")]
-        // 這裡的水晶數量是遊戲內的初始值，實際的水晶數量應該從 PlayerData 或其他持久化系統中讀取
-        [SerializeField] private int crystal = 100;
+        #endregion
 
-        public int Crystal => crystal;
+        #region   事件
 
-        public event System.Action<int> OnCrystalChanged;
-        [SerializeField] private int winCrystalReward = 100;
-        [SerializeField] private int loseCrystalReward = 25;
+        public event Action<int> OnHpChanged;
+        public event Action<int> OnGoldChanged;
+        public event Action<int> OnWaveChanged;
+        public event Action<int> OnCrystalChanged;
+
+        // 保留舊名稱，避免 UiManager 原本的訂閱失效。
+        public event Action OnWin;
+        public event Action OnGameOver;
+
+        /// <summary>
+        /// 正確命名的勝利事件別名；新程式建議使用這個名稱。
+        /// </summary>
+        public event Action Onwin
+        {
+            add => OnWin += value;
+            remove => OnWin -= value;
+        }
+
+        #endregion
+
+        #region 公開屬性
+
+        public GameState CurrentState => currentState;
+
+        public int CastleHp => castleHp;
+
+        public int Gold => gold;
+
+        public int CurrentWave => currentWave;
+
+        public int TotalWaves => totalWaves;
+
+        public int Crystal => PlayerData.Crystal;
         public int WinCrystalReward => winCrystalReward;
         public int LoseCrystalReward => loseCrystalReward;
+
+        private const int DefaultGold = 100;
+        private const string MainMenuSceneName = "主選單";
+
         private bool crystalRewardGiven;
+        #endregion
 
-        public bool CanBuildTower()
-        {
-            return currentState == GameState.Build || currentState == GameState.Playing;
-        }
+        #region Unity 生命週期 
 
-        public void StartGame()
-        {
-            crystalRewardGiven = false;
-
-            castleHp =
-               ShopBonus.CastleMaxHP;
-
-            OnHpChanged?.Invoke(castleHp);
-
-            Debug.Log(
-                $"商店城堡等級：" +
-                $"{PlayerPrefs.GetInt(ShopUpgradeType.CastleHP.ToString(), 0)}，" +
-                $"本場城堡生命：{castleHp}"
-            );
-            if (currentState != GameState.Build) return;
-
-            currentState = GameState.Playing;
-            Time.timeScale = 1f; // 確保遊戲時間恢復正常
-            Debug.Log("遊戲開始!");
-
-        }
-
-        public void PauseGame()
-        {
-            if (currentState != GameState.Playing) return;
-            currentState = GameState.Paused;
-            Time.timeScale = 0f; // 暫停遊戲時間
-            Debug.Log("遊戲暫停!");
-        }
-
-        public void ResumeGame()
-        {
-            if (currentState != GameState.Paused) return;
-            currentState = GameState.Playing;
-            Time.timeScale = 1f; // 恢復遊戲時間
-            Debug.Log("遊戲繼續!");
-        }
         private void Awake()
         {
-            if (Instance == null)
-            {
-                Instance = this;
-                DontDestroyOnLoad(gameObject);
-            }
-            else
+            if (instance != null && instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
 
-            castleHp = ShopBonus.CastleMaxHP;
-            crystalRewardGiven = false;
-
-            Debug.Log($"城堡初始生命：{castleHp}");
+            instance = this;
+            InitializeRuntimeValues();
         }
+
         private void Start()
         {
             if (LevelSession.SelectedLevel != null)
             {
-                totalWaves = LevelSession.SelectedLevel.totalWaves;
+                totalWaves = LevelSession.SelectedLevel.TotalWaves;
             }
-            // 初始化事件(顯示當前數值)
-            OnHpChanged?.Invoke(castleHp);
-            OnGoldChanged?.Invoke(gold);
-            OnWaveChanged?.Invoke(currentWave);
-            btnBackToMenuWin.onClick.AddListener(BackToMenu);
-            btnBackToMenuGameOver.onClick.AddListener(BackToMenu);
+
+            BindButtons();
+            NotifyAllValues();
         }
-        public void TakeDamege(int damage)
+
+        private void OnDestroy()
         {
-            // 只有在遊戲進行中才會受到傷害
-            if (currentState != GameState.Playing) return;
-            castleHp -= damage;
-            // 更新UI
-            OnHpChanged?.Invoke(castleHp);
-            if (castleHp <= 0)
+            UnbindButtons();
+
+            if (instance == this)
             {
-                castleHp = 0;
+                instance = null;
+            }
+        }
+
+        #endregion
+
+        #region 遊戲狀態
+
+        /// <summary>
+        /// 目前狀態是否允許建造塔或英雄。
+        /// </summary>
+        private void ChangeState(GameState state)
+        {
+            // 狀態沒變就不用重複設定
+            if (currentState == state)
+                return;
+
+            currentState = state;
+
+#if UNITY_EDITOR
+            Debug.Log(
+                $"Game State → {state}",
+                this
+            );
+#endif
+        }
+        public bool CanBuildTower()
+        {
+            
+            return currentState == GameState.Build ||
+                   currentState == GameState.Playing;
+        }
+
+        public bool IsGameRunning()
+        {
+            return currentState == GameState.Playing;
+        }
+
+        public void StartGame()
+        {
+            if (currentState != GameState.Build)
+                return;
+
+            crystalRewardGiven = false;
+            castleHp = ShopBonus.CastleMaxHP;
+            ChangeState(GameState.Playing);
+            ResumeTime();
+
+          NotifyHp();
+
+#if UNITY_EDITOR
+            Debug.Log(
+                $"遊戲開始。城堡等級：" +
+                $"{PlayerPrefs.GetInt(ShopUpgradeType.CastleHP.ToString(), 0)}，" +
+                $"本場生命：{castleHp}",
+                this
+            );
+#endif
+        }
+
+        public void PauseGame()
+        {
+            if (currentState != GameState.Playing)
+                return;
+
+            ChangeState(GameState.Paused);
+           PauseTime(); 
+        }
+
+        public void ResumeGame()
+        {
+            if (currentState != GameState.Paused)
+                return;
+
+            ChangeState(GameState.Playing);
+            ResumeTime();
+        }
+
+        public void ResetGameState()
+        {
+            ResumeTime();
+
+            castleHp = ShopBonus.CastleMaxHP;
+            gold = DefaultGold;
+            currentWave = 0;
+            ChangeState(GameState.Build);
+            crystalRewardGiven = false;
+
+            NotifyAllValues();
+        }
+
+        #endregion
+
+        #region  城堡系統
+
+        /// <summary>
+        /// 對城堡造成傷害。
+        /// </summary>
+        public void TakeDamage(int damage)
+        {
+            if (currentState != GameState.Playing || damage <= 0)
+                return;
+
+            castleHp = Mathf.Max(0, castleHp - damage);
+            NotifyHp();
+
+            if (castleHp == 0)
+            {
                 GameOver();
             }
         }
+        #endregion
+
+        #region  金幣系統
+
         public void AddGold(int amount)
         {
-            if (currentState != GameState.Playing) return;
+            if (!CanBuildTower() || amount <= 0)
+                return;
 
-            gold += amount;
-            if (gold < 0) gold = 0;
-
-            OnGoldChanged?.Invoke(gold);
+            gold = Mathf.Max(0, gold + amount);
+            NotifyGold();
         }
-        public bool SpendGold(int amout)
+
+        public bool SpendGold(int amount)
         {
-            if (gold >= amout)
+            if (!CanBuildTower() ||
+                amount <= 0 ||
+                gold < amount)
             {
-                gold -= amout;
-                OnGoldChanged?.Invoke(gold);
-                return true;
+                return false;
             }
-            return false;
+
+            gold -= amount;
+            NotifyGold();
+            return true;
         }
+
+        #endregion
+
+        #region 波數系統
+        public void SetTotalWaves(int amount)
+        {
+            totalWaves = Mathf.Max(0, amount);
+        }
+
         public void StartNextWave()
         {
-            //防止重複觸發
-            if (currentState != GameState.Playing) return;
-            //波數 + 1
+            if (currentState != GameState.Playing)
+                return;
+
             currentWave++;
-            //更新UI
-            OnWaveChanged?.Invoke(currentWave);
-            Debug.Log($"第{currentWave}波開始");
+            NotifyWave();
+
+#if UNITY_EDITOR
+            Debug.Log($"第 {currentWave} 波開始", this);
+#endif
         }
+
         public void EndWave()
         {
-            if (currentState != GameState.Playing) return;
+            if (currentState != GameState.Playing)
+                return;
 
             CheckWin();
 
@@ -180,108 +314,217 @@ namespace CHANG
                 StartNextWave();
             }
         }
+
         public void CheckWin()
         {
-            Debug.Log($"CheckWin currentWave={currentWave}, totalWaves={totalWaves}, HP={castleHp}");
+            if (currentState != GameState.Playing)
+                return;
+
+            if (totalWaves <= 0)
+            {
+                Debug.LogWarning("Total Waves 尚未設定，無法判斷勝利。", this);
+                return;
+            }
 
             if (currentWave >= totalWaves && castleHp > 0)
             {
-                Debug.Log("Win!");
                 Win();
             }
         }
+
+        #endregion
+        #region  勝敗系統
+
         public void Win()
         {
-            if (currentState != GameState.Playing) return;
-            currentState = GameState.Win;
+            if (currentState != GameState.Playing)
+                return;
+
+            ChangeState(GameState.Win);
             GiveCrystalReward(winCrystalReward);
-            Time.timeScale = 0f;   // ⭐ 補上
+            PauseTime();
+
+            OnWin?.Invoke();
+
+#if UNITY_EDITOR
             Debug.Log(
-                $"你贏了，獲得 {winCrystalReward} 水晶，" +
-                $"目前共有 {PlayerData.Crystal} 水晶"
+                $"遊戲勝利，獲得 {winCrystalReward} 水晶；" +
+                $"目前共有 {PlayerData.Crystal} 水晶。",
+                this
             );
-            Onwin?.Invoke();
+#endif
         }
 
         public void GameOver()
         {
-            if (currentState == GameState.GameOver)
+            if (currentState == GameState.GameOver ||
+                currentState == GameState.Win)
+            {
                 return;
+            }
 
-            currentState = GameState.GameOver;
-
+            ChangeState(GameState.GameOver);
             GiveCrystalReward(loseCrystalReward);
-
-            Time.timeScale = 0f;
+            PauseTime();
 
             OnGameOver?.Invoke();
 
+#if UNITY_EDITOR
             Debug.Log(
-                $"遊戲失敗，獲得 {loseCrystalReward} 水晶，" +
-                $"目前共有 {PlayerData.Crystal} 水晶"
+                $"遊戲失敗，獲得 {loseCrystalReward} 水晶；" +
+                $"目前共有 {PlayerData.Crystal} 水晶。",
+                this
             );
+#endif
         }
-        public bool IsGameRunning()
-        {
-            return currentState == GameState.Playing;
-        }
-        private void BackToMenu()
-        {
-            Time.timeScale = 1f;
-            ResetGameState();   // 如果這個方法就寫在 GameManager 裡，直接呼叫自己就好，不用 GameManager.Instance.
 
-            if (LoadingManager.Instance != null)
-            {
-                LoadingManager.Instance.StartLoad("主選單");
-            }
-            else
-            {
-                Debug.LogWarning("沒有 LoadingManager，直接切換場景（開發測試用）");
-                SceneManager.LoadScene("主選單");
-            }
-        }
-        public void ResetGameState()
-        {
-            castleHp = ShopBonus.CastleMaxHP;
-            gold = 100;
-            currentWave = 0;
-            currentState = GameState.Build;
-
-            // 重置後記得更新 UI 顯示
-            OnHpChanged?.Invoke(castleHp);
-            OnGoldChanged?.Invoke(gold);
-            OnWaveChanged?.Invoke(currentWave);
-
-        }
         private void GiveCrystalReward(int amount)
         {
-            PlayerData.Crystal += amount;
+            if (crystalRewardGiven || amount <= 0)
+                return;
+
+            crystalRewardGiven = true;
+            AddCrystal(amount);
         }
+
+        #endregion
+
+        #region  水晶系統
+
+        /// <summary>
+        /// 消耗永久水晶。
+        /// </summary>
         public bool SpendCrystal(int amount)
         {
             if (amount <= 0)
                 return false;
 
-            if (crystal < amount)
+            if (!PlayerData.SpendCrystal(amount))
             {
-                Debug.Log($"水晶不足，目前水晶：{crystal}，需要：{amount}");
+#if UNITY_EDITOR
+                Debug.Log(
+                    $"水晶不足，目前水晶：{PlayerData.Crystal}，需要：{amount}",
+                    this
+                );
+#endif
                 return false;
             }
 
-            crystal -= amount;
-            OnCrystalChanged?.Invoke(crystal);
-
-            Debug.Log($"消耗 {amount} 水晶，剩餘 {crystal}");
+            NotifyCrystal();
             return true;
         }
 
+        /// <summary>
+        /// 增加永久水晶。
+        /// </summary>
         public void AddCrystal(int amount)
         {
             if (amount <= 0)
                 return;
 
-            crystal += amount;
-            OnCrystalChanged?.Invoke(crystal);
+            PlayerData.Crystal += amount;
+            NotifyCrystal();       
         }
+
+        #endregion
+
+        #region 場景切換
+        private void BackToMenu()
+        {
+            ResumeTime();
+
+            if (LoadingManager.Instance != null)
+            {
+                LoadingManager.Instance.StartLoad(MainMenuSceneName);
+                return;
+            }
+
+            Debug.LogWarning(
+                "找不到 LoadingManager，改用 SceneManager 直接切換場景。",
+                this
+            );
+
+            SceneManager.LoadScene(MainMenuSceneName);
+        }
+
+        #endregion
+
+        #region   UI更新
+        private void NotifyHp()
+        {
+            OnHpChanged?.Invoke(castleHp);
+        }
+
+        private void NotifyGold()
+        {
+            OnGoldChanged?.Invoke(gold);
+        }
+
+        private void NotifyWave()
+        {
+            OnWaveChanged?.Invoke(currentWave);
+        }
+        private void NotifyCrystal()
+        {
+            OnCrystalChanged?.Invoke(PlayerData.Crystal);
+        } 
+        #endregion
+        #region  初始化
+
+        private void InitializeRuntimeValues()
+        {
+            castleHp = ShopBonus.CastleMaxHP;
+            gold = Mathf.Max(0, gold);
+            currentWave = Mathf.Max(0, currentWave);
+            crystalRewardGiven = false;
+            ResumeTime();
+        }
+
+        private void NotifyAllValues()
+        {
+            NotifyHp();
+            NotifyGold();
+            NotifyWave();
+            OnCrystalChanged?.Invoke(PlayerData.Crystal);
+        }
+
+        private void BindButtons()
+        {
+            if (btnBackToMenuWin != null)
+            {
+                btnBackToMenuWin.onClick.AddListener(BackToMenu);
+            }
+
+            if (btnBackToMenuGameOver != null)
+            {
+                btnBackToMenuGameOver.onClick.AddListener(BackToMenu);
+            }
+        }
+
+        private void UnbindButtons()
+        {
+            if (btnBackToMenuWin != null)
+            {
+                btnBackToMenuWin.onClick.RemoveListener(BackToMenu);
+            }
+
+            if (btnBackToMenuGameOver != null)
+            {
+                btnBackToMenuGameOver.onClick.RemoveListener(BackToMenu);
+            }
+        }
+
+        #endregion
+        #region  工具方法
+        private void PauseTime()
+        {
+            Time.timeScale = 0f;
+        }
+
+        private void ResumeTime()
+        {
+            Time.timeScale = 1f;
+        } 
+        #endregion
     }
 }

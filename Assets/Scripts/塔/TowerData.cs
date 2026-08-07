@@ -2,52 +2,158 @@
 
 namespace CHANG
 {
-    [CreateAssetMenu(fileName = "NewTowerData", menuName = "Game/TowerData")]
-    public class TowerData : ScriptableObject
+    #region 防禦塔類型
+
+    public enum TowerAttackType
     {
-        public enum TowerAttackType
-        {
-            Bullet
-        }
-        public enum TowerEffectType
-        {
-            None,
-            Burn, // 燒傷（持續傷害）
-            Poison  , // 毒（持續傷害 + 減速）
-        }
-        public Vector3 buildFootprint = new Vector3(1f, 1f, 1f); // 手動在 Inspector 設定塔的佔地大小
-        public TowerAttackType attackType;
-        public TowerEffectType effectType;
-        [Header("文字說明")]
-        public string towerName;      // 防禦塔名稱（例如：火焰祭壇）
-        [TextArea(3, 5)]
-        public string description;    // 防禦塔詳細介紹（例如：噴射出熊熊烈火，造成持續性範圍傷害。）
-        [Header("等級資料")]
-        public TowerLevel[] levels; // ⭐ 核心
-        [Header("模型（每級外觀）")]
-        public GameObject[] levelPrefabs;
-        [Header("視覺模型（每級換外觀用）")]
-        public GameObject[] levelModelPrefabs; // 純模型 Prefab（換外觀用）
-        [Header("圖示")]
-        public Sprite icon; // 防禦塔圖示
-        [Header("音效")]
-        public AudioClip attackSFX;
+        Bullet
     }
 
+    public enum TowerEffectType
+    {
+        None,
+        Burn,
+        Poison
+    }
+
+    #endregion
+
+
+    /// <summary>
+    /// 防禦塔資料。
+    /// 包含基本資訊、建造設定、每級數值、模型、圖示與音效。
+    /// </summary>
+    [CreateAssetMenu(
+        fileName = "NewTowerData",
+        menuName = "Game/TowerData"
+    )]
+    public class TowerData : ScriptableObject
+    {
+        #region 建造設定
+
+        [Header("建造設定")]
+        [Tooltip("防禦塔在地圖上的佔地大小")]
+        public Vector3 buildFootprint =
+            new Vector3(1f, 1f, 1f);
+
+        #endregion
+
+        #region 攻擊設定
+
+        [Header("攻擊設定")]
+        public TowerAttackType attackType;
+
+        #endregion
+
+        #region 文字說明
+
+        [Header("文字說明")]
+        public string towerName;
+
+        [TextArea(3, 5)]
+        public string description;
+
+        #endregion
+
+        #region 等級資料
+
+        [Header("等級資料")]
+        public TowerLevel[] levels;
+
+        #endregion
+
+        #region 模型設定
+
+        [Header("完整 Prefab（每級建造用）")]
+        public GameObject[] levelPrefabs;
+
+        [Header("視覺模型（每級換外觀用）")]
+        public GameObject[] levelModelPrefabs;
+
+        #endregion
+
+        #region UI 設定
+
+        [Header("圖示")]
+        public Sprite icon;
+
+        #endregion
+
+        #region 音效設定
+
+        [Header("音效")]
+        public AudioClip attackSFX;
+
+        #endregion
+    }
+
+
+    #region 防禦塔每級資料
+
+    /// <summary>
+    /// 防禦塔單一等級的能力數值。
+    /// </summary>
     [System.Serializable]
     public class TowerLevel
     {
+        #region 基礎數值
+
+        [Header("基礎數值")]
+
+        [Tooltip("攻擊範圍")]
         public float attackRange;
+
+        [Tooltip("攻擊傷害")]
         public float damage;
+
+        [Tooltip("每秒攻擊次數")]
         public float attackSpeed;
+
+        [Tooltip("建造或升級花費")]
         public int cost;
-        public GameObject bulletPrefab; // ⭐ 每級可不同子彈
-        public TowerData.TowerEffectType effectType; // 每級特效類型（可選擇覆蓋或繼承）
-        public float effectDuration; // 特效持續時間（如果有）
-        public float effectDamagePerSecond; // 特效每秒傷害（如果有）
-        public float slowPercent; // 毒藥減速百分比（如果有）
+
+        #endregion
+
+        #region 子彈設定
+
+        [Header("子彈設定")]
+
+        [Tooltip("此等級使用的子彈 Prefab")]
+        public GameObject bulletPrefab;
+
+        #endregion
+
+        #region 狀態效果
+
+        [Header("狀態效果")]
+
+        public TowerEffectType effectType;
+
+        [Tooltip("狀態效果持續時間")]
+        public float effectDuration;
+
+        [Tooltip("持續傷害 DPS")]
+        public float effectDamagePerSecond;
+
+        [Range(0f, 1f)]
+        [Tooltip("減速百分比，例如 0.5 = 減速 50%")]
+        public float slowPercent;
+
+        #endregion
+
+        #region 範圍傷害
+
+        [Header("範圍傷害")]
+
+        [Tooltip("爆炸半徑，0 代表單體攻擊")]
         public float blastRadius;
-        public float minDamageRatio = 0.4f; // 邊緣傷害 = maxDamage × 這個值
+
+        [Range(0f, 1f)]
+        [Tooltip("爆炸邊緣最低傷害倍率")]
+        public float minDamageRatio = 0.4f;
+
+        #endregion
     }
 
+    #endregion
 }

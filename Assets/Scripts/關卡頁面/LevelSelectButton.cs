@@ -7,46 +7,103 @@ namespace CHANG
     [RequireComponent(typeof(Button))]
     public class LevelSelectButton : MonoBehaviour
     {
+        #region Inspector 設定
+
         [Header("這顆按鈕代表哪一關")]
         [SerializeField] private LevelData levelData;
 
         [Header("UI 元件連結")]
         [SerializeField] private TextMeshProUGUI levelNameText;
 
+        #endregion
+
+        #region 執行期間資料
+
         private Button button;
+
+        #endregion
+
+        #region Unity 生命週期
 
         private void Awake()
         {
             button = GetComponent<Button>();
+
+            Debug.Assert(
+                button != null,
+                "LevelSelectButton 缺少 Button"
+            );
         }
 
         private void Start()
         {
+            InitializeUI();
+            RegisterButton();
+        }
+
+        private void OnDestroy()
+        {
+            if (button != null)
+            {
+                button.onClick.RemoveListener(
+                    LoadSelectedLevel
+                );
+            }
+        }
+
+        #endregion
+
+        #region 初始化
+
+        private void InitializeUI()
+        {
             if (levelData == null)
             {
-                Debug.LogWarning($"{gameObject.name} 沒有設定 LevelData！");
+                Debug.LogWarning(
+                    $"{gameObject.name} 沒有設定 LevelData！"
+                );
+
                 return;
             }
 
             if (levelNameText != null)
-                levelNameText.text = levelData.levelName;
+            {
+                levelNameText.text =
+                    levelData.LevelName;
+            }
+        }
 
+        private void RegisterButton()
+        {
             if (LoadingManager.Instance == null)
             {
-                Debug.LogError("LoadingManager 尚未初始化，請確認場景載入順序");
+                Debug.LogError(
+                    "LoadingManager 尚未初始化，請確認場景載入順序"
+                );
+
                 return;
             }
 
-            button.onClick.AddListener(OnClickSelectLevel);
+            button.onClick.AddListener(
+                LoadSelectedLevel
+            );
         }
 
-        private void OnClickSelectLevel()
+        #endregion
+
+        #region 按鈕事件
+
+        private void LoadSelectedLevel()
         {
-            Debug.Log($"①點擊了關卡: {levelData?.levelName}");
-            LevelSession.SelectedLevel = levelData;
-            Debug.Log($"②LoadingManager.Instance = {LoadingManager.Instance}");
-            LoadingManager.Instance.StartLoad(levelData.sceneName);
-            Debug.Log("③StartLoad已呼叫");
+            Debug.Log($"點擊了關卡：{levelData?.LevelName}");
+
+            LevelSession.SelectLevel(levelData);
+
+            LoadingManager.Instance.StartLoad(
+                levelData.SceneName
+            );
         }
+
+        #endregion
     }
 }

@@ -1,40 +1,207 @@
-﻿using CHANG;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-public class SettingsPanel: MonoBehaviour
+
+namespace CHANG
 {
-    private Button btn, btnSettings, btnBack;
-    private CanvasGroup groupOption;
-    private Slider sliderMaster, sliderBgm, sliderSfx;
-
-    private void Awake()
+    /// <summary>
+    /// 設定面板。
+    /// 負責開關設定介面與同步音量滑桿。
+    /// </summary>
+    public class SettingsPanel : MonoBehaviour
     {
-        btnSettings = GameObject.Find("按鈕_設定").GetComponent<Button>();
-        btnBack = GameObject.Find("按鈕_設定_返回").GetComponent<Button>();
-        groupOption = GameObject.Find("群組_設定").GetComponent<CanvasGroup>();
-        sliderMaster = GameObject.Find("滑桿_主音量").GetComponent<Slider>();
-        sliderBgm = GameObject.Find("滑桿_音樂").GetComponent<Slider>();
-        sliderSfx = GameObject.Find("滑桿_音效").GetComponent<Slider>();
+        #region Inspector 設定
 
-        btnSettings.onClick.AddListener(() =>
-        {
-            StartCoroutine(FadeSystem.Fade(groupOption));
-        });
-        btnBack.onClick.AddListener(() =>
-        {
-            StartCoroutine(FadeSystem.Fade(groupOption, false));
-        });
-        sliderMaster.onValueChanged.AddListener(x => SoundManager.Instance.UpdateMasterVolume(x));
-        sliderBgm.onValueChanged.AddListener(x => SoundManager.Instance.UpdateBGMVolume(x));
-        sliderSfx.onValueChanged.AddListener(x => SoundManager.Instance.UpdateSFXVolume(x));
+        [Header("設定面板")]
+        [SerializeField] private Button btnSettings;
+        [SerializeField] private Button btnBack;
+        [SerializeField] private CanvasGroup groupOption;
 
-       
+        [Header("音量滑桿")]
+        [SerializeField] private Slider sliderMaster;
+        [SerializeField] private Slider sliderBgm;
+        [SerializeField] private Slider sliderSfx;
+
+        #endregion
+
+        #region Unity 生命週期
+
+        private void Awake()
+        {
+            RegisterEvents();
+        }
+
+        private void Start()
+        {
+            RefreshVolumeUI();
+        }
+
+        private void OnDestroy()
+        {
+            UnregisterEvents();
+        }
+
+        #endregion
+
+        #region 事件註冊
+
+        private void RegisterEvents()
+        {
+            if (btnSettings != null)
+            {
+                btnSettings.onClick.AddListener(
+                    ShowSettings
+                );
+            }
+
+            if (btnBack != null)
+            {
+                btnBack.onClick.AddListener(
+                    HideSettings
+                );
+            }
+
+            if (sliderMaster != null)
+            {
+                sliderMaster.onValueChanged.AddListener(
+                    OnMasterVolumeChanged
+                );
+            }
+
+            if (sliderBgm != null)
+            {
+                sliderBgm.onValueChanged.AddListener(
+                    OnBgmVolumeChanged
+                );
+            }
+
+            if (sliderSfx != null)
+            {
+                sliderSfx.onValueChanged.AddListener(
+                    OnSfxVolumeChanged
+                );
+            }
+        }
+
+        private void UnregisterEvents()
+        {
+            if (btnSettings != null)
+            {
+                btnSettings.onClick.RemoveListener(
+                    ShowSettings
+                );
+            }
+
+            if (btnBack != null)
+            {
+                btnBack.onClick.RemoveListener(
+                    HideSettings
+                );
+            }
+
+            if (sliderMaster != null)
+            {
+                sliderMaster.onValueChanged.RemoveListener(
+                    OnMasterVolumeChanged
+                );
+            }
+
+            if (sliderBgm != null)
+            {
+                sliderBgm.onValueChanged.RemoveListener(
+                    OnBgmVolumeChanged
+                );
+            }
+
+            if (sliderSfx != null)
+            {
+                sliderSfx.onValueChanged.RemoveListener(
+                    OnSfxVolumeChanged
+                );
+            }
+        }
+
+        #endregion
+
+        #region 設定面板
+
+        private void ShowSettings()
+        {
+            if (groupOption == null)
+                return;
+
+            StartCoroutine(
+                FadeSystem.Fade(
+                    groupOption,
+                    true
+                )
+            );
+        }
+
+        private void HideSettings()
+        {
+            if (groupOption == null)
+                return;
+
+            StartCoroutine(
+                FadeSystem.Fade(
+                    groupOption,
+                    false
+                )
+            );
+        }
+
+        #endregion
+
+        #region 音量更新
+
+        private void RefreshVolumeUI()
+        {
+            if (SoundManager.Instance == null)
+                return;
+
+            if (sliderMaster != null)
+            {
+                sliderMaster.SetValueWithoutNotify(
+                    SoundManager.Instance.VolumeMaster
+                );
+            }
+
+            if (sliderBgm != null)
+            {
+                sliderBgm.SetValueWithoutNotify(
+                    SoundManager.Instance.VolumeBGM
+                );
+            }
+
+            if (sliderSfx != null)
+            {
+                sliderSfx.SetValueWithoutNotify(
+                    SoundManager.Instance.VolumeSFX
+                );
+            }
+        }
+
+        private void OnMasterVolumeChanged(float value)
+        {
+            SoundManager.Instance?.UpdateMasterVolume(
+                value
+            );
+        }
+
+        private void OnBgmVolumeChanged(float value)
+        {
+            SoundManager.Instance?.UpdateBGMVolume(
+                value
+            );
+        }
+
+        private void OnSfxVolumeChanged(float value)
+        {
+            SoundManager.Instance?.UpdateSFXVolume(
+                value
+            );
+        }
+
+        #endregion
     }
-    private void Start()
-    {
-        sliderMaster.value = SoundManager.Instance.VolumeMaster;
-        sliderBgm.value = SoundManager.Instance.VolumeBGM;
-        sliderSfx.value = SoundManager.Instance.VolumeSFX;
-    }
-   
 }

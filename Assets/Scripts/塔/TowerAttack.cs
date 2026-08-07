@@ -2,60 +2,107 @@
 
 namespace CHANG
 {
+    /// <summary>
+    /// 防禦塔攻擊狀態。
+    /// 負責鎖定目標、旋轉塔頭與執行攻擊。
+    /// </summary>
     public class TowerAttack : StateTower
     {
-        public TowerAttack(string name, StateMachine stateMachine, Tower tower) : base(name, stateMachine, tower)
+        #region 建構式
+
+        public TowerAttack(
+            string name,
+            StateMachine stateMachine,
+            Tower tower)
+            : base(
+                name,
+                stateMachine,
+                tower
+            )
         {
         }
 
-       
-        public override void Enter()
-        {
-            base.Enter();
-        }
+        #endregion
+
+        #region 狀態更新
+
         public override void Update()
         {
-            base.Update();
-
-            Debug.Log("TowerAttack 狀態運行中");
-
             if (!tower.HasTarget())
             {
-                stateMachine.ChangeState(tower.Idle);
+                stateMachine.ChangeState(
+                    tower.Idle
+                );
+
                 return;
             }
 
-            Enemy target = tower.GetTarget();
+            Enemy target =
+                tower.GetTarget();
 
-            if (target != null && tower.Head != null)
+            if (target == null ||
+                target.IsDead)
             {
-                Debug.Log($"轉向目標：{target.name}");  // ⭐ 加這行
-                Vector3 dir = target.transform.position - tower.Head.position;
-                Quaternion rot = Quaternion.LookRotation(dir);
-                tower.Head.rotation = Quaternion.Lerp(
-                    tower.Head.rotation,
-                    rot,
-                    10f * Time.deltaTime
+                stateMachine.ChangeState(
+                    tower.Idle
                 );
+
+                return;
             }
+
+            RotateHeadToTarget(
+                target
+            );
 
             tower.TickAttackTimer();
 
-            if (tower.IsAttackReady())
-            {
-                if (target != null)
-                {
-                    Debug.Log("塔攻擊");
-                    tower.Fire(target);
-                    tower.ResetAttackTimer();
-                }
-            }
+            if (!tower.IsAttackReady())
+                return;
+
+            tower.Fire(
+                target
+            );
+
+            tower.ResetAttackTimer();
         }
 
-        public override void Exit()
+        #endregion
+
+        #region 旋轉
+
+        private void RotateHeadToTarget(
+            Enemy target)
         {
-            base.Exit();
+            if (tower.Head == null ||
+                target == null ||
+                target.IsDead)
+            {
+                return;
+            }
+
+            Vector3 direction =
+                target.transform.position -
+                tower.Head.position;
+
+            if (direction.sqrMagnitude <=
+                0.001f)
+            {
+                return;
+            }
+
+            Quaternion targetRotation =
+                Quaternion.LookRotation(
+                    direction
+                );
+
+            tower.Head.rotation =
+                Quaternion.Lerp(
+                    tower.Head.rotation,
+                    targetRotation,
+                    10f * Time.deltaTime
+                );
         }
+
+        #endregion
     }
 }
-

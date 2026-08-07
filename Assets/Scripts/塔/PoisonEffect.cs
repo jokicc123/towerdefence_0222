@@ -2,42 +2,98 @@
 
 namespace CHANG
 {
+    /// <summary>
+    /// 中毒效果。
+    /// 持續造成傷害並降低移動速度。
+    /// </summary>
     public class PoisonEffect : StatusEffect
     {
-        private float damagePerSecond;
-        private float slowPercent;
+        #region 欄位
+
+        private readonly float damagePerSecond;
+        private readonly float slowPercent;
+
+        #endregion
+
+        #region 建構式
 
         public PoisonEffect(
             Enemy enemy,
             float duration,
             float damagePerSecond,
-            float slowPercent
-        ) : base(enemy, duration)
+            float slowPercent)
+            : base(enemy, duration)
         {
-            this.damagePerSecond = damagePerSecond;
-            this.slowPercent = slowPercent;
+            this.damagePerSecond =
+                Mathf.Max(0f, damagePerSecond);
+
+            this.slowPercent =
+                Mathf.Clamp01(slowPercent);
         }
+
+        #endregion
+
+        #region 狀態效果
 
         public override void OnApply()
         {
-            enemy.ApplySlow(slowPercent);
-            enemy.SetEffectColor(new Color(0.2f, 0.8f, 0.2f)); // 🟢 綠色
-            Debug.Log("☠️ 中毒開始");
+            if (enemy == null)
+                return;
+
+            enemy.ApplySlow(
+                slowPercent
+            );
+
+            enemy.SetEffectColor(
+                new Color(
+                    0.2f,
+                    0.8f,
+                    0.2f
+                )
+            );
+
+#if UNITY_EDITOR
+            Debug.Log(
+                "中毒開始"
+            );
+#endif
         }
 
-        protected override void OnTick(float dt)
+        protected override void OnTick(
+            float deltaTime)
         {
-            float damage = damagePerSecond * dt;
+            if (enemy == null)
+                return;
 
-            enemy.TakeDamage(damage);
-            Debug.Log($"☠️ Poison Damage: {damage}");
+            enemy.TakeDamage(
+                damagePerSecond *
+                deltaTime
+            );
+
+#if UNITY_EDITOR
+            Debug.Log(
+                $"Poison Damage：" +
+                $"{damagePerSecond * deltaTime:0.0}"
+            );
+#endif
         }
 
         public override void OnExpire()
         {
+            if (enemy == null)
+                return;
+
             enemy.RemoveSlow();
-            enemy.ResetColor(); // 恢復原色
-            Debug.Log("☠️ 中毒結束");
+
+            enemy.ResetColor();
+
+#if UNITY_EDITOR
+            Debug.Log(
+                "中毒結束"
+            );
+#endif
         }
+
+        #endregion
     }
 }

@@ -4986,8 +4986,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6b7b28bc1b06e6b48bbabe3a6bff5423, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerModelRef
-  FirePoint: {fileID: 4249737782010098}
-  Head: {fileID: 4194968633999842}
+  firePoint: {fileID: 4249737782010098}
+  head: {fileID: 4194968633999842}
 --- !u!1 &1536940116365116
 GameObject:
   m_ObjectHideFlags: 0

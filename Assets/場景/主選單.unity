@@ -989,6 +989,28 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 356264414}
   m_CullTransparentMesh: 1
+--- !u!114 &572995709 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1814181475378110516, guid: 3e4e60a2c3f9b2048b6825c338b7a1f6, type: 3}
+  m_PrefabInstance: {fileID: 928358922801247054}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Slider
+--- !u!114 &598527364 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6490307937717438476, guid: 3e4e60a2c3f9b2048b6825c338b7a1f6, type: 3}
+  m_PrefabInstance: {fileID: 928358922801247054}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &680852362
 GameObject:
   m_ObjectHideFlags: 0
@@ -2244,6 +2266,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fb85ae121654f34aab2a70ca29bab95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingsPanel
+  btnSettings: {fileID: 1391313456}
+  btnBack: {fileID: 598527364}
+  groupOption: {fileID: 2071087866}
+  sliderMaster: {fileID: 1534398060}
+  sliderBgm: {fileID: 1543452874}
+  sliderSfx: {fileID: 572995709}
 --- !u!4 &1265291708
 Transform:
   m_ObjectHideFlags: 0
@@ -2501,6 +2529,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1323354520}
   m_CullTransparentMesh: 1
+--- !u!114 &1391313456 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4005688031471612223, guid: 03e7c1137613d5b4098232b70237c976, type: 3}
+  m_PrefabInstance: {fileID: 2239272245639205050}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
 --- !u!1 &1453549102
 GameObject:
   m_ObjectHideFlags: 0
@@ -2713,6 +2752,28 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1459486995}
   m_CullTransparentMesh: 1
+--- !u!114 &1534398060 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4282360480480339608, guid: 3e4e60a2c3f9b2048b6825c338b7a1f6, type: 3}
+  m_PrefabInstance: {fileID: 928358922801247054}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Slider
+--- !u!114 &1543452874 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5280867036756640675, guid: 3e4e60a2c3f9b2048b6825c338b7a1f6, type: 3}
+  m_PrefabInstance: {fileID: 928358922801247054}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67db9e8f0e2ae9c40bc1e2b64352a6b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Slider
 --- !u!1 &1706423964
 GameObject:
   m_ObjectHideFlags: 0
@@ -3142,6 +3203,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1955037391}
   m_CullTransparentMesh: 1
+--- !u!225 &2071087866 stripped
+CanvasGroup:
+  m_CorrespondingSourceObject: {fileID: 8862693252106409961, guid: 3e4e60a2c3f9b2048b6825c338b7a1f6, type: 3}
+  m_PrefabInstance: {fileID: 928358922801247054}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2087194696
 GameObject:
   m_ObjectHideFlags: 0
@@ -3854,6 +3920,30 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1907908221170336125, guid: 2d4e258bca9d48747a4b6fe97377ae6d, type: 3}
+      propertyPath: btnQuit
+      value: 
+      objectReference: {fileID: 1289492564}
+    - target: {fileID: 1907908221170336125, guid: 2d4e258bca9d48747a4b6fe97377ae6d, type: 3}
+      propertyPath: btnShop
+      value: 
+      objectReference: {fileID: 1854419850}
+    - target: {fileID: 1907908221170336125, guid: 2d4e258bca9d48747a4b6fe97377ae6d, type: 3}
+      propertyPath: btnCredit
+      value: 
+      objectReference: {fileID: 914453143}
+    - target: {fileID: 1907908221170336125, guid: 2d4e258bca9d48747a4b6fe97377ae6d, type: 3}
+      propertyPath: btnNewGame
+      value: 
+      objectReference: {fileID: 356264417}
+    - target: {fileID: 1907908221170336125, guid: 2d4e258bca9d48747a4b6fe97377ae6d, type: 3}
+      propertyPath: groupCredit
+      value: 
+      objectReference: {fileID: 355085920}
+    - target: {fileID: 1907908221170336125, guid: 2d4e258bca9d48747a4b6fe97377ae6d, type: 3}
+      propertyPath: btnBackCredit
+      value: 
+      objectReference: {fileID: 901346838}
     - target: {fileID: 2722205690091811010, guid: 2d4e258bca9d48747a4b6fe97377ae6d, type: 3}
       propertyPath: m_Name
       value: "\u9078\u55AE\u7BA1\u7406\u5668"

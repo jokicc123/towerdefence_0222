@@ -19778,3 +19778,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.RangeCircle
   segments: 50
+  lineWidth: 0.1
+  yOffset: 0.05

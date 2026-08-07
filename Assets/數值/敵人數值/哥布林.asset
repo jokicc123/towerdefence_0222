@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: "\u54E5\u5E03\u6797"
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.EnemyData
   enemyName: "\u54E5\u5E03\u6797"
-  maxHealth: 50
+  maxHealth: 70
   moveSpeed: 1
   damage: 10
   goldReward: 10
   modelPrefab: {fileID: 1258991314359982, guid: 3749b9edee740c44ea7455a4fa1b7382, type: 3}
   xpReward: 12
-  buffType: 2
+  buffType: 0
   buffMultiplier: 1.2
   buffRadius: 6
   buffUpdateInterval: 0.5
-  buffSelf: 1
+  buffSelf: 0
   buffVFX: {fileID: 0}
