@@ -1391,7 +1391,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: de4db9b35676e544b86900ae93710a71, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6ca9319e43d5915428f433d4f305e76e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -2914,8 +2914,8 @@ MonoBehaviour:
   descriptionText: {fileID: 1954604163}
   costText: {fileID: 638423484}
   skillIcon: {fileID: 2045142163}
-  skill2Icon: {fileID: 1009453823}
   skillText: {fileID: 1310475134}
+  skill2Icon: {fileID: 1009453823}
   skill2Text: {fileID: 871061882}
   passiveIcon: {fileID: 887947704}
   passiveText: {fileID: 2037941506}
@@ -4284,7 +4284,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 0cbab1bd47fd02b45b7cfc6d85c7f60a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7acc22a46e70f004bb05101a9b9fe97e, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -4643,7 +4643,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: ffbc81f23aea4fc469afeb67e3bf9d5a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: fab504203d3bc60418f2bce755d0393b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

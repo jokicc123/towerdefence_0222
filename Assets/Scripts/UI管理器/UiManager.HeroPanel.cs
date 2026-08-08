@@ -35,7 +35,7 @@ namespace CHANG
         private TMP_Text heroUnlockDescriptionText;
 
         [SerializeField]
-        private GameObject heroPanel;
+        private CanvasGroup heroPanel;
 
         [SerializeField]
         private Slider heroExpSlider;
@@ -68,10 +68,12 @@ namespace CHANG
 
             currentHero.ShowRangeCircle();
 
-            if (heroPanel != null)
-            {
-                heroPanel.SetActive(true);
-            }
+            StartCoroutine(
+               FadeSystem.Fade(
+               heroPanel,
+               true
+               )
+               );
 
             RefreshHeroUI();
         }
@@ -85,10 +87,12 @@ namespace CHANG
 
             UnsubscribeCurrentHero();
 
-            if (heroPanel != null)
-            {
-                heroPanel.SetActive(false);
-            }
+            StartCoroutine(
+               FadeSystem.Fade(
+               heroPanel,
+               false
+               )
+               );
         }
 
         #endregion

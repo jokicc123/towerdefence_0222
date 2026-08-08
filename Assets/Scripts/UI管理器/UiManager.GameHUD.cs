@@ -73,17 +73,14 @@ namespace CHANG
                 hp.ToString();
         }
 
-        private void UpdateGold(
-            int gold)
+        private void UpdateGold(int gold)
         {
             if (goldText != null)
             {
-                goldText.text =
-                    gold.ToString();
+                goldText.text = gold.ToString();
             }
 
-            if (upgradePanel != null &&
-                upgradePanel.activeSelf)
+            if (currentTower != null)
             {
                 RefreshUpgradeUI();
             }

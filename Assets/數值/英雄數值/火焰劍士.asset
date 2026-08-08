@@ -82,7 +82,7 @@ MonoBehaviour:
     description: "\u904B\u7528\u592A\u967D\u7684\u529B\u91CF\u5C0D\u5834\u4E0A\u9020\u6210\u5927\u91CF\u7684\u707C\u71D2\u50B7\uFF0C\u4E14\u9020\u6210\u707C\u71D2\u50B7\u5BB3\u52A0\u500D\n"
     skillType: 3
     unlockLevel: 2
-    icon: {fileID: 21300000, guid: 6c6e0838a05843f409abb565e55b362f, type: 3}
+    icon: {fileID: 21300000, guid: 0a4b01f1537389149b22399ce4b3da5f, type: 3}
     vfxPrefab: {fileID: 8172849020266659018, guid: 2af5562ce69fc2d448481a1587a352a5, type: 3}
     summonPrefab: {fileID: 0}
     levelStats:
@@ -173,7 +173,7 @@ MonoBehaviour:
       \u4E14\u9020\u6210\u707C\u71D2\u50B7\u5BB3\u52A0\u500D"
     skillType: 4
     unlockLevel: 1
-    icon: {fileID: 21300000, guid: d4a7e7b5fc29129499b2ab9d6a74dd49, type: 3}
+    icon: {fileID: 21300000, guid: 115864bb4f471694ead897416cfdbd83, type: 3}
     vfxPrefab: {fileID: 1206498299807332555, guid: af6c1e3f046eecd4d81330aeb285600f, type: 3}
     summonPrefab: {fileID: 0}
     levelStats:

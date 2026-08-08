@@ -1,5 +1,6 @@
 ﻿using TMPro;
 using UnityEngine;
+using System.Collections;
 using UnityEngine.UI;
 
 namespace CHANG
@@ -28,38 +29,48 @@ namespace CHANG
         [SerializeField] private Button sellButton;
         [SerializeField] private Button moveTowerButton;
 
-        [SerializeField] private GameObject upgradePanel;
+
+        [SerializeField] private CanvasGroup upgradePanel;
+        private Coroutine panelFadeCoroutine;
         [SerializeField] private Image towerIcon;
 
         #endregion
-
         #region 升級面板
 
         public void ShowUpgradeUI(Tower tower)
         {
-            if (tower == null)
+            if (tower == null ||
+                upgradePanel == null)
+            {
                 return;
+            }
 
             currentTower = tower;
 
-            if (upgradePanel != null)
-            {
-                upgradePanel.SetActive(true);
-            }
+            StopCoroutineIfNeeded();
+
+            panelFadeCoroutine =
+                StartCoroutine(
+                    FadeUpgradePanel(true)
+                );
 
             RefreshUpgradeUI();
         }
 
-        public void HideUpgradeUI()
+       public void HideUpgradeUI()
         {
             currentTower = null;
 
-            if (upgradePanel != null)
-            {
-                upgradePanel.SetActive(false);
-            }
-        }
+            if (upgradePanel == null)
+                return;
 
+            StopCoroutineIfNeeded();
+
+            panelFadeCoroutine =
+                StartCoroutine(
+                    FadeUpgradePanel(false)
+                );
+        }
         private void RefreshUpgradeUI()
         {
             if (currentTower == null ||
@@ -71,6 +82,17 @@ namespace CHANG
             UpdateTowerBasicInfo();
             UpdateTowerStats();
             UpdateTowerUpgradeState();
+        }
+        private IEnumerator FadeUpgradePanel(bool fadeIn)
+        {
+            yield return StartCoroutine(
+                FadeSystem.Fade(
+                    upgradePanel,
+                    fadeIn
+                )
+            );
+
+            panelFadeCoroutine = null;
         }
 
         #endregion
@@ -238,6 +260,20 @@ namespace CHANG
         {
             HideUpgradeUI();
         }
+
+        private void StopCoroutineIfNeeded()
+        {
+            if (panelFadeCoroutine == null)
+                return;
+
+            StopCoroutine(
+                panelFadeCoroutine
+            );
+
+            panelFadeCoroutine = null;
+        }
+
+     
 
         #endregion
     }
