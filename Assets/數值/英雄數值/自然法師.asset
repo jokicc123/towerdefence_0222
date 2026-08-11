@@ -28,27 +28,27 @@ MonoBehaviour:
   attackSFX: {fileID: 8300000, guid: 6772243cdeaafde49ab7e4410706c453, type: 3}
   levelStats:
   - xpToNextLevel: 80
-    damage: 28
+    damage: 34
     attackSpeed: 1
     range: 8
     unlockDescription: "\u68EE\u6797\u4E4B\u5B50:\u8B93\u81EA\u7136\u5C6C\u6027\u7684\u9632\u79A6\u5854\u589E\u52A015%\u50B7\u5BB3"
   - xpToNextLevel: 120
-    damage: 34
+    damage: 48
     attackSpeed: 1.05
     range: 8.2
     unlockDescription: "\u89E3\u9396\u6280\u80FD\u300C\u834A\u68D8\u8513\u5EF6\u300D"
   - xpToNextLevel: 170
-    damage: 41
+    damage: 60
     attackSpeed: 1.1
     range: 8.4
     unlockDescription: "\u834A\u68D8\u8513\u5EF6\u6548\u679C\u63D0\u5347"
   - xpToNextLevel: 170
-    damage: 49
+    damage: 75
     attackSpeed: 1.15
     range: 8.6
     unlockDescription: "\u68EE\u6797\u4E4B\u5B50\u6548\u679C\u63D0\u5347"
-  - xpToNextLevel: 230
-    damage: 58
+  - xpToNextLevel: 0
+    damage: 80
     attackSpeed: 1.2
     range: 8.8
     unlockDescription: "\u89E3\u9396\u6280\u80FD\u300C\u6A39\u4EBA\u964D\u81E8\u300D"

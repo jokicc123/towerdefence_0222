@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CHANG.TowerData
   buildFootprint: {x: 1, y: 1, z: 1}
   attackType: 0
-  effectType: 2
   towerName: "\u6BD2\u6C23\u5854"
   description: 
   levels:
@@ -43,7 +42,7 @@ MonoBehaviour:
   - attackRange: 4.1
     damage: 18
     attackSpeed: 1.1
-    cost: 300
+    cost: 200
     bulletPrefab: {fileID: 1473216698478842, guid: 5cbce723b31a42e45ac848afa85ddec2, type: 3}
     effectType: 2
     effectDuration: 4.6

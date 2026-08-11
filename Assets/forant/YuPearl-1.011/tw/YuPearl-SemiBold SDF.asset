@@ -126,23 +126,23 @@ MonoBehaviour:
     m_FaceIndex: 0
     m_FamilyName: YuPearl
     m_StyleName: SemiBold
-    m_PointSize: 73
+    m_PointSize: 72
     m_Scale: 1
     m_UnitsPerEM: 2048
-    m_LineHeight: 73
-    m_AscentLine: 62.092773
+    m_LineHeight: 72
+    m_AscentLine: 61.242188
     m_CapLine: 50
-    m_MeanLine: 38
+    m_MeanLine: 37
     m_Baseline: 0
-    m_DescentLine: -10.907227
-    m_SuperscriptOffset: 62.092773
+    m_DescentLine: -10.7578125
+    m_SuperscriptOffset: 61.242188
     m_SuperscriptSize: 0.5
-    m_SubscriptOffset: -10.907227
+    m_SubscriptOffset: -10.7578125
     m_SubscriptSize: 0.5
-    m_UnderlineOffset: -7.1289062
-    m_UnderlineThickness: 3.5644531
-    m_StrikethroughOffset: 15.2
-    m_StrikethroughThickness: 3.5644531
+    m_UnderlineOffset: -7.03125
+    m_UnderlineThickness: 3.515625
+    m_StrikethroughOffset: 14.8
+    m_StrikethroughThickness: 3.515625
     m_TabWidth: 21
   m_Material: {fileID: -3825707225791506597}
   m_SourceFontFileGUID: 65dda5f6f4dac4845badc11234c858ca
@@ -151,14 +151,14 @@ MonoBehaviour:
     sourceFontFileGUID: 65dda5f6f4dac4845badc11234c858ca
     faceIndex: 0
     pointSizeSamplingMode: 0
-    pointSize: 73
+    pointSize: 72
     padding: 0
     paddingMode: 1
     packingMode: 0
     atlasWidth: 1024
     atlasHeight: 512
     characterSetSelectionMode: 7
-    characterSequence: " 123NT_etwx\u2026\u25A1\u3002\u3010\u3011\u4E00\u4E0A\u4E14\u4E26\u4E2D\u4E4B\u4E86\u4E88\u4EBA\u4F60\u4F7F\u4F86\u500D\u50B7\u5143\u5149\u529B\u52A0\u52A9\u52D5\u5316\u5348\u5354\u53BB\u53EC\u547D\u548C\u559A\u5834\u5927\u592A\u5B50\u5B88\u5BB3\u5C0D\u5EF6\u5F37\u6210\u6230\u63A7\u6490\u64C5\u64CA\u64CD\u653B\u6575\u6797\u68D8\u68EE\u6A39\u6B63\u706B\u707C\u7130\u7136\u71D2\u7246\u74B0\u7528\u7684\u7981\u7D20\u7D66\u8005\u81E8\u81EA\u81F4\u834A\u8513\u885B\u88AB\u8B77\u900F\u9020\u904B\u904E\u91CF\u932E\u9577\u964D\u967D\u9B25\u89E3\u9396\u4F7F\u7528\u4E2D\u57CE\u5821\u751F\u547D\u9632\u79A6\u5854\u82F1\u96C4\u9078\u64C7\u95DC\u5361\u738B\u570B\u8FD4\u56DE\u4E3B\u9078\u55AE\n\n\n\n"
+    characterSequence: " 123NT_etwx\u2026\u25A1\u3002\u3010\u3011\u4E00\u4E0A\u4E14\u4E26\u4E2D\u4E4B\u4E86\u4E88\u4EBA\u4F60\u4F7F\u4F86\u500D\u50B7\u5143\u5149\u529B\u52A0\u52A9\u52D5\u5316\u5348\u5354\u53BB\u53EC\u547D\u548C\u559A\u5834\u5927\u592A\u5B50\u5B88\u5BB3\u5C0D\u5EF6\u5F37\u6210\u6230\u63A7\u6490\u64C5\u64CA\u64CD\u653B\u6575\u6797\u68D8\u68EE\u6A39\u6B63\u706B\u707C\u7130\u7136\u71D2\u7246\u74B0\u7528\u7684\u7981\u7D20\u7D66\u8005\u81E8\u81EA\u81F4\u834A\u8513\u885B\u88AB\u8B77\u900F\u9020\u904B\u904E\u91CF\u932E\u9577\u964D\u967D\u9B25\u89E3\u9396\u4F7F\u7528\u4E2D\u57CE\u5821\u751F\u547D\u9632\u79A6\u5854\u82F1\u96C4\u9078\u64C7\u95DC\u5361\u738B\u570B\u8FD4\u56DE\u4E3B\u9078\u55AE\u64CD\u63A7\u68EE\u6797\u529B\u91CF\u7684\u5B88\u8B77\u8005\u64C5\u9577\u7981\u932E\u6575\u4EBA\u4E26\u53EC\u559A\u6A39\u4EBA\u5354\u52A9\u6230\u9B25\uFF0C\u3002\u904B\u7528\u81EA\u7136\u7684\u529B\u91CF\u7981\u932E\u6575\u4EBA\u53EC\u559A\u5B88\u885B\u68EE\u6797\u7684\u6A39\u4EBA\u4F86\u653B\u64CA\u6575\u4EBA\u900F\u904E\u81EA\u7136\u7684\u529B\u91CF\u5F37\u5316\u5143\u7D20\u7684\u653B\u64CA\u529B\u7372\u5F97\n\n\n\n\n"
     referencedFontAssetGUID: 295b919d786b55041b8686d512719d67
     referencedTextAssetGUID: 
     fontStyle: 0

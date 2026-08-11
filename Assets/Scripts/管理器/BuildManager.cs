@@ -214,6 +214,30 @@ namespace CHANG
             {
                 col.enabled = false;
             }
+            // ⭐ 關閉所有粒子
+            foreach (ParticleSystem ps in
+                     previewInstance.GetComponentsInChildren<ParticleSystem>(true))
+            {
+                ps.Stop(
+                    true,
+                    ParticleSystemStopBehavior.StopEmittingAndClear
+                );
+
+                ps.gameObject.SetActive(false);
+            }
+
+            // ⭐ 關閉所有 Trail
+            foreach (TrailRenderer trail in
+                     previewInstance.GetComponentsInChildren<TrailRenderer>(true))
+            {
+                trail.Clear();
+                trail.enabled = false;
+            }
+            foreach (RangeCircle range in
+                     previewInstance.GetComponentsInChildren<RangeCircle>(true))
+            {
+                range.gameObject.SetActive(false);
+            }
         }
 
         #endregion
