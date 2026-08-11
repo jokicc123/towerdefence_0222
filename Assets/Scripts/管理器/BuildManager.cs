@@ -4,6 +4,9 @@ using UnityEngine.EventSystems;
 
 namespace CHANG
 {
+    /// <summary>
+    /// 建造管理器，負責處理防禦塔與英雄的建造、預覽、放置與取消。
+    /// </summary>
     public class BuildManager : MonoBehaviour
     {
         #region Singleton

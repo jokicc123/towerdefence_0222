@@ -28,6 +28,9 @@ namespace CHANG
         private TMP_Text valueText;
 
         [SerializeField]
+        private TMP_Text nameText;
+
+        [SerializeField]
         private Button upgradeButton;
 
         #endregion
@@ -113,7 +116,7 @@ namespace CHANG
                 ShopManager.Instance.GetLevel(
                     data.type
                 );
-
+            UpdateName();
             UpdateLevel(level);
 
             if (level >= data.maxLevel)
@@ -224,10 +227,33 @@ namespace CHANG
             upgradeButton.interactable =
                 hasCost;
         }
+        private void UpdateName()
+        {
+            if (nameText == null ||
+                data == null)
+            {
+                return;
+            }
+
+            switch (data.type)
+            {
+                case ShopUpgradeType.CastleHP:
+                    nameText.text = "城堡生命";
+                    break;
+
+                case ShopUpgradeType.TowerDamage:
+                    nameText.text = "防禦塔傷害";
+                    break;
+
+                case ShopUpgradeType.HeroDamage:
+                    nameText.text = "英雄傷害";
+                    break;
+            }
+        }
 
         #endregion
 
-        #region 顯示格式
+            #region 顯示格式
 
         private string FormatValue(
             float value)

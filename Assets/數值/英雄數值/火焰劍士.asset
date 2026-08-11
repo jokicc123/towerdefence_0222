@@ -16,7 +16,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: c62181d81ffaa9948bcd0f419c0b1292, type: 3}
   prefab: {fileID: 2088957602027481754, guid: 8a433ee8c411c4e4792c3975d4cf83ab, type: 3}
   description: "\u904B\u7528\u706B\u7130\u548C\u592A\u967D\u7684\u529B\u91CF\u7D66\u4E88\u6575\u4EBA\u81F4\u547D\u4E00\u64CA"
-  purchaseCost: 80
+  purchaseCost: 100
   attackType: 1
   bulletPrefab: {fileID: 0}
   meleeHitRadius: 1.5
@@ -28,55 +28,30 @@ MonoBehaviour:
   attackSFX: {fileID: 8300000, guid: 6d61a6d0e5aaf8b47abbf198b4e4ca35, type: 3}
   levelStats:
   - xpToNextLevel: 80
-    damage: 28
+    damage: 24
     attackSpeed: 1
-    range: 8
-    unlockDescription: "\u68EE\u6797\u4E4B\u5B50:\u8B93\u81EA\u7136\u5C6C\u6027\u7684\u9632\u79A6\u5854\u589E\u52A015%\u50B7\u5BB3"
-  - xpToNextLevel: 120
+    range: 1.5
+    unlockDescription: "\u706B\u7130\u4E4B\u5B50:\u8B93\u81EA\u7136\u5C6C\u6027\u7684\u9632\u79A6\u5854\u589E\u52A015%\u50B7\u5BB3"
+  - xpToNextLevel: 150
     damage: 34
     attackSpeed: 1.05
-    range: 8.2
-    unlockDescription: "\u89E3\u9396\u6280\u80FD\u300C\u834A\u68D8\u8513\u5EF6\u300D"
-  - xpToNextLevel: 170
+    range: 1.8
+    unlockDescription: 
+  - xpToNextLevel: 200
     damage: 41
     attackSpeed: 1.1
-    range: 8.4
-    unlockDescription: "\u834A\u68D8\u8513\u5EF6\u6548\u679C\u63D0\u5347"
-  - xpToNextLevel: 170
+    range: 2
+    unlockDescription: "\u89E3\u9396\u6280\u80FD\u300C\u834A\u68D8\u8513\u5EF6\u300D"
+  - xpToNextLevel: 250
     damage: 49
     attackSpeed: 1.15
-    range: 8.6
-    unlockDescription: "\u68EE\u6797\u4E4B\u5B50\u6548\u679C\u63D0\u5347"
-  - xpToNextLevel: 230
+    range: 2.5
+    unlockDescription: "\u706B\u7130\u4E4B\u5B50\u6548\u679C\u63D0\u5347"
+  - xpToNextLevel: 0
     damage: 58
     attackSpeed: 1.2
-    range: 8.8
-    unlockDescription: "\u89E3\u9396\u6280\u80FD\u300C\u6A39\u4EBA\u964D\u81E8\u300D"
-  - xpToNextLevel: 300
-    damage: 68
-    attackSpeed: 1.25
-    range: 9.1
-    unlockDescription: "\u666E\u653B\u50B7\u5BB3\u63D0\u5347"
-  - xpToNextLevel: 440
-    damage: 79
-    attackSpeed: 1.3
-    range: 9.4
-    unlockDescription: "\u834A\u68D8\u8513\u5EF6\u63A7\u5236\u63D0\u5347"
-  - xpToNextLevel: 530
-    damage: 91
-    attackSpeed: 1.35
-    range: 9.7
-    unlockDescription: "\u6A39\u4EBA\u6230\u9B25\u80FD\u529B\u63D0\u5347"
-  - xpToNextLevel: 600
-    damage: 104
-    attackSpeed: 1.4
-    range: 10
-    unlockDescription: "\u5C04\u7A0B\u8207\u81EA\u7136\u529B\u91CF\u63D0\u5347"
-  - xpToNextLevel: 0
-    damage: 120
-    attackSpeed: 1.5
-    range: 10.5
-    unlockDescription: MAX
+    range: 3
+    unlockDescription: "\u89E3\u9396\u6280\u80FD\u300C\u6B63\u5348\u7684\u592A\u967D\u300D"
   skill1:
     skillName: "\u706B\u7130\u4E4B\u7246"
     description: "\u904B\u7528\u592A\u967D\u7684\u529B\u91CF\u5C0D\u5834\u4E0A\u9020\u6210\u5927\u91CF\u7684\u707C\u71D2\u50B7\uFF0C\u4E14\u9020\u6210\u707C\u71D2\u50B7\u5BB3\u52A0\u500D\n"
@@ -122,51 +97,6 @@ MonoBehaviour:
       damagePerSecond: 14
       attackSpeed: 0
       multiplier: 0
-    - value: 90
-      radius: 0
-      length: 7.5
-      width: 0
-      cooldown: 12
-      duration: 4
-      damagePerSecond: 16
-      attackSpeed: 0
-      multiplier: 0
-    - value: 105
-      radius: 0
-      length: 8
-      width: 2.4
-      cooldown: 13
-      duration: 3
-      damagePerSecond: 18
-      attackSpeed: 0
-      multiplier: 0
-    - value: 115
-      radius: 0
-      length: 8.5
-      width: 2.4
-      cooldown: 12
-      duration: 4
-      damagePerSecond: 20
-      attackSpeed: 0
-      multiplier: 0
-    - value: 130
-      radius: 0
-      length: 9.5
-      width: 2.8
-      cooldown: 11.5
-      duration: 4.5
-      damagePerSecond: 26
-      attackSpeed: 0
-      multiplier: 0
-    - value: 150
-      radius: 0
-      length: 10
-      width: 3
-      cooldown: 10
-      duration: 5
-      damagePerSecond: 30
-      attackSpeed: 0
-      multiplier: 0
   skill2:
     skillName: "\u6B63\u5348\u7684\u592A\u967D"
     description: "\u904B\u7528\u592A\u967D\u7684\u529B\u91CF \u5C0D\u5834\u4E0A\u9020\u6210\u5927\u91CF\u7684\u707C\u71D2\u50B7\u5BB3
@@ -186,42 +116,6 @@ MonoBehaviour:
       damagePerSecond: 30
       attackSpeed: 0
       multiplier: 1.3
-    - value: 0
-      radius: 4.8
-      length: 0
-      width: 0
-      cooldown: 34
-      duration: 5.5
-      damagePerSecond: 35
-      attackSpeed: 0
-      multiplier: 1.35
-    - value: 0
-      radius: 5.2
-      length: 0
-      width: 0
-      cooldown: 33
-      duration: 6
-      damagePerSecond: 40
-      attackSpeed: 0
-      multiplier: 1.5
-    - value: 0
-      radius: 6.2
-      length: 0
-      width: 0
-      cooldown: 32
-      duration: 7
-      damagePerSecond: 46
-      attackSpeed: 0
-      multiplier: 2
-    - value: 0
-      radius: 8
-      length: 0
-      width: 0
-      cooldown: 30
-      duration: 8
-      damagePerSecond: 52
-      attackSpeed: 0
-      multiplier: 1.75
   passive:
     skillName: "\u706B\u7130\u4E4B\u5B50"
     icon: {fileID: 21300000, guid: 59a05e55bf6299345b3cf5933d408ef3, type: 3}

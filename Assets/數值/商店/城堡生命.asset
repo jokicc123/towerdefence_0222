@@ -15,12 +15,11 @@ MonoBehaviour:
   upgradeName: "\u57CE\u5821\u751F\u547D"
   icon: {fileID: 21300000, guid: 5a0981f0fc74e574383502dfa2a061cf, type: 3}
   type: 0
-  maxLevel: 6
-  crystalCosts: 64000000780000008c000000a0000000b4000000c8000000
+  maxLevel: 5
+  crystalCosts: 64000000780000008c000000a0000000b4000000
   values:
   - 100
   - 120
   - 140
   - 160
   - 180
-  - 200
